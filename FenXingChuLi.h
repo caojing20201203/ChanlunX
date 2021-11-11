@@ -29,15 +29,6 @@ class FenXing {
             this->left = this->middle = this->right = this->free = { 0 };
         }
 
-        FenXing(FenXingType type, float gao, float di, Kxian1 left, Kxian1 middle, Kxian1 right) {
-            this->type = type;
-            this->gao = gao;
-            this->di = di;
-            this->left = left;
-            this->middle = middle;
-            this->right = right;
-        }
-
         FenXing(FenXingType type, float gao, float di, Kxian1 left, Kxian1 middle, Kxian1 right, Kxian1 free) {
             this->type = type;
             this->gao = gao;
@@ -89,12 +80,12 @@ class FenXing {
         }
 };
 
-enum class FenXingStatus {LEFT, MIDDLE, RIGHT, FREE_FIRST, FREE, TOP, FREE_NEW_TOP, VERIFY_TOP, AFTER_VERIFY_TOP, VERIFY_NEW_TOP, BACK_ZHONGYIN_TOP,  BOTTOM, FREE_NEW_BOTTOM, VERIFY_BOTTOM, AFTER_VERIFY_BOTTOM, VERIFY_NEW_BOTTOM, BACK_ZHONGYIN_BOTTOM};
+enum class FenXingChuLiStatus {LEFT, MIDDLE, RIGHT, FREE};
 
 class FenXingChuLi {
     private:
         static Kxian1 left,middle, right, free, last_bar;
-        static FenXingStatus status;
+        static FenXingChuLiStatus status;
         static float comp_fx_gao, comp_fx_di;
         static int comp_fx_gao_count, comp_fx_di_count;
         static FenXing fx, temp_fx;
