@@ -5,16 +5,16 @@ using namespace std;
 
 XianDuan XianDuanChuLi::last_xd = XianDuan();
 XianDuanChuLiStatus  XianDuanChuLi::status = XianDuanChuLiStatus::LEFT;
-Bi1 XianDuanChuLi::last_bi = Bi1();
+Bi XianDuanChuLi::last_bi = Bi();
 
 XianDuanChuLi::XianDuanChuLi() {
     this->last_xd = XianDuan();
-    this->last_bi = Bi1();
-    this->bicl = BiChuLi1();
+    this->last_bi = Bi();
+    this->bicl = BiChuLi();
 }
 
 void XianDuanChuLi::handle(vector<Kxian1>& kxianList) {
-    Bi1 bi = Bi1();
+    Bi bi = Bi();
     this->bicl.handle(kxianList);
     /*
     int count = this->bicl.biList.size();
@@ -26,23 +26,23 @@ void XianDuanChuLi::handle(vector<Kxian1>& kxianList) {
 }
 
 
-Bi1 XianDuanChuLi::generate_bi(Bi1 first_bi, Bi1 second_bi,Bi1 three_bi) {
+Bi XianDuanChuLi::generate_bi(Bi first_bi, Bi second_bi,Bi three_bi) {
     FenXing start_fx, stop_fx;
 
     start_fx = first_bi.get_start_fx();
     stop_fx = three_bi.get_stop_fx();
-    return(Bi1(start_fx, stop_fx));
+    return(Bi(start_fx, stop_fx));
 }
 
-Bi1 XianDuanChuLi::update_stop_bi(Bi1 bi, FenXing stop_fx) {
+Bi XianDuanChuLi::update_stop_bi(Bi bi, FenXing stop_fx) {
     FenXing start_fx = bi.get_start_fx();
-    return(Bi1(start_fx, stop_fx));
+    return(Bi(start_fx, stop_fx));
 }
 
-XianDuan XianDuanChuLi::failure_xd(Bi1 start_bi, Bi1 stop_bi) {
+XianDuan XianDuanChuLi::failure_xd(Bi start_bi, Bi stop_bi) {
     XianDuanType xd_type = this->last_xd.get_type();
     XianDuan xd = XianDuan();
-    Bi1 xd_start_bi = Bi1();
+    Bi xd_start_bi = Bi();
 
     if (xd_type != XianDuanType::NONE) {
         xd_start_bi = this->last_xd.get_start_bi();
@@ -58,7 +58,7 @@ XianDuan XianDuanChuLi::failure_xd(Bi1 start_bi, Bi1 stop_bi) {
     return(xd);
 }
 
-XianDuan XianDuanChuLi::find_xianduan(Bi1 bi) {
+XianDuan XianDuanChuLi::find_xianduan(Bi bi) {
     XianDuan xd = XianDuan();
     if (this->last_bi.get_type() == BiType::NONE) {
         this->last_bi = bi;
@@ -104,7 +104,7 @@ XianDuan XianDuanChuLi::find_xianduan(Bi1 bi) {
         case XianDuanChuLiStatus::MIDDLE_HIGH_LOW:
             if (bi.get_type() == BiType::UP) {
                 if (bi.get_high() > this->left.get_high()){
-                    Bi1 start_bi = this->generate_bi(this->left, this->after_left, this->middle);
+                    Bi start_bi = this->generate_bi(this->left, this->after_left, this->middle);
                     xd = this->failure_xd(start_bi, bi);
                     XianDuanChuLi::status = XianDuanChuLiStatus::LEFT;
                 }
@@ -130,7 +130,7 @@ XianDuan XianDuanChuLi::find_xianduan(Bi1 bi) {
             else {
                 if (bi.get_type() == BiType::DOWN) {
                     if (bi.get_low() < this->left.get_low()) {
-                        Bi1 start_bi = this->generate_bi(this->left, this->after_left, this->middle);
+                        Bi start_bi = this->generate_bi(this->left, this->after_left, this->middle);
                         xd = this->failure_xd(start_bi, bi);
                         XianDuanChuLi::status = XianDuanChuLiStatus::LEFT;
                     }
@@ -159,7 +159,7 @@ XianDuan XianDuanChuLi::find_xianduan(Bi1 bi) {
         case XianDuanChuLiStatus::MIDDLE_NORMAL:
             if (bi.get_type() == BiType::DOWN) {
                 if (bi.get_low() < this->left.get_low()) {
-                    Bi1 stop_bi = generate_bi(this->after_left, this->middle, bi);
+                    Bi stop_bi = generate_bi(this->after_left, this->middle, bi);
                     xd = this->failure_xd(this->left, stop_bi);
                     XianDuanChuLi::status = XianDuanChuLiStatus::LEFT;
                 }
@@ -178,7 +178,7 @@ XianDuan XianDuanChuLi::find_xianduan(Bi1 bi) {
             else {
                 if (bi.get_type() == BiType::UP) {
                     if (bi.get_high() > this->left.get_high()) {
-                        Bi1 stop_bi = generate_bi(this->after_left, this->middle, bi);
+                        Bi stop_bi = generate_bi(this->after_left, this->middle, bi);
                         xd = this->failure_xd(this->left, stop_bi);
                         XianDuanChuLi::status = XianDuanChuLiStatus::LEFT;
                     }
@@ -200,6 +200,7 @@ XianDuan XianDuanChuLi::find_xianduan(Bi1 bi) {
             break;
         }
     }
+    return(xd);
 }
 
 void Bi3(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {

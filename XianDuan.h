@@ -8,8 +8,8 @@ enum class XianDuanType { NONE,  UP, DOWN, FAILURE_UP, FAILURE_DOWN };
 class XianDuan{
 private:
     XianDuanType type = XianDuanType::NONE;
-    Bi1 left, after_left, middle, after_middle;
-    Bi1 start_bi, stop_bi;
+    Bi left, after_left, middle, after_middle;
+    Bi start_bi, stop_bi;
     float high, low;
     float length;
 
@@ -19,15 +19,15 @@ public:
         this->high = 0;
         this->low = 0;
         this->length = 0;
-        this->start_bi = Bi1();
-        this->stop_bi = Bi1();
-        this->left = Bi1();
-        this->after_left = Bi1();
-        this->middle = Bi1();
-        this->after_middle = Bi1();
+        this->start_bi = Bi();
+        this->stop_bi = Bi();
+        this->left = Bi();
+        this->after_left = Bi();
+        this->middle = Bi();
+        this->after_middle = Bi();
     }
 
-    XianDuan(Bi1 start_bi, Bi1 stop_bi) {
+    XianDuan(Bi start_bi, Bi stop_bi) {
         this->start_bi = start_bi;
         this->stop_bi = stop_bi;
         this->high = 0;
@@ -55,11 +55,11 @@ public:
         this->type = xd_type;
     }
 
-    Bi1 get_start_bi() {
+    Bi get_start_bi() {
         return(this->start_bi);
     }
 
-    Bi1 get_stop_bi() {
+    Bi get_stop_bi() {
         return(this->stop_bi);
     }
 };
@@ -70,18 +70,18 @@ class XianDuanChuLi {
 private:
     static XianDuan last_xd;
     static XianDuanChuLiStatus status;
-    static Bi1 last_bi;
-    Bi1 left = Bi1();
-    Bi1 after_left = Bi1();
-    Bi1 middle = Bi1();
-    Bi1  after_middle = Bi1();
-    Bi1 right = Bi1();
-    BiChuLi1 bicl;
-    XianDuan find_xianduan(Bi1 bi);
-    XianDuan failure_xd(Bi1 first_bi, Bi1 second_bi);
+    static Bi last_bi;
+    Bi left = Bi();
+    Bi after_left = Bi();
+    Bi middle = Bi();
+    Bi  after_middle = Bi();
+    Bi right = Bi();
+    BiChuLi bicl;
+    XianDuan find_xianduan(Bi bi);
+    XianDuan failure_xd(Bi first_bi, Bi second_bi);
     ZhongShu1 zhongshu_a, zhongshu_b;
-    Bi1 generate_bi(Bi1 a, Bi1 b, Bi1 c);
-    Bi1 update_stop_bi(Bi1 a, FenXing fx);
+    Bi generate_bi(Bi a, Bi b, Bi c);
+    Bi update_stop_bi(Bi a, FenXing fx);
 public:
     XianDuanChuLi();
     void handle(vector<Kxian1>& kxlist);
