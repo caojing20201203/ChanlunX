@@ -53,7 +53,6 @@ public:
                 this->di = middle.get_low();
             }
         }
-
         this->high_low_type = high_low_type;
         this->left = left;
         this->middle = middle;
