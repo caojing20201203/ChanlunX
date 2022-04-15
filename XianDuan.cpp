@@ -173,9 +173,16 @@ vector<Bi>  XianDuanChuLi::get_xd_bi_list() {
         bi_list.push_back(this->after_left);
         bi_list.push_back(this->middle);
         bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
         break;
     case XianDuanChuLiStatus::LEFTINCLUDEMIDDLE_AFTER_RIGHT:
+        bi_list.push_back(this->start);
+        bi_list.push_back(this->left);
+        bi_list.push_back(this->after_left);
+        bi_list.push_back(this->middle);
+        bi_list.push_back(this->after_middle);
+        bi_list.push_back(this->right);
+        break;
+    case XianDuanChuLiStatus::LEFTINCLUDEMIDDLE_FREE:
         bi_list.push_back(this->start);
         bi_list.push_back(this->left);
         bi_list.push_back(this->after_left);
@@ -225,7 +232,7 @@ vector<Bi>  XianDuanChuLi::get_xd_bi_list() {
         bi_list.push_back(this->free);
         break;
 
-    case XianDuanChuLiStatus::AFTER_FREE_NORMAL:
+    case XianDuanChuLiStatus::AFTER_FREE_1:
         bi_list.push_back(this->start);
         bi_list.push_back(this->left);
         bi_list.push_back(this->after_left);
@@ -237,7 +244,7 @@ vector<Bi>  XianDuanChuLi::get_xd_bi_list() {
         bi_list.push_back(this->after_free);
         break;
 
-    case XianDuanChuLiStatus::AFTER_FREE_NORMAL_NORMAL:
+    case XianDuanChuLiStatus::AFTER_FREE_2:
         bi_list.push_back(this->start);
         bi_list.push_back(this->left);
         bi_list.push_back(this->after_left);
@@ -299,9 +306,6 @@ vector<Bi>  XianDuanChuLi::get_xd_bi_list() {
         bi_list.push_back(this->free);
         bi_list.push_back(this->after_free);
         break;
-
-        // LONGXIANDUAN, LONGXIANDUAN_NORMAL, LONGXIANDUAN_NORMAL_NORMAL, LONGXIANDUAN_NORMAL_NORMAL_NORMAL
-  
     }
     return(bi_list);
 }
@@ -579,48 +583,48 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan(Bi bi) {
         if (bi.get_type() == BiType::UP) {
             if (bi.get_high() > this->start.get_high()) {
                 this->left = bi.generate_bi(this->left, this->after_left, bi);
-return(this->failure_xd(this->start, this->left));
+                return(this->failure_xd(this->start, this->left));
             }
             else {
-            if (bi.get_high() > this->left.get_high()) {
-                this->left = bi.generate_bi(this->left, this->after_left, bi);
-                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-            }
-            else {
-                if (bi.get_high() > this->middle.get_high()) {
-                    this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
+                if (bi.get_high() > this->left.get_high()) {
+                    this->left = bi.generate_bi(this->left, this->after_left, bi);
+                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
                 }
                 else {
-                    //LEFT_INCLUDE_MIDDLE_NORMAL_NORMAL
-                    this->right = bi;
-                    this->status = XianDuanChuLiStatus::LEFTINCLUDEMIDDLE_AFTER_RIGHT;
+                    if (bi.get_high() > this->middle.get_high()) {
+                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
+                        this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
+                    }
+                    else {
+                        //LEFT_INCLUDE_MIDDLE_NORMAL_NORMAL
+                        this->right = bi;
+                        this->status = XianDuanChuLiStatus::LEFTINCLUDEMIDDLE_AFTER_RIGHT;
+                    }
                 }
-            }
             }
         }
         else {
-        //下降笔
-        if (bi.get_low() < this->start.get_low()) {
-            this->left = bi.generate_bi(this->left, this->after_left, bi);
-            return(this->failure_xd(this->start, this->left));
-        }
-        else {
-            if (bi.get_low() < this->left.get_low()) {
+            //下降笔
+            if (bi.get_low() < this->start.get_low()) {
                 this->left = bi.generate_bi(this->left, this->after_left, bi);
-                this->status = XianDuanChuLiStatus::AFTER_LEFT;
+                return(this->failure_xd(this->start, this->left));
             }
             else {
-                if (bi.get_low() < this->middle.get_low()) {
-                    this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
+                if (bi.get_low() < this->left.get_low()) {
+                    this->left = bi.generate_bi(this->left, this->after_left, bi);
+                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
                 }
                 else {
-                    this->right = bi;
-                    this->status = XianDuanChuLiStatus::LEFTINCLUDEMIDDLE_AFTER_RIGHT;
+                    if (bi.get_low() < this->middle.get_low()) {
+                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
+                        this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
+                    }
+                    else {
+                        this->right = bi;
+                        this->status = XianDuanChuLiStatus::LEFTINCLUDEMIDDLE_AFTER_RIGHT;
+                    }
                 }
             }
-        }
         }
         break;
 
@@ -1202,7 +1206,7 @@ return(this->failure_xd(this->start, this->left));
             else {
                 if (bi.get_high() < this->after_right.get_high()) {
                     this->after_free = bi;
-                    this->status = XianDuanChuLiStatus::AFTER_FREE_NORMAL;
+                    this->status = XianDuanChuLiStatus::AFTER_FREE_1;
                 }
                 else {
                     ret_xd.xd1 = XianDuan(this->start, this->after_left);
@@ -1248,7 +1252,7 @@ return(this->failure_xd(this->start, this->left));
                 if (bi.get_low() > this->after_right.get_low()) {
                     //after_right 包含 after_free
                     this->after_free = bi;
-                    this->status = XianDuanChuLiStatus::AFTER_FREE_NORMAL;
+                    this->status = XianDuanChuLiStatus::AFTER_FREE_1;
                 }
                 else {
                     ret_xd.xd1 = XianDuan(this->start, this->after_left);
@@ -1285,7 +1289,7 @@ return(this->failure_xd(this->start, this->left));
         }
         break;
 
-    case XianDuanChuLiStatus::AFTER_FREE_NORMAL:
+    case XianDuanChuLiStatus::AFTER_FREE_1:
         if (bi.get_type() == BiType::UP) {
             if (bi.get_high() > this->start.get_high()) {
                 this->start = bi.generate_bi(this->start, this->left, this->after_left);
@@ -1305,7 +1309,7 @@ return(this->failure_xd(this->start, this->left));
                     }
                     else {
                         this->after_free_1 = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_NORMAL_NORMAL;
+                        this->status = XianDuanChuLiStatus::AFTER_FREE_2;
                     }
                 }
             }
@@ -1330,14 +1334,14 @@ return(this->failure_xd(this->start, this->left));
                     }
                     else {
                         this->after_free_1 = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_NORMAL_NORMAL;
+                        this->status = XianDuanChuLiStatus::AFTER_FREE_2;
                     }
                 }
             }
         }
         break;
 
-    case XianDuanChuLiStatus::AFTER_FREE_NORMAL_NORMAL:
+    case XianDuanChuLiStatus::AFTER_FREE_2:
         if (bi.get_type() == BiType::UP) {
             if (bi.get_high() > this->middle.get_high()) {
                 this->start = bi.generate_bi(this->start, this->left, this->after_left);
@@ -1353,10 +1357,11 @@ return(this->failure_xd(this->start, this->left));
                 else {
                     if (bi.get_high() > this->after_free.get_high()) {
                         this->after_free = bi.generate_bi(this->after_free, this->after_free_1, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_NORMAL;
+                        this->status = XianDuanChuLiStatus::AFTER_FREE_1;
                     }
                     else {
-                        OutputDebugPrintf("AFTER_FREE_FREE_NORMAL_NORMAL_NORMAL 未处理");
+                        this->after_free_2 = bi;
+                        this->status = XianDuanChuLiStatus::AFTER_FREE_3;
                     }
                 }
             }
@@ -1377,10 +1382,73 @@ return(this->failure_xd(this->start, this->left));
                 else {
                     if (bi.get_low() < this->after_free.get_low()) {
                         this->after_free = bi.generate_bi(this->after_free, this->after_free_1, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_NORMAL;
+                        this->status = XianDuanChuLiStatus::AFTER_FREE_1;
                     }
                     else {
-                        OutputDebugPrintf("AFTER_FREE_FREE_NORMAL_NORMAL_NORMAL 未处理");
+                        this->after_free_2 = bi;
+                        this->status = XianDuanChuLiStatus::AFTER_FREE_3;
+                    }
+                }
+            }
+        }
+        break;
+
+    case XianDuanChuLiStatus::AFTER_FREE_3:
+        if (bi.get_type() == BiType::UP) {
+            if (bi.get_high() > this->start.get_high()) {
+                this->start = bi.generate_bi(this->start, this->left, this->after_left);
+                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
+                return(this->failure_xd(this->start, this->left));
+            }
+            else {
+                if (bi.get_high() > this->right.get_high()) {
+                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
+                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
+                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
+                }
+                else {
+                    if (bi.get_high() > this->free.get_high()) {
+                        this->free = bi.generate_bi(this->free, this->after_free, bi);
+                        this->status = XianDuanChuLiStatus::AFTER_FREE;
+                    }
+                    else {
+                        if (bi.get_high() > this->after_free_1.get_high()) {
+                            this->after_free_1 = bi.generate_bi(this->after_free_1, this->after_free_2, bi);
+                            this->status = XianDuanChuLiStatus::AFTER_FREE_1;
+                        }
+                        else {
+                            OutputDebugPrintf("AFTER_FREE_4未处理");
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            //下降笔
+            if (bi.get_low() < this->start.get_low()) {
+                this->start = bi.generate_bi(this->start, this->left, this->after_left);
+                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
+                return(this->failure_xd(this->start, this->left));
+            }
+            else {
+                if (bi.get_low() < this->right.get_low()) {
+                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
+                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
+                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
+                }
+                else {
+                    if (bi.get_low() < this->free.get_low()) {
+                        this->free = bi.generate_bi(this->free, this->after_free, bi);
+                        this->status = XianDuanChuLiStatus::AFTER_FREE;
+                    }
+                    else {
+                        if (bi.get_low() < this->after_free_1.get_low()) {
+                            this->after_free_1 = bi.generate_bi(this->after_free_1, this->after_free_2, bi);
+                            this->status = XianDuanChuLiStatus::AFTER_FREE_1;
+                        }
+                        else {
+                            OutputDebugPrintf("AFTER_FREE_4 未处理");
+                        }
                     }
                 }
             }

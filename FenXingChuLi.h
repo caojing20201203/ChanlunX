@@ -149,6 +149,8 @@ private:
     FenXing __high_low_process(Kxian1 kx);
     FenXing __failure_verify_top(Kxian1 kx);
     FenXing __failue_verify_bottom(Kxian1 kx);
+    FenXing __determ_fenxing(Kxian1 kx);
+    FenXing __fenxing_process(Kxian1 kx);
 
 public:
     vector<Kxian1> kxianList;
