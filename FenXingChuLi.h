@@ -9,7 +9,7 @@ using namespace std;
 
 #pragma pack(push, 1)
 
-enum class FenXingType { NONE, TOP, BOTTOM, FAILURE_TOP, FAILURE_BOTTOM, VERIFY_TOP, VERIFY_BOTTOM, FAILURE_VERIFY_TOP, FAILURE_VERIFY_BOTTOM };
+enum class FenXingType { NONE, TOP, BOTTOM, FAILURE_TOP, FAILURE_BOTTOM, VERIFY_TOP, VERIFY_BOTTOM, FAILURE_VERIFY_TOP, FAILURE_VERIFY_BOTTOM, NEW_TOP, NEW_BOTTOM };
 enum class HighLowType {NONE, NEW_HIGH, NEW_LOW};
 
 //分型
@@ -151,6 +151,7 @@ private:
     FenXing __failue_verify_bottom(Kxian1 kx);
     FenXing __determ_fenxing(Kxian1 kx);
     FenXing __fenxing_process(Kxian1 kx);
+    FenXing __kxian_process(Kxian1 kx);
 
 public:
     vector<Kxian1> kxianList;

@@ -64,6 +64,14 @@ void BiChuLi::handle(vector<Kxian1>& kxianList) {
     for (int i = 0; i < count; i++) {
         FenXing fx = this->fxcl.keyFenXingList[i];
         bi = this->__find_bi(fx);
+        switch (bi.get_type()) {
+        case BiType::TEMP_DOWN:
+        case BiType::TEMP_UP:
+            break;
+        case BiType::FAILURE_TEMP_DOWN:
+        case BiType::FAILURE_TEMP_UP:
+            break;
+        }
         if (bi.get_type() != BiType::NONE) {
             debug_bi(bi);
             this->biList.push_back(bi);
