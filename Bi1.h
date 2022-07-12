@@ -142,6 +142,9 @@ public:
     Bi last_bi = Bi();
     void handle(vector<Kxian1> &kxlist);
     Bi __find_bi(FenXing fx);
+    vector<Bi> __baohan_process(int start, int stop);
+    vector<Bi> __remove_baohan_bi();
+
     BiChuLi();
 };
 

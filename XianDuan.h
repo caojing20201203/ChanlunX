@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "bi1.h"
+#include "bi_zhongshu.h"
 #include<vector>
 
 using namespace std;
@@ -121,9 +122,9 @@ public:
     }
 };
 
-enum class XianDuanChuLiStatus { START, LEFT, AFTER_LEFT, MIDDLE_HIGHLOW, MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE, LEFTINCLUDEMIDDLE_RIGHT, LEFTINCLUDEMIDDLE_AFTER_RIGHT, LEFTINCLUDEMIDDLE_FREE, AFTER_MIDDLE, RIGHT, AFTER_RIGHT, FREE, AFTER_FREE, AFTER_FREE_1, AFTER_FREE_2, AFTER_FREE_3, LONGXIANDUAN, LONGXIANDUAN_RIGHT, LONGXIANDUAN_AFTER_RIGHT, LONGXIANDUAN_FREE, LONGXIANDUAN_AFTER_FREE, LONGXIANDUAN_AFTER_FREE_1 };
+enum class XianDuanChuLiStatus { START, LEFT, AFTER_LEFT, MIDDLE_HIGHLOW, MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE, LEFT_INCLUDE_MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE_INCLUDE_RIGHT, LEFT_INCLUDE_MIDDLE_INCLUDE_RIGHT_NORMAL, LEFT_INCLUDE_MIDDLE_INCLUDE_RIGHT_INCLUDE_FREE,AFTER_MIDDLE, RIGHT, RIGHT_NORMAL, RIGHT_NORMAL_NORMAL, RIGHT_NORMAL_NORMAL_NORMAL, AFTER_RIGHT, FREE, AFTER_FREE, AFTER_FREE_1, AFTER_FREE_2, AFTER_FREE_3, LONGXIANDUAN, LONGXIANDUAN_RIGHT, LONGXIANDUAN_AFTER_RIGHT, LONGXIANDUAN_FREE, LONGXIANDUAN_AFTER_FREE, LONGXIANDUAN_AFTER_FREE_1 };
 
-enum class FindXianDuanReturnType { None, Failure, One, Two, Three };
+enum class FindXianDuanReturnType { None, Failure, NewXianDuan, XianDuanUpgrade, One, Two, Three };
 struct FindXianDuanReturn {
     FindXianDuanReturnType type;
     XianDuan xd1;
@@ -133,9 +134,9 @@ struct FindXianDuanReturn {
 
 class XianDuanChuLi {
 private:
-    static XianDuan last_xd;
-    static XianDuanChuLiStatus status;
-    static Bi last_bi;
+    XianDuan last_xd;
+    XianDuanChuLiStatus status;
+    Bi last_bi;
 
     Bi start = Bi();
     Bi left = Bi();
@@ -150,6 +151,8 @@ private:
     Bi after_free_2 = Bi();
     BiChuLi bicl;
 
+    Bi_ZhongShuChuLi A_zscl, B_zscl;
+
     FindXianDuanReturn find_xianduan(Bi bi);
     FindXianDuanReturn __find_xianduan(Bi bi);
     void __backroll(Bi bi);
@@ -157,6 +160,7 @@ private:
     FindXianDuanReturn failure_xd(Bi first_bi, Bi second_bi);
     FindXianDuanReturn __right_process(Bi bi);
     bool __middle_process(Bi bi);
+
 public:
     XianDuanChuLi();
     void handle(vector<Kxian1>& kxlist);

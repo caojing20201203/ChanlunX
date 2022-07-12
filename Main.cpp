@@ -28,6 +28,7 @@ void Func1(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
     Bi3_fenxing(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
+
 //=============================================================================
 // 输出函数2号：被动-分型
 //=============================================================================
@@ -117,6 +118,15 @@ void Func13(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 {
     bi_zhongshu_low(nCount, pOut, pHigh, pLow, pIgnore);
 }
+
+//==============================================================================
+//输出函数14号：获得顶底数据
+//==============================================================================
+void Func14(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi3_fenxing_highlow(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
 static PluginTCalcFuncInfo Info[] =
 {
     { 1, &Func1},
@@ -132,6 +142,7 @@ static PluginTCalcFuncInfo Info[] =
     {11, &Func11},
     {12, &Func12},
     {13, &Func13},
+    {14, &Func14},
     { 0, NULL}
 };
 

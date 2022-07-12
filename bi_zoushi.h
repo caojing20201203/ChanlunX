@@ -5,10 +5,10 @@
 
 using namespace std;
 
-enum class Bi_ZouShiChuLiStatus { NONE, a_0, a_1, a_2, a_2_highlow, a_2_normal, a_2_normal_normal, a_2_longxd, a_2_longxd_normal, a_2_longxd_normal_normal, a_3, A_a0, A_a1, A_a2, A, b_1, b_2, B_b0, b_2_normal, b_2_longxd, b_2_longxd_normal, b_3, B_b1, B_b2, B, c_0, c_1, c_2, c_2_normal };
+enum class Bi_ZouShiChuLiStatus { NONE, a_0, a_1, a1_equal_a0, a1_highlow_a0, a_2, a2_highlow_a1_equal_a0, a2_normal_a1_equal_a0, a_2_highlow, a_2_normal, a_2_normal_normal, a_2_longxd, a_2_longxd_normal, a_2_longxd_normal_normal, a_3, A_a0, A_a1, A_a2, A, b_1, b_2, B_b0, b_2_normal, b_2_longxd, b_2_longxd_normal, b_3, B_b1, B_b2, B, c_0, c_1, c_2, c_2_normal };
 
 enum class Bi_ZouShiType {NONE, UP, DOWN};
-enum class Bi_ZouShiKind {NONE, LONGXIANDUAN, PANZHENG, UP, DOWN};
+enum class Bi_ZouShiKind {NONE, BI, LONGXIANDUAN, PANZHENG, UP, DOWN};
 class Bi_ZouShi {
     private:
         Bi_ZouShiType type;
@@ -37,7 +37,7 @@ class Bi_ZouShi {
             this->bi_list.clear();
         }
 
-        Bi_ZouShi(Bi_ZouShiKind kind, Bi start_bi, Bi stop_bi, Bi_ZouShiChuLiStatus status, vector<Bi> bi_list){
+        Bi_ZouShi(Bi_ZouShiKind kind, Bi start_bi, Bi stop_bi){
             if (start_bi.get_type() == BiType::UP)
                 this->type = Bi_ZouShiType::UP;
             else {
@@ -59,8 +59,6 @@ class Bi_ZouShi {
             this->stop_pos = stop_bi.get_stop_pos();
             this->verify_pos = stop_bi.get_stop_verify_position();
             this->high_low_type = this->get_stop_bi().get_high_low_type();
-            this->stop_status = status;
-            this->bi_list = bi_list;
         }
 
         Bi_ZouShiType get_type() {
@@ -94,9 +92,17 @@ class Bi_ZouShi {
         Bi_ZouShiChuLiStatus get_stop_status() {
             return(this->stop_status);
         }
+
+        float get_low() {
+            return(this->low);
+        }
+
+        float get_high() {
+            return(this->high);
+        }
 };
 
-enum class FindBiZouShiReturnType {None, Failue, One, Two, Three};
+enum class FindBiZouShiReturnType {None, Failue, New_ZouShi, One, Two, Three};
 struct FindBiZouShiReturn{
     FindBiZouShiReturnType type;
     Bi_ZouShi bi_zoushi_1;
@@ -116,6 +122,7 @@ class Bi_ZouShiChuLi {
         Bi c_0, c_1, c_2, c_3, c_4;
         Bi_ZhongShuChuLi bi_zhongshu_chuli;
         Bi_ZhongShu A, B;
+        Bi_ZouShi last_bi_zoushi;
     public:
         vector<Bi> bi_list;
         Bi_ZouShiChuLi();
@@ -126,6 +133,7 @@ class Bi_ZouShiChuLi {
         FindBiZouShiReturn find_bi_zoushi(Bi bi);
         void enter_zhongshu(Bi bi, Bi_ZouShiChuLiStatus status);
         vector<Bi> save_bi_list(Bi_ZouShiChuLiStatus status);
+        Bi_ZouShi get_last_zoushi();
 };
 
 void bi_zhongshu_start_stop(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgon);

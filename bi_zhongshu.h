@@ -7,6 +7,7 @@ class Bi_ZhongShu {
         int start_pos, stop_pos;
         Bi input_bi, output_bi;
         Bi max_bi, min_bi;
+        float length;
     public:
         vector<Bi> bi_list;
         Bi_ZhongShu() {
@@ -21,6 +22,7 @@ class Bi_ZhongShu {
             this->stop_pos = 0;
             this->max_bi = Bi();
             this->min_bi = Bi();
+            this->length = 0;
         }
 
         Bi_ZhongShu(Bi in, Bi xd1, Bi xd2, Bi xd3) {
@@ -41,6 +43,7 @@ class Bi_ZhongShu {
             this->low = max(xd1.get_low(), xd3.get_low());
             this->start_pos = in.get_stop_pos();
             this->stop_pos = xd3.get_stop_pos();
+            this->length = this->high - this->low;
         } 
 
         void stop() {
@@ -49,6 +52,10 @@ class Bi_ZhongShu {
             Bi output = this->bi_list[num];
             this->output_bi = output;
             this->stop_pos = output.get_stop_pos();
+        }
+
+        float get_length() {
+            return(this->length);
         }
 
         float get_high() {
@@ -108,6 +115,7 @@ class Bi_ZhongShu {
                     return(this->bi_list[i + 1]);
                 }
             }
+            return(Bi());
         }
 };
 
@@ -128,4 +136,5 @@ class Bi_ZhongShuChuLi {
         }
 };
 
+extern bool determ_bi_radio(Bi bi1, Bi Bi2);
 extern float get_bi_radio(Bi bi1, Bi bi2);

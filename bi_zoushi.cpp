@@ -59,42 +59,43 @@ FindBiZouShiReturn Bi_ZouShiChuLi::bi_zoushi_failure(Bi_ZouShi bi_zoushi) {
         for (int i = 0; i < bi_list.size(); i++) {
             last_bi_zoushi.get_bilist().push_back(bi_list[i]);
         }
-        ret_fd.bi_zoushi_1 = Bi_ZouShi(last_bi_zoushi.get_kind(), last_bi_zoushi.get_start_bi(), bi_zoushi.get_stop_bi(), last_bi_zoushi.get_stop_status(), last_bi_zoushi.get_bilist());
+        ret_fd.bi_zoushi_1 = Bi_ZouShi(last_bi_zoushi.get_kind(), last_bi_zoushi.get_start_bi(), bi_zoushi.get_stop_bi());
         ret_fd.type = FindBiZouShiReturnType::One;
         this->bi_zoushi_list.push_back(ret_fd.bi_zoushi_1);
     }
     else {
-        bi_list.clear();
-        start_bi = bi_zoushi.get_start_bi();
-        stop_bi = bi_zoushi.get_stop_bi();
-        bi_list.push_back(start_bi);
-        if (start_bi.get_type() == BiType::UP) {
-            bi_zoushi_kind = Bi_ZouShiKind::LONGXIANDUAN;
+    bi_list.clear();
+    start_bi = bi_zoushi.get_start_bi();
+    stop_bi = bi_zoushi.get_stop_bi();
+    bi_list.push_back(start_bi);
+    if (start_bi.get_type() == BiType::UP) {
+        bi_zoushi_kind = Bi_ZouShiKind::LONGXIANDUAN;
+    }
+    else {
+        if (start_bi.get_type() == BiType::DOWN) {
+            bi_zoushi_kind == Bi_ZouShiKind::LONGXIANDUAN;
         }
-        else {
-            if (start_bi.get_type() == BiType::DOWN) {
-                bi_zoushi_kind == Bi_ZouShiKind::LONGXIANDUAN;
-            }
-        }
-        ret_fd.bi_zoushi_1 = Bi_ZouShi(bi_zoushi_kind, start_bi, start_bi, Bi_ZouShiChuLiStatus::a_0, bi_list);
-        bi_list.clear();
-        bi_list.push_back(stop_bi);
-        ret_fd.bi_zoushi_2 = Bi_ZouShi(bi_zoushi_kind, stop_bi, stop_bi, Bi_ZouShiChuLiStatus::a_0, bi_list);
-        ret_fd.type = FindBiZouShiReturnType::Two;
-        this->bi_zoushi_list.push_back(ret_fd.bi_zoushi_1);
-        this->bi_zoushi_list.push_back(ret_fd.bi_zoushi_2);
+    }
+    ret_fd.bi_zoushi_1 = Bi_ZouShi(bi_zoushi_kind, start_bi, start_bi);
+    bi_list.clear();
+    bi_list.push_back(stop_bi);
+    ret_fd.bi_zoushi_2 = Bi_ZouShi(bi_zoushi_kind, stop_bi, stop_bi);
+    ret_fd.type = FindBiZouShiReturnType::Two;
+    this->bi_zoushi_list.push_back(ret_fd.bi_zoushi_1);
+    this->bi_zoushi_list.push_back(ret_fd.bi_zoushi_2);
     }
     return(ret_fd);
 }
 
-void Bi_ZouShiChuLi::enter_zhongshu(Bi bi, Bi_ZouShiChuLiStatus status){
+void Bi_ZouShiChuLi::enter_zhongshu(Bi bi, Bi_ZouShiChuLiStatus status) {
     Bi_ZhongShu bi_zhongshu;
     if (status == Bi_ZouShiChuLiStatus::A) {
         bi_zhongshu = Bi_ZhongShu(this->a, this->A_a0, this->A_a1, bi);
         this->bi_zhongshu_chuli = Bi_ZhongShuChuLi(this->a, this->A_a0, this->A_a1, bi);
         this->bi_zhongshu_list.push_back(bi_zhongshu);
         this->status = status;
-    } else {
+    }
+    else {
         if (status == Bi_ZouShiChuLiStatus::B) {
             bi_zhongshu = Bi_ZhongShu(this->b, this->B_b0, this->B_b1, bi);
             this->bi_zhongshu_chuli = Bi_ZhongShuChuLi(this->b, this->B_b0, this->B_b1, bi);
@@ -107,65 +108,227 @@ void Bi_ZouShiChuLi::enter_zhongshu(Bi bi, Bi_ZouShiChuLiStatus status){
 
 vector<Bi> Bi_ZouShiChuLi::save_bi_list(Bi_ZouShiChuLiStatus status) {
     vector<Bi> bi_list;
-    switch(status) {
-        case Bi_ZouShiChuLiStatus::a_0:
-            bi_list.push_back(this->a_0);
-            break;
-        case Bi_ZouShiChuLiStatus::a_1:
-            bi_list.push_back(this->a_0);
-            bi_list.push_back(this->a_1);
-            break;
-        case Bi_ZouShiChuLiStatus::A_a0:
-            bi_list.push_back(this->a_0);
-            bi_list.push_back(this->a_1);
-            bi_list.push_back(this->a_2);
-            break;
-        case Bi_ZouShiChuLiStatus::a_2_normal:
-            bi_list.push_back(this->a_0);
-            bi_list.push_back(this->a_1);
-            bi_list.push_back(this->a_2);
-            break;
-        case Bi_ZouShiChuLiStatus::a_2_longxd:
-            bi_list.push_back(this->a_0);
-            bi_list.push_back(this->a_1);
-            bi_list.push_back(this->a_2);
-            bi_list.push_back(this->a_3);
-            bi_list.push_back(this->a_4);
-            break;
+    switch (status) {
+    case Bi_ZouShiChuLiStatus::a_0:
+        bi_list.push_back(this->a_0);
+        break;
+    case Bi_ZouShiChuLiStatus::a_1:
+        bi_list.push_back(this->a_0);
+        bi_list.push_back(this->a_1);
+        break;
+    case Bi_ZouShiChuLiStatus::A_a0:
+        bi_list.push_back(this->a_0);
+        bi_list.push_back(this->a_1);
+        bi_list.push_back(this->a_2);
+        break;
+    case Bi_ZouShiChuLiStatus::a_2_normal:
+        bi_list.push_back(this->a_0);
+        bi_list.push_back(this->a_1);
+        bi_list.push_back(this->a_2);
+        break;
+    case Bi_ZouShiChuLiStatus::a_2_longxd:
+        bi_list.push_back(this->a_0);
+        bi_list.push_back(this->a_1);
+        bi_list.push_back(this->a_2);
+        bi_list.push_back(this->a_3);
+        bi_list.push_back(this->a_4);
+        break;
     }
     return(bi_list);
+}
+
+#define MIN_RADIO 0.382
+#define MAX_RADIO 0.618
+
+Bi_ZouShi Bi_ZouShiChuLi::get_last_zoushi() {
+    Bi_ZouShi ret_zoushi;
+
+    int count = this->bi_zoushi_list.size();
+    if (count > 1) {
+        ret_zoushi = this->bi_zoushi_list[count - 1];
+    }
+    return(ret_zoushi);
 }
 
 FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
     float bi_high = bi.get_high();
     float bi_low = bi.get_low();
     float a_0_radio, a_1_radio, a_2_radio;
-
+    Bi_ZouShi last_zoushi;
     FindBiZouShiReturn ret_fd;
     ret_fd.type = FindBiZouShiReturnType::None;
     Bi_ZhongShu bi_zhongshu = Bi_ZhongShu();
+    Bi tmp_bi;
 
     a_0_radio = 0;
     a_1_radio = 0;
 
-    switch(this->status) {
-        case Bi_ZouShiChuLiStatus::a_0:
-            this->a_0 = bi;
-            this->status = Bi_ZouShiChuLiStatus::a_1;
-            break;
+    switch (this->status) {
+    case Bi_ZouShiChuLiStatus::a_0:
+        this->a_0 = bi;
+        this->status = Bi_ZouShiChuLiStatus::a_1;
+        break;
 
-        case Bi_ZouShiChuLiStatus::a_1:
-            a_0_radio = get_bi_radio(this->a_0, bi);
-            if ((bi.get_type() == BiType::UP && bi_high > this->a_0.get_high()) || (bi.get_type() == BiType::DOWN && bi_low < this->a_0.get_low()) ) {
-                ret_fd.type = FindBiZouShiReturnType::Failue;
-                vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::a_1);
-                ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, bi, Bi_ZouShiChuLiStatus::a_1, bi_list);
-                this->status = Bi_ZouShiChuLiStatus::a_0;
-            } else {
-                    this->a_1 = bi;
-                    this->status = Bi_ZouShiChuLiStatus::a_2;
+    case Bi_ZouShiChuLiStatus::a_1:
+        if (determ_bi_radio(this->a_0, bi)) {
+            this->a_1 = bi;
+            this->status = Bi_ZouShiChuLiStatus::a1_equal_a0;
+        }
+        else {
+            if ((bi.get_type() == BiType::UP && bi.get_high() > this->a_0.get_high())
+                || (bi.get_type() == BiType::DOWN && bi.get_low() < this->a_0.get_low())) {
+                last_zoushi = this->get_last_zoushi();
+                if (last_zoushi.get_type() == Bi_ZouShiType::UP) {
+                    tmp_bi = bi.generate_bi(last_zoushi.get_start_bi(), Bi(), last_zoushi.get_stop_bi());
+                    if (determ_bi_radio(tmp_bi, this->a_0)) {
+                        this->a_1 = this->a_0;
+                        this->a_0 = tmp_bi;
+                        this->a_2 = bi;
+                        this->status = Bi_ZouShiChuLiStatus::a2_highlow_a1_equal_a0;
+                        ret_fd.type = FindBiZouShiReturnType::Failue;
+                        ret_fd.bi_zoushi_1 = last_zoushi;
+                    }
+                    else {
+                        if ((last_zoushi.get_type() == Bi_ZouShiType::DOWN && last_zoushi.get_low() < this->a_0.get_low())
+                            || (last_zoushi.get_type() == Bi_ZouShiType::UP && last_zoushi.get_high() > this->a_0.get_high())){
+                            tmp_bi = last_zoushi.get_start_bi();
+                            ret_fd.type = FindBiZouShiReturnType::New_ZouShi;
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, tmp_bi, bi);
+                            this->status = Bi_ZouShiChuLiStatus::a_0;
+                        }
+                        else {
+                            ret_fd.type = FindBiZouShiReturnType::One;
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::BI, this->a_0, this->a_0);
+                            this->a_0 = bi;
+                            this->status = Bi_ZouShiChuLiStatus::a_1;
+                        }
+                    }
+                }
+                else {
+                    //没有last_zoushi
+                    ret_fd.type = FindBiZouShiReturnType::One;
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::BI, this->a_0, this->a_0);
+                    this->a_0 = bi;
+                    this->status = Bi_ZouShiChuLiStatus::a_1;
+                }
             }
-            break;
+            else {
+                this->a_1 = bi;
+                this->status = Bi_ZouShiChuLiStatus::a_2;
+            }
+        }
+        break;
+
+    case Bi_ZouShiChuLiStatus::a1_equal_a0:
+        if (determ_bi_radio(this->a_1, bi)) {
+            //中枢处理
+            this->A = Bi_ZhongShu(Bi(), this->a_0, this->a_1, bi);
+            this->enter_zhongshu(bi, Bi_ZouShiChuLiStatus::A);
+            this->status = Bi_ZouShiChuLiStatus::A;
+        }
+        else {
+            if (bi.get_type() == BiType::UP) {
+                if (bi.get_high() > this->a_1.get_high()) {
+                    if (this->a_0.get_low() > this->a_1.get_low()) {
+                        this->a_0 = bi.generate_bi(this->a_0, this->a_1, bi);
+                        this->status = Bi_ZouShiChuLiStatus::a_1;
+                    }
+                    else {
+                        last_zoushi = this->get_last_zoushi();
+                        if (last_zoushi.get_type() == Bi_ZouShiType::DOWN) {
+                            if (last_zoushi.get_high() > this->a_0.get_high()) {
+                                tmp_bi = bi.generate_bi(last_zoushi.get_start_bi(), Bi(), this->a_1);
+                                if (determ_bi_radio(tmp_bi, bi)) {
+                                    this->a_0 = tmp_bi;
+                                    this->a_1 = bi;
+                                    this->status = Bi_ZouShiChuLiStatus::a1_equal_a0;
+                                }
+                                else {
+                                    if (tmp_bi.get_high() > bi.get_high()) {
+                                        this->a_0 = tmp_bi;
+                                        this->a_1 = bi;
+                                        this->status = Bi_ZouShiChuLiStatus::a_2;
+                                    }
+                                    else {
+                                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, last_zoushi.get_start_bi(), this->a_1);
+                                        ret_fd.type = FindBiZouShiReturnType::New_ZouShi;
+                                        this->a_0 = bi;
+                                        this->status = Bi_ZouShiChuLiStatus::a_1;
+                                    }
+                                }
+                            }
+                            else {
+                                ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::BI, this->a_1, this->a_1);
+                                ret_fd.type = FindBiZouShiReturnType::New_ZouShi;
+                                this->a_0 = bi;
+                                this->status = Bi_ZouShiChuLiStatus::a_1;
+                            }
+                        }
+                        else {
+                            if (last_zoushi.get_type() == Bi_ZouShiType::NONE) {
+                                ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::BI, this->a_1, this->a_1);
+                                ret_fd.type = FindBiZouShiReturnType::One;
+                                this->a_0 = bi;
+                                this->status = Bi_ZouShiChuLiStatus::a_1;
+                            }
+                            else {
+                                OutputDebugPrintf("last_zoushi 不是DOWN， 需要处理");
+                            }
+                        }
+                    }
+                }
+                else {
+                    if (bi.get_low() >= this->a_1.get_low()) {
+                        this->a_2 = bi;
+                        this->status = Bi_ZouShiChuLiStatus::a2_normal_a1_equal_a0;
+                    }
+                    else {
+                        OutputDebugPrintf("a1 highlow a0 处理错误， 待修改");
+                    }
+                }
+            }
+            else {
+                if (bi.get_type() == BiType::DOWN) {
+                    if (bi.get_low() < this->a_1.get_low()) {
+                        if (this->a_0.get_high() > this->a_1.get_high()) {
+                            this->a_0 = bi.generate_bi(this->a_0, this->a_1, bi);
+                            this->status = Bi_ZouShiChuLiStatus::a_1;
+                        }
+                        else {
+                            last_zoushi = this->get_last_zoushi();
+                            if (last_zoushi.get_type() == Bi_ZouShiType::UP) {
+                                tmp_bi = bi.generate_bi(last_zoushi.get_start_bi(), Bi(), last_zoushi.get_stop_bi());
+                                tmp_bi = bi.generate_bi(last_zoushi.get_start_bi(), Bi(), this->a_1);
+                                if (determ_bi_radio(tmp_bi, bi)) {
+                                    this->a_0 = tmp_bi;
+                                    this->a_1 = bi;
+                                    this->status = Bi_ZouShiChuLiStatus::a1_equal_a0;
+                                }
+                                else {
+                                    if (tmp_bi.get_low() < bi.get_low()) {
+                                        this->a_0 = tmp_bi;
+                                        this->a_1 = bi;
+                                        this->status = Bi_ZouShiChuLiStatus::a_2;
+                                    }
+                                    else {
+                                        this->a_0 = bi;
+                                        this->status = Bi_ZouShiChuLiStatus::a_1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        if (bi.get_high() < this->a_0.get_high()) {
+                        }
+                        else {
+
+                        }
+                    }
+                }
+            }
+        }
+        break;
 
         case Bi_ZouShiChuLiStatus::a_2:
             a_0_radio = get_bi_radio(this->a_0, this->a_1);
@@ -227,7 +390,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                             //创新低
                             ret_fd.type = FindBiZouShiReturnType::Failue;
                             bi_list = save_bi_list(Bi_ZouShiChuLiStatus::a_2);
-                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_2, Bi_ZouShiChuLiStatus::a_2, bi_list);
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_2);
                             this->a_0 = bi;
                             this->status = Bi_ZouShiChuLiStatus::a_1;
                         } 
@@ -243,7 +406,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                             //创新高
                             ret_fd.type = FindBiZouShiReturnType::Failue;
                             bi_list = save_bi_list(Bi_ZouShiChuLiStatus::a_2);
-                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_2, Bi_ZouShiChuLiStatus::a_2, bi_list);
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_2);
                             this->a_0 = bi;
                             this->status = Bi_ZouShiChuLiStatus::a_1;
                         }
@@ -263,7 +426,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     //盘整
                     ret_fd.type = FindBiZouShiReturnType::One;
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::A_a0);
-                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN,this->a, this->a_1, Bi_ZouShiChuLiStatus::A_a0, bi_list);
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN,this->a_0, this->a_1);
                     this->a_0 = bi;
                     this->status = Bi_ZouShiChuLiStatus::a_1;
                 } else {
@@ -284,7 +447,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         //盘整
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::A_a0);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN,this->a, this->a_1, Bi_ZouShiChuLiStatus::A_a0, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN,this->a, this->a_1);
                         this->a_0 = bi;
                         this->status = Bi_ZouShiChuLiStatus::a_1;
                     } else {
@@ -330,7 +493,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         //盘整
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi>& bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::a_0);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_0, Bi_ZouShiChuLiStatus::a_0, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_0);
                         this->a_0 = this->a_1;
                         this->a_1 = this->a_2;
                         this->a_2 = bi;
@@ -354,7 +517,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                             //盘整
                             ret_fd.type = FindBiZouShiReturnType::One;
                             vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::a_0);
-                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_0, Bi_ZouShiChuLiStatus::a_0, bi_list);
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, this->a_0);
                             this->a_0 = this->a_1;
                             this->a_1 = this->a_2;
                             this->a_2 = bi;
@@ -412,7 +575,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     ret_fd.type = FindBiZouShiReturnType::One;
                     this->a_3 = bi;
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::a_2_longxd);
-                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, bi, Bi_ZouShiChuLiStatus::a_2_longxd, bi_list);
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, bi);
                     this->status = Bi_ZouShiChuLiStatus::a_0;
                 } else {
                     this->a_4 = bi;
@@ -423,7 +586,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     if (bi_low < this->a_2.get_low()) {
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::a_2_longxd);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, bi, Bi_ZouShiChuLiStatus::a_2_longxd, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::LONGXIANDUAN, this->a_0, bi);
                         this->status = Bi_ZouShiChuLiStatus::a_0;
                     } else {
                         this->a_4 = bi;
@@ -490,7 +653,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         Bi zs_input = this->A.get_input();
                         Bi zs_max_bi = this->A.get_max_bi();
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::A);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, zs_input, zs_max_bi, Bi_ZouShiChuLiStatus::A, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, zs_input, zs_max_bi);
                         this->a_0 = this->A.find_next_bi(zs_max_bi);
                         this->a_1 = bi;
                         this->status = Bi_ZouShiChuLiStatus::a_2;
@@ -512,7 +675,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                             Bi zs_input = this->A.get_input();
                             Bi zs_min_bi = this->A.get_min_bi();
                             vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::A);
-                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, zs_input, zs_min_bi, Bi_ZouShiChuLiStatus::A, bi_list);
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, zs_input, zs_min_bi);
                             this->a_0 = this->A.find_next_bi(zs_min_bi);
                             this->a_1 = bi;
                             this->status = Bi_ZouShiChuLiStatus::a_2;
@@ -541,7 +704,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     //创新高
                     ret_fd.type = FindBiZouShiReturnType::One;
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::B_b0);
-                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b, Bi_ZouShiChuLiStatus::B_b0, bi_list);
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b);
                     this->a_0 = bi;
                     this->status = Bi_ZouShiChuLiStatus::a_1;
                 } else {
@@ -549,7 +712,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         //进入上一个中枢， 进行扩展模式
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::B_b0);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b, Bi_ZouShiChuLiStatus::B_b0, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b);
                         this->a_0 = bi;
                         this->status = Bi_ZouShiChuLiStatus::a_1;
 
@@ -570,7 +733,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         //创新低
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::B_b0);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b, Bi_ZouShiChuLiStatus::B_b0, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b);
                         this->a_0 = bi;
                         this->status = Bi_ZouShiChuLiStatus::a_1;
                     } else {
@@ -578,7 +741,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                             //进入上一个中枢
                             ret_fd.type = FindBiZouShiReturnType::One;
                             vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::B_b0);
-                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b, Bi_ZouShiChuLiStatus::B_b0, bi_list);
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a_0, this->b);
                             this->a_0 = bi;
                             this->status = Bi_ZouShiChuLiStatus::a_1;
                         } else {
@@ -653,7 +816,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     Bi zs_input = this->B.bi_list[0];
                     Bi zs_max_bi = this->B.get_max_bi();
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::B);
-                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a, zs_max_bi, Bi_ZouShiChuLiStatus::B, bi_list);
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a, zs_max_bi);
                     this->a_0 = this->B.find_next_bi(zs_max_bi);
                     this->a_1 = bi;
                     this->status = Bi_ZouShiChuLiStatus::a_2;
@@ -674,7 +837,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         Bi zs_input = this->B.bi_list[0];
                         Bi zs_min_bi = this->B.get_min_bi();
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::B);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a, zs_min_bi, Bi_ZouShiChuLiStatus::B, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::PANZHENG, this->a, zs_min_bi);
 
                         this->a_0 = this->B.find_next_bi(zs_min_bi);
                         this->a_1 = bi;
@@ -691,7 +854,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                 if (bi_high > this->c_0.get_high()) {
                     ret_fd.type == FindBiZouShiReturnType::One;
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_2);
-                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::UP, this->a, bi, Bi_ZouShiChuLiStatus::c_2, bi_list);
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::UP, this->a, bi);
                     this->status = Bi_ZouShiChuLiStatus::a_0;
                 } else {
                     this->c_2 = bi;
@@ -702,7 +865,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     if (bi_low < this->c_0.get_low()) {
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_2);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::UP, this->a, bi, Bi_ZouShiChuLiStatus::c_2, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::UP, this->a, bi);
                         this->status = Bi_ZouShiChuLiStatus::a_0;
                     } else {
                         this->c_2 = bi;
@@ -717,7 +880,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                 if (bi_high > this->a.get_high()) {
                     ret_fd.type = FindBiZouShiReturnType::One;
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_0);
-                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0, Bi_ZouShiChuLiStatus::c_0, bi_list);
+                    ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0);
                     this->a_0 = this->c_1;
                     this->a_1 = this->c_2;
                     this->a_3 = bi;
@@ -726,7 +889,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     if (bi_high < this->B.get_low()) {
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_0);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0, Bi_ZouShiChuLiStatus::c_0, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0);
                         this->a = bi.generate_bi(this->c_1, this->c_2, bi);
                         this->status = Bi_ZouShiChuLiStatus::a_1;
                     } else {
@@ -739,7 +902,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                     if (bi_low < this->a.get_low()) {
                         ret_fd.type = FindBiZouShiReturnType::One;
                         vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_0);
-                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0, Bi_ZouShiChuLiStatus::c_0, bi_list);
+                        ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0);
                         this->a_0 = this->c_1;
                         this->a_1 = this->c_2;
                         this->a_3 = bi;
@@ -748,7 +911,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
                         if (bi_low > this->B.get_high()) {
                             ret_fd.type = FindBiZouShiReturnType::One;
                             vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_0);
-                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0, Bi_ZouShiChuLiStatus::c_0, bi_list);
+                            ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::DOWN, this->a, this->c_0);
                             this->a = bi.generate_bi(this->c_1, this->c_2, bi);
                             this->status = Bi_ZouShiChuLiStatus::a_1;
                         } else {

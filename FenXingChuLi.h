@@ -129,7 +129,7 @@ public:
 
 //enum class FenXingChuLiStatus { LEFT, MIDDLE, RIGHT, FREE };
 enum class FreeStatus {NONE, FREE_0, FREE_1, FREE_2};
-enum class FenXingChuLiStatus {ONE, TWO, THREE, FOUR, FIVE, SIX, FENXING_END};
+enum class FenXingChuLiStatus {START, ONE, TWO, HIGHLOW, LOWHIGH, THREE, FOUR, FIVE, SIX, FENXING_END};
 
 class FenXingChuLi {
 private:
@@ -163,6 +163,7 @@ public:
 };
 
 void Bi3_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_fenxing_highlow(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void Bi4_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 
 #pragma pack(pop)
