@@ -10,3 +10,4 @@ cmake-build-debug/
 Debug/
 ChanlunX.dir/
 .vs.old/
+.Release/

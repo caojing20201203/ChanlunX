@@ -104,19 +104,19 @@ void Func10(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 //笔中枢开始结束
 void Func11(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 {
-    bi_zhongshu_start_stop(nCount, pOut, pHigh, pLow, pIgnore);
+    Bi3_bi_zhongshu(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
 //笔中枢--高
 void Func12(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 {
-    bi_zhongshu_high(nCount, pOut, pHigh, pLow, pIgnore);
+    Bi3_bi_zhongshu_high(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
 //笔中枢--低
 void Func13(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 {
-    bi_zhongshu_low(nCount, pOut, pHigh, pLow, pIgnore);
+    Bi3_bi_zhongshu_low(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
 //==============================================================================
@@ -125,6 +125,14 @@ void Func13(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 void Func14(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
 {
     Bi3_fenxing_highlow(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
+//==============================================================================
+//输出函数15号：显示线段的组成笔
+//==============================================================================
+void Func15(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi3_xianduan_bi(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
 static PluginTCalcFuncInfo Info[] =
@@ -143,6 +151,7 @@ static PluginTCalcFuncInfo Info[] =
     {12, &Func12},
     {13, &Func13},
     {14, &Func14},
+    {15, &Func15},
     { 0, NULL}
 };
 

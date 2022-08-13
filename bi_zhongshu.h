@@ -27,31 +27,22 @@ class Bi_ZhongShu {
 
         Bi_ZhongShu(Bi in, Bi xd1, Bi xd2, Bi xd3) {
             this->input_bi = in;
+            this->high = min(xd1.get_high(), xd3.get_high());
+            this->low = max(xd1.get_low(), xd3.get_low());
+            this->max_high = max(xd1.get_high(), xd3.get_high());
+            this->min_low = min(xd1.get_low(), xd3.get_low());
             this->bi_list.push_back(xd1);
             this->bi_list.push_back(xd2);
             this->bi_list.push_back(xd3);
-            if (xd1.get_high() > xd3.get_high()) {
-                this->max_high = xd1.get_high();
-                this->min_low = xd3.get_low();
-                this->min_bi = xd3;
-            } else {
-                this->max_high = xd3.get_high();
-                this->max_bi = xd2;
-                this->min_low = xd1.get_low();
-            }
-            this->high = min(xd1.get_high(), xd3.get_high());
-            this->low = max(xd1.get_low(), xd3.get_low());
+
             this->start_pos = in.get_stop_pos();
             this->stop_pos = xd3.get_stop_pos();
             this->length = this->high - this->low;
         } 
 
-        void stop() {
-            //int num = this->bi_list.size() - 2;
-            int num = this->bi_list.size() - 1;
-            Bi output = this->bi_list[num];
-            this->output_bi = output;
-            this->stop_pos = output.get_stop_pos();
+        void stop(Bi bi) {
+            this->output_bi = bi;
+            this->stop_pos = bi.get_start_pos();
         }
 
         float get_length() {
@@ -88,6 +79,10 @@ class Bi_ZhongShu {
             return(this->input_bi);
         }
 
+        void set_stop_pos(Bi bi) {
+            this->stop_pos = bi.get_stop_pos();
+        }
+
         Bi get_output() {
             return(this->output_bi);
         }
@@ -119,6 +114,11 @@ class Bi_ZhongShu {
         }
 };
 
+enum class FindBiZhongShuReturnType { None, THREE_BUY, THREE_SELL, ZHONSHU_UPGRADE, ZhongShuSuccess, ZhongShuFailer };
+struct FindBiZhongShuReturn {
+    FindBiZhongShuReturnType type;
+    Bi_ZhongShu bi_zhongshu;
+};
 enum class Bi_ZhongShuChuLiStatus {NONE, UP, DOWN, INSIDE, THREE_BUY, THREE_SELL};
 class Bi_ZhongShuChuLi {
     private:
@@ -128,13 +128,10 @@ class Bi_ZhongShuChuLi {
         Bi_ZhongShuChuLi();
         Bi_ZhongShuChuLi(Bi input, Bi xd1, Bi xd2, Bi xd3);
 
-        Bi_ZhongShu find_Bi_ZhongShu(Bi xd);
+        FindBiZhongShuReturn find_Bi_ZhongShu(Bi xd);
         Bi_ZhongShu get_Bi_ZhongShu();
 
         Bi_ZhongShuChuLiStatus get_status() {
             return(this->status);
         }
 };
-
-extern bool determ_bi_radio(Bi bi1, Bi Bi2);
-extern float get_bi_radio(Bi bi1, Bi bi2);

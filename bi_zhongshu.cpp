@@ -23,61 +23,96 @@ Bi_ZhongShu Bi_ZhongShuChuLi::get_Bi_ZhongShu() {
     return(this->bi_zhongshu);
 }
 
-bool determ_bi_radio(Bi bi1, Bi bi2) {
-    float radio = get_bi_radio(bi1, bi2);
-    if (radio > 0.618)
-        return(true);
-    else
-        return(false);
-}
-
-
-float get_bi_radio(Bi bi1, Bi bi2) {
-    float radio = 0.0;
-    float bi1_len = bi1.get_length();
-    float bi2_len = bi2.get_length();
-    if (bi2_len < bi1_len)
+bool is_bi_equal_1(float bi1_len, float bi2_len) {
+    float radio;
+    if (bi1_len < bi2_len) {
+        radio = bi1_len / bi2_len;
+    }
+    else {
         radio = bi2_len / bi1_len;
-    else
-        radio = bi1_len / bi2_len * -1;
-    return(radio);
+    }
+    if (radio >= 0.618) {
+        return(true);
+    }
+    else {
+        return(false);
+    }
 }
 
-Bi_ZhongShu Bi_ZhongShuChuLi::find_Bi_ZhongShu(Bi bi) {
+
+FindBiZhongShuReturn Bi_ZhongShuChuLi::find_Bi_ZhongShu(Bi bi) {
+    FindBiZhongShuReturn ret_bi_zhongshu = FindBiZhongShuReturn();
     Bi last_bi = this->bi_zhongshu.bi_list.back();
     this->bi_zhongshu.bi_list.push_back(bi);
     Bi_ZhongShu ret_Bi_ZhongShu = Bi_ZhongShu();
     float bi_high = bi.get_high();
     float bi_low = bi.get_low();
-    float bi_radio = 0.3 * this->bi_zhongshu.get_length();
-    float bi_cha;
 
-    if (this->bi_zhongshu.bi_list.size() >= 9) {
+    if (this->bi_zhongshu.bi_list.size() >= 10) {
         //TODO: 中枢升级
+        Bi first_bi = bi.generate_bi(this->bi_zhongshu.bi_list[1], this->bi_zhongshu.bi_list[2], this->bi_zhongshu.bi_list[3]);
+        Bi second_bi = bi.generate_bi(this->bi_zhongshu.bi_list[4], this->bi_zhongshu.bi_list[5], this->bi_zhongshu.bi_list[6]);
+        Bi three_bi = bi.generate_bi(this->bi_zhongshu.bi_list[7], this->bi_zhongshu.bi_list[8], this->bi_zhongshu.bi_list[9]);
+        Bi input = this->bi_zhongshu.get_input();
+        
+        ret_bi_zhongshu.bi_zhongshu = Bi_ZhongShu(input, first_bi, second_bi, three_bi);
+        ret_bi_zhongshu.type = FindBiZhongShuReturnType::ZHONSHU_UPGRADE;
         OutputDebugPrintf("ToDo 中枢升级");
+        return(ret_bi_zhongshu);
     }
-    else {
-        if (bi.get_type() == BiType::UP) {
-            if (bi_high > this->bi_zhongshu.get_high()) {
-                bi_cha = bi_high - this->bi_zhongshu.get_high();
-                if (bi_cha > bi_radio) {
-                    this->bi_zhongshu.stop();
-                    ret_Bi_ZhongShu = this->bi_zhongshu;
-                }
-            }
+    switch (bi.get_type()) {
+    case BiType::UP:
+        if (bi_high < this->bi_zhongshu.get_low()) {
+            //3卖
+            this->bi_zhongshu.stop(last_bi);
+            ret_bi_zhongshu.bi_zhongshu = this->bi_zhongshu;
+            ret_bi_zhongshu.type = FindBiZhongShuReturnType::THREE_SELL;
         }
         else {
-            if (bi.get_type() == BiType::DOWN) {
-                if (bi_low < this->bi_zhongshu.get_low()) {
-                    bi_cha = this->bi_zhongshu.get_low() - bi_low;
-                    if (bi_cha > bi_radio) {
-                        this->bi_zhongshu.stop();
-                        ret_Bi_ZhongShu = this->bi_zhongshu;
+            if (bi_high > this->bi_zhongshu.get_high()) {
+                if (is_bi_equal_1(bi.get_length(), this->bi_zhongshu.get_length()) == false) {
+                    if (this->bi_zhongshu.get_input().get_type() == BiType::UP) {
+                        this->bi_zhongshu.stop(bi);
+                        ret_bi_zhongshu.bi_zhongshu = this->bi_zhongshu;
+                        ret_bi_zhongshu.type = FindBiZhongShuReturnType::ZhongShuSuccess;
+                    }
+                    else {
+                        this->bi_zhongshu.stop(last_bi);
+                        ret_bi_zhongshu.bi_zhongshu = this->bi_zhongshu;
+                        ret_bi_zhongshu.type = FindBiZhongShuReturnType::ZhongShuFailer;
                     }
                 }
-
             }
         }
+        break;
+    case BiType::DOWN:
+        if (bi_low > this->bi_zhongshu.get_high()) {
+            //3买
+            this->bi_zhongshu.stop(last_bi);
+            ret_bi_zhongshu.bi_zhongshu = this->bi_zhongshu;
+            ret_bi_zhongshu.type = FindBiZhongShuReturnType::THREE_BUY;
+        }
+        else {
+            if (bi_low < this->bi_zhongshu.get_low()) {
+                if (is_bi_equal_1(bi.get_length(), this->bi_zhongshu.get_length()) == false) {
+                    if (this->bi_zhongshu.get_input().get_type() == BiType::DOWN) {
+                        this->bi_zhongshu.stop(bi);
+                        ret_bi_zhongshu.bi_zhongshu = this->bi_zhongshu;
+                        ret_bi_zhongshu.type = FindBiZhongShuReturnType::ZhongShuSuccess;
+                    }
+                    else {
+                        this->bi_zhongshu.stop(last_bi);
+                        ret_bi_zhongshu.bi_zhongshu = this->bi_zhongshu;
+                        ret_bi_zhongshu.type = FindBiZhongShuReturnType::ZhongShuFailer;
+                    }
+                }
+            }
+        }
+        break;
     }
-    return(ret_Bi_ZhongShu);
+
+    if (ret_bi_zhongshu.type == FindBiZhongShuReturnType::None)
+        this->bi_zhongshu.set_stop_pos(bi);
+
+    return(ret_bi_zhongshu);
 }

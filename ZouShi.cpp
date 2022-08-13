@@ -207,7 +207,7 @@ FindZouShiReturn ZouShiChuLi::find_zoushi(XianDuan xd) {
             if (xd.get_high() > this->b_0.get_high()) {
                 this->b = this->generate_xd(this->b_0, this->b_1, xd);
                 this->A = this->zhongshucl.get_zhongshu();
-                this-A.stop(this->b);
+                this->A.stop(this->b);
                 this->status = ZouShiChuLiStatus::B_xd1;
             } else {
                 this->status = ZouShiChuLiStatus::A_THREEBUY_NORMAL;
@@ -342,7 +342,7 @@ void Bi3_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn){
     BaoHanChuLi baohanChuli;
     ZouShiChuLi zoushichuli;
     ZouShi zoushi;
-    int start_pos, stop_pos, verify_pos;
+    int start_pos, stop_pos;
 
     for (int i = 0; i < nCount; i++) {
         baohanChuli.add(pHigh[i], pLow[i]);
@@ -387,7 +387,7 @@ void Bi4_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn){
     BaoHanChuLi baohanChuli;
     ZouShiChuLi zoushichuli;
     ZouShi zoushi;
-    int start_pos, stop_pos, verify_pos;
+    int start_pos, stop_pos;
 
     for (int i = 0; i < nCount; i++) {
         baohanChuli.add(pHigh[i], pLow[i]);

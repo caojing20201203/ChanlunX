@@ -6,15 +6,17 @@
 using namespace std;
 
 enum class XianDuanType { NONE, TEMP_UP, TEMP_DOWN, FAILURE_TEMP_UP, FAILURE_TEMP_DOWN, UP, DOWN, FAILURE_UP, FAILURE_DOWN, LONG_XIANDUAN };
+enum class XianDuanKind {NONE, SigleBi,ThreeBi,LONGXIANDUAN, PANZHENG, QUSHI};
 class XianDuan {
 private:
     XianDuanType type = XianDuanType::NONE;
-    vector <Bi>bi_list;
+    vector<Bi> bi_list;
     Bi start_bi, stop_bi;
     int start_pos, stop_pos, verify_pos;
     float high, low;
     float length;
     HighLowType high_low_type;
+    XianDuanKind kind;
 
 public:
     XianDuan() {
@@ -28,6 +30,7 @@ public:
         this->stop_pos = 0;
         this->verify_pos = 0;
         this->high_low_type = HighLowType::NONE;
+        this->kind = XianDuanKind::NONE;
     }
 
     XianDuan(Bi start_bi, Bi stop_bi) {
@@ -39,6 +42,7 @@ public:
         this->start_pos = start_bi.get_start_fx().get_middle().get_position();
         this->stop_pos = stop_bi.get_stop_fx().get_middle().get_position();
         this->verify_pos = stop_bi.get_stop_fx().get_free().get_position();
+
         if (start_bi.get_type() == BiType::DOWN) {
             this->high = start_bi.get_high();
             this->low = stop_bi.get_low();
@@ -62,6 +66,14 @@ public:
 
     void set_type(XianDuanType xd_type) {
         this->type = xd_type;
+    }
+
+    XianDuanKind get_kind() {
+        return(this->kind);
+    }
+
+    void set_kind(XianDuanKind kind) {
+        this->kind = kind;
     }
 
     float get_high() {
@@ -122,14 +134,15 @@ public:
     }
 };
 
-enum class XianDuanChuLiStatus { START, LEFT, AFTER_LEFT, MIDDLE_HIGHLOW, MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE, LEFT_INCLUDE_MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE_INCLUDE_RIGHT, LEFT_INCLUDE_MIDDLE_INCLUDE_RIGHT_NORMAL, LEFT_INCLUDE_MIDDLE_INCLUDE_RIGHT_INCLUDE_FREE,AFTER_MIDDLE, RIGHT, RIGHT_NORMAL, RIGHT_NORMAL_NORMAL, RIGHT_NORMAL_NORMAL_NORMAL, AFTER_RIGHT, FREE, AFTER_FREE, AFTER_FREE_1, AFTER_FREE_2, AFTER_FREE_3, LONGXIANDUAN, LONGXIANDUAN_RIGHT, LONGXIANDUAN_AFTER_RIGHT, LONGXIANDUAN_FREE, LONGXIANDUAN_AFTER_FREE, LONGXIANDUAN_AFTER_FREE_1 };
+enum class XianDuanChuLiStatus { START, LEFT, AFTER_LEFT, MIDDLE_EQUAL, MIDDLE_EQUAL_NORMAL, MIDDLE_HIGHLOW, MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE, AFTER_MIDDLE, RIGHT, RIGHT_NORMAL, RIGHT_NORMAL_NORMAL, RIGHT_NORMAL_NORMAL_NORMAL, RIGHT_NORMAL_NORMAL_NORMAL_NORMAL, AFTER_RIGHT, FREE, AFTER_FREE, AFTER_FREE_1, AFTER_FREE_2, AFTER_FREE_3, LONGXIANDUAN, LONGXIANDUAN_RIGHT, LONGXIANDUAN_RIGHT_NORMAL, LONGXIANDUAN_FREE, LONGXIANDUAN_AFTER_FREE, LONGXIANDUAN_AFTER_FREE_1, A, b_3, b_3_normal, B_b1, B_b2, B_b3, B};
 
-enum class FindXianDuanReturnType { None, Failure, NewXianDuan, XianDuanUpgrade, One, Two, Three };
+enum class FindXianDuanReturnType { None, Failure, NewXianDuan, XianDuanUpgrade, One, Two, Two_Bi, Three, FindZhongShu, ZhongShuSuccess, ZhongShuFailer, ZhongShuUpgrade };
 struct FindXianDuanReturn {
     FindXianDuanReturnType type;
     XianDuan xd1;
     XianDuan xd2;
     XianDuan xd3;
+    Bi_ZhongShu zhongshu;
 };
 
 class XianDuanChuLi {
@@ -149,6 +162,8 @@ private:
     Bi after_free = Bi();
     Bi after_free_1 = Bi();
     Bi after_free_2 = Bi();
+
+    Bi a, b, b_1, b_2,b_3, c;
     BiChuLi bicl;
 
     Bi_ZhongShuChuLi A_zscl, B_zscl;
@@ -157,9 +172,14 @@ private:
     FindXianDuanReturn __find_xianduan(Bi bi);
     void __backroll(Bi bi);
     void debug_xianduan(XianDuan xd);
-    FindXianDuanReturn failure_xd(Bi first_bi, Bi second_bi);
+    FindXianDuanReturn failure_xd();
     FindXianDuanReturn __right_process(Bi bi);
     bool __middle_process(Bi bi);
+    bool __determ_zhongshu(Bi bi);
+    XianDuan get_last_xd(int num);
+    void push_bi_list();
+    FindXianDuanReturn set_xianduan(FindXianDuanReturnType ret_type);
+   
 
 public:
     XianDuanChuLi();
@@ -168,8 +188,13 @@ public:
 
     vector<XianDuan> xianDuanList;
     vector<XianDuan> key_xianduan_list;
+    vector<Bi_ZhongShu> zhongshu_list;
 };
 
 void Bi3_xianduan(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_xianduan_bi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void Bi4_xianduan(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_bi_zhongshu(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_bi_zhongshu_high(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_bi_zhongshu_low(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 extern void OutputDebugPrintf(const char* strOutputString, ...);

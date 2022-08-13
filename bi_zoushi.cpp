@@ -56,7 +56,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::bi_zoushi_failure(Bi_ZouShi bi_zoushi) {
     if (!this->bi_zoushi_list.empty()) {
         Bi_ZouShi last_bi_zoushi = this->bi_zoushi_list.back();
         bi_list = bi_zoushi.get_bilist();
-        for (int i = 0; i < bi_list.size(); i++) {
+        for (unsigned int i = 0; i < bi_list.size(); i++) {
             last_bi_zoushi.get_bilist().push_back(bi_list[i]);
         }
         ret_fd.bi_zoushi_1 = Bi_ZouShi(last_bi_zoushi.get_kind(), last_bi_zoushi.get_start_bi(), bi_zoushi.get_stop_bi());
@@ -73,7 +73,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::bi_zoushi_failure(Bi_ZouShi bi_zoushi) {
     }
     else {
         if (start_bi.get_type() == BiType::DOWN) {
-            bi_zoushi_kind == Bi_ZouShiKind::LONGXIANDUAN;
+            bi_zoushi_kind = Bi_ZouShiKind::LONGXIANDUAN;
         }
     }
     ret_fd.bi_zoushi_1 = Bi_ZouShi(bi_zoushi_kind, start_bi, start_bi);
@@ -140,6 +140,14 @@ vector<Bi> Bi_ZouShiChuLi::save_bi_list(Bi_ZouShiChuLiStatus status) {
 #define MIN_RADIO 0.382
 #define MAX_RADIO 0.618
 
+bool determ_bi_radio(Bi bi1, Bi bi2) {
+    return(false);
+}
+
+float get_bi_radio(Bi bi1, Bi bi2) {
+    return(0.618);
+}
+
 Bi_ZouShi Bi_ZouShiChuLi::get_last_zoushi() {
     Bi_ZouShi ret_zoushi;
 
@@ -159,6 +167,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
     ret_fd.type = FindBiZouShiReturnType::None;
     Bi_ZhongShu bi_zhongshu = Bi_ZhongShu();
     Bi tmp_bi;
+    FindBiZhongShuReturn ret_bi_zhongshu;
 
     a_0_radio = 0;
     a_1_radio = 0;
@@ -636,7 +645,8 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
             break;
         */
         case Bi_ZouShiChuLiStatus::A:
-            bi_zhongshu = this->bi_zhongshu_chuli.find_Bi_ZhongShu(bi);
+            ret_bi_zhongshu = this->bi_zhongshu_chuli.find_Bi_ZhongShu(bi);
+            bi_zhongshu = ret_bi_zhongshu.bi_zhongshu;
             if (bi_zhongshu.get_output().get_type() != BiType::NONE) {
                 if (bi_zhongshu_chuli.get_status() == Bi_ZhongShuChuLiStatus::THREE_SELL) {
                     //出现3卖
@@ -852,7 +862,7 @@ FindBiZouShiReturn Bi_ZouShiChuLi::find_bi_zoushi(Bi bi) {
         case Bi_ZouShiChuLiStatus::c_2:
             if (bi.get_type() == BiType::UP) {
                 if (bi_high > this->c_0.get_high()) {
-                    ret_fd.type == FindBiZouShiReturnType::One;
+                    ret_fd.type = FindBiZouShiReturnType::One;
                     vector<Bi> bi_list = this->save_bi_list(Bi_ZouShiChuLiStatus::c_2);
                     ret_fd.bi_zoushi_1 = Bi_ZouShi(Bi_ZouShiKind::UP, this->a, bi);
                     this->status = Bi_ZouShiChuLiStatus::a_0;
@@ -978,7 +988,7 @@ void bi_zhongshu_high(int nCount, float* pOut, float* pHigh, float* pLow, float*
     if (count == 0)
         return;
 
-    for (int i = 0; i < count; i++) {
+    for (unsigned int i = 0; i < count; i++) {
         bi_zhongshu = bi_zoushichuli.bi_zhongshu_list[i];
         start_pos = bi_zhongshu.get_start_pos();
         stop_pos = bi_zhongshu.get_stop_pos();
@@ -1008,7 +1018,7 @@ void bi_zhongshu_low(int nCount, float* pOut, float* pHigh, float* pLow, float* 
     if (count == 0)
         return;
 
-    for (int i = 0; i < count; i++) {
+    for (unsigned int i = 0; i < count; i++) {
         bi_zhongshu = bi_zoushichuli.bi_zhongshu_list[i];
         start_pos = bi_zhongshu.get_start_pos();
         stop_pos = bi_zhongshu.get_stop_pos();
@@ -1022,7 +1032,7 @@ void Bi3_bi_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pI
     BaoHanChuLi baohanChuli;
     Bi_ZouShiChuLi bi_zoushichuli;
     Bi_ZouShi bi_zoushi;
-    int start_pos, stop_pos, verify_pos;
+    int start_pos, stop_pos;
 
     for (int i = 0; i < nCount; i++) {
         baohanChuli.add(pHigh[i], pLow[i]);

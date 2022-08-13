@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool debug_bi_status = true;
+bool debug_bi_status = false;
 
 BiChuLi::BiChuLi() {
     this->fxcl = FenXingChuLi();
@@ -480,7 +480,7 @@ void Bi3_bi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
         }
 
 
-        for (int i = 1; i < count; i++) {
+        for (unsigned int i = 1; i < count; i++) {
             bi = bichuli.biList[i];
             stop_pos = bi.get_stop_pos();
             switch (bi.get_type()) {

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-bool debug_fenxing_status = true;
+bool debug_fenxing_status = false;
 
 
 float FenXingChuLi::comp_fx_gao, FenXingChuLi::comp_fx_di;
@@ -471,8 +471,8 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                 if (this->two.get_high() > this->one.get_high()) {
                     if (kx_gao > this->two.get_high()) {
                         //上升趋势
-                        float first_kx_gao = this->one.get_high() + 0.01;
-                        float first_kx_di = this->one.get_low() + 0.01;
+                        float first_kx_gao = float(this->one.get_high() + 0.01);
+                        float first_kx_di = float(this->one.get_low() + 0.01);
                         first_kx = Kxian1(first_kx_gao, first_kx_di, Direction::UP, -1);
                         tmp_fx = FenXing(first_kx, this->one, this->two, kxian);
                         this->four = kxian;
@@ -491,8 +491,8 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                 else {
                     if (kx_di < this->two.get_low()) {
                         //下降趋势
-                        float first_kx_gao = this->one.get_high() - 0.01;
-                        float first_kx_di = this->one.get_low() - 0.01;
+                        float first_kx_gao = float(this->one.get_high() - 0.01);
+                        float first_kx_di = float(this->one.get_low() - 0.01);
                         first_kx = Kxian1(first_kx_gao, first_kx_di, Direction::DOWN, -1);
                         tmp_fx = FenXing(first_kx, this->one, this->two, kxian);
                         this->four = kxian;
@@ -677,17 +677,16 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
     case FenXingChuLiStatus::LOWHIGH:
         if (kx_di < this->min_low) {
             this->min_low = kx_di;
-            this->one = this->two;
-            this->two = this->three;
-            this->three = kxian;
-            this->status = FenXingChuLiStatus::HIGHLOW;
+            this->one = this->last_bar;
+            this->two = kxian;
+            this->status = FenXingChuLiStatus::THREE;
         }
         else {
             if (kx_gao > this->max_high) {
-                this->four = kxian;
                 this->max_high = kx_gao;
-                tmp_fx = FenXing(this->one, this->two, this->three, this->four);
-                this->status = FenXingChuLiStatus::FIVE;
+                this->one = this->last_bar;
+                this->two = kxian;
+                this->status = FenXingChuLiStatus::THREE;
             }
             else {
                 tmp_fx = FenXing(this->one, this->two, kxian, kxian);
