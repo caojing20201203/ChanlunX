@@ -119,17 +119,32 @@ struct FindBiZhongShuReturn {
     FindBiZhongShuReturnType type;
     Bi_ZhongShu bi_zhongshu;
 };
+enum class FindZhongShuBiReturnType {None, ONE, TWO};
+struct FindZhongShuBiReturn {
+    FindZhongShuBiReturnType type;
+    Bi bi1;
+    Bi bi2;
+};
+
+/*
 enum class Bi_ZhongShuChuLiStatus {NONE, UP, DOWN, INSIDE, THREE_BUY, THREE_SELL};
+*/
+enum class Bi_ZhongShuChuLiStatus {NONE, INPUT, ZS1, ZS2, ZS3, ZS4, ZS5, ZS6, ZS7, ZS8, THREE_BUY, THREE_SELL};
+
 class Bi_ZhongShuChuLi {
     private:
         Bi_ZhongShu bi_zhongshu;
         Bi_ZhongShuChuLiStatus status;
+        Bi input, zs1, zs2, zs3, zs4, zs5, zs6, zs7, zs8, output, zs_input, zs_output;
     public:
         Bi_ZhongShuChuLi();
         Bi_ZhongShuChuLi(Bi input, Bi xd1, Bi xd2, Bi xd3);
 
         FindBiZhongShuReturn find_Bi_ZhongShu(Bi xd);
+        FindBiZhongShuReturn __find_Bi_ZhongShu(Bi xd);
         Bi_ZhongShu get_Bi_ZhongShu();
+        FindZhongShuBiReturn generate_zs_bi(Bi bi);
+        Bi get_last_zs_bi();
 
         Bi_ZhongShuChuLiStatus get_status() {
             return(this->status);

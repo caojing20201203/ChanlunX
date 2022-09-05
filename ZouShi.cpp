@@ -46,7 +46,7 @@ void ZouShiChuLi::handle(vector<Kxian1>& kxianList) {
 }
 
 FindZouShiReturn ZouShiChuLi::find_zoushi(XianDuan xd) {
-    ZhongShu ret_zhongshu;
+    FindZhongShuReturn ret_zhongshu;
     FindZouShiReturn ret_zoushi;
 
     switch(this->status) {
@@ -323,8 +323,8 @@ FindZouShiReturn ZouShiChuLi::find_zoushi(XianDuan xd) {
         case ZouShiChuLiStatus::B:
             this->zhongshucl = ZhongShuChuLi(this->b, this->B_xd1, this->B_xd2, this->B_xd3);
             ret_zhongshu = this->zhongshucl.find_zhongshu(xd);
-            if (ret_zhongshu.get_high() > 0.0) {
-                this->B = ret_zhongshu;
+            if (ret_zhongshu.zhongshu.get_high() > 0.0) {
+                this->B = ret_zhongshu.zhongshu;
                 this->c_0 = this->A.get_output();
                 this->c_1 = xd;
                 this->status = ZouShiChuLiStatus::c;

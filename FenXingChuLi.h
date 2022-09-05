@@ -160,6 +160,7 @@ public:
     void handle(vector<Kxian1>& kxianList);
     FenXing __find_fenxing(Kxian1 kx);
     FenXingChuLi();
+    bool firstBarStatus;
 };
 
 void Bi3_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
