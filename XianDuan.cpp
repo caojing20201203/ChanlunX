@@ -919,7 +919,6 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan(Bi bi) {
                 if (this->a.get_type() != this->b.get_type()) {
                     if (this->a.get_type() == BiType::UP) {
                         Bi max_bi = ret_zhongshu.bi_zhongshu.get_max_bi();
-**********************************************
                         ret_xd.xd1 = XianDuan(this->a, max_bi);
                         ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
                         Bi max_next_bi = ret_zhongshu.bi_zhongshu.find_next_bi(max_bi);
@@ -1476,6 +1475,7 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan(Bi bi) {
             }
             else {
                 if (bi_high > this->middle.get_high()) {
+                    this->right = bi.generate_bi(this->right, Bi(), bi);
                     ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
                     this->status = XianDuanChuLiStatus::START;
                 }
@@ -1498,6 +1498,7 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan(Bi bi) {
             }
             else {
                 if (bi_low < this->middle.get_low()) {
+                    this->right = bi.generate_bi(this->right, Bi(), bi);
                     ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
                     this->status = XianDuanChuLiStatus::START;
                 }
