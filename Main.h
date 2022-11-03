@@ -10,5 +10,6 @@
 #include "ZouShi.h"
 #include "bi_zoushi.h"
 #include "bi_zhongshu.h"
+#include "CompositeBi.h"
 
 #endif

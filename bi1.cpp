@@ -7,6 +7,255 @@ using namespace std;
 
 bool debug_bi_status = false;
 
+#define PRE_START           0
+#define PRE_LEFT            1
+#define PRE_AFTER_LEFT      2
+#define PRE_AFTER_LEFT_HIGHLOW    3
+#define PRE_AFTER_LEFT_NORMAL     4
+
+using namespace std;
+
+char* get_pre_status(int status) {
+    switch (status) {
+    case PRE_START:
+        return("PRE_STATUS");
+    case PRE_LEFT:
+        return("PRE_LEFT");
+    case PRE_AFTER_LEFT:
+        return("PRE_AFTER_LEFT");
+    case PRE_AFTER_LEFT_HIGHLOW:
+        return("PRE_AFTER_LEFT_HIGHLOW");
+    case PRE_AFTER_LEFT_NORMAL:
+        return("PRE_AFTER_LEFT_NORMAL");
+    }
+}
+
+
+vector<Bi> pre_bi_process(vector<Bi> biList) {
+    vector<Bi> ret_list;
+    int count, i, j;
+    int status = PRE_START;
+    count = biList.size();
+    Bi first, second, three, bi;
+    Bi bi1, bi2;
+
+    for (int i = 0; i < count; i++) {
+        bi = biList[i];
+        if (bi.get_type() == BiType::UP)
+            OutputDebugPrintf("上升笔  %s %f %f 【%f】", get_pre_status(status), bi.get_low(), bi.get_high(), bi.get_length());
+        else
+            OutputDebugPrintf("下降笔  %s %f %f 【%f】", get_pre_status(status), bi.get_high(), bi.get_low(), bi.get_length());
+
+        switch (status) {
+        case PRE_START:
+            first = bi;
+            status = PRE_LEFT;
+            break;
+        case PRE_LEFT:
+            switch (bi.get_type()) {
+            case BiType::UP:
+                if (bi.get_high() > first.get_high()) {
+                    ret_list.push_back(first);
+                    first = bi;
+                    status = PRE_LEFT;
+                }
+                else {
+                    second = bi;
+                    status = PRE_AFTER_LEFT;
+                }
+                break;
+            case BiType::DOWN:
+                if (bi.get_low() < first.get_low()) {
+                    ret_list.push_back(first);
+                    first = bi;
+                    status = PRE_LEFT;
+                }
+                else {
+                    second = bi;
+                    status = PRE_AFTER_LEFT;
+                }
+                break;
+            }
+            break;
+        case PRE_AFTER_LEFT:
+            switch (bi.get_type()) {
+            case BiType::UP:
+                if (bi.get_high() > first.get_high()) {
+                    three = bi;
+                    status = PRE_AFTER_LEFT_HIGHLOW;
+                }
+                else {
+                    three = bi;
+                    status = PRE_AFTER_LEFT_NORMAL;
+                }
+                break;
+            case BiType::DOWN:
+                if (bi.get_low() < first.get_low()) {
+                    three = bi;
+                    status = PRE_AFTER_LEFT_HIGHLOW;
+                }
+                else {
+                    three = bi;
+                    status = PRE_AFTER_LEFT_NORMAL;
+                }
+                break;
+            }
+            break;
+        case PRE_AFTER_LEFT_HIGHLOW:
+            switch (bi.get_type()) {
+            case BiType::UP:
+                if (bi.get_high() > second.get_high()) {
+                    first = bi.generate_bi(first, second, three);
+                    ret_list.push_back(first);
+                    first = bi;
+                    second = Bi();
+                    three = Bi();
+                    status = PRE_LEFT;
+                }
+                else {
+                    first = bi.generate_bi(first, second, three);
+                    second = bi;
+                    three = Bi();
+                    status = PRE_AFTER_LEFT;
+                }
+                break;
+            case BiType::DOWN:
+                if (bi.get_low() < second.get_low()) {
+                    first = bi.generate_bi(first, second, three);
+                    ret_list.push_back(first);
+                    first = bi;
+                    second = Bi();
+                    three = Bi();
+                    status = PRE_LEFT;
+                }
+                else {
+                    first = bi.generate_bi(first, second, three);
+                    second = bi;
+                    three = Bi();
+                    status = PRE_AFTER_LEFT;
+                }
+                break;
+            }
+        case PRE_AFTER_LEFT_NORMAL:
+            switch (bi.get_type()) {
+            case BiType::UP:
+                if (first.get_type() == BiType::DOWN) {
+                    if (bi.get_high() > first.get_high()) {
+                        ret_list.push_back(first);
+                        first = bi.generate_bi(second, three, bi);
+                        second = Bi();
+                        three = Bi();
+                        status = PRE_LEFT;
+                    }
+                    else {
+                        if (bi.get_high() > second.get_high()) {
+                            second = bi.generate_bi(second, three, bi);
+                            status = PRE_AFTER_LEFT;
+                        }
+                    }
+                }
+                else {
+                    if (bi.get_high() > first.get_high()) {
+                        three = bi.generate_bi(three, Bi(), bi);
+                        status = PRE_AFTER_LEFT_HIGHLOW;
+                    }
+                    else {
+                        if (bi.get_high() > three.get_high()) {
+                            three = bi.generate_bi(three, Bi(), bi);
+                            status = PRE_AFTER_LEFT_NORMAL;
+                        }
+                    }
+                }
+                break;
+            case BiType::DOWN:
+                if (first.get_type() == BiType::UP) {
+                    if (bi.get_low() < first.get_low()) {
+                        ret_list.push_back(first);
+                        first = bi.generate_bi(second, three, bi);
+                        second = Bi();
+                        three = Bi();
+                        status = PRE_LEFT;
+                    }
+                    else {
+                        if (bi.get_low() < second.get_low()) {
+                            second = bi.generate_bi(second, three, bi);
+                            status = PRE_AFTER_LEFT;
+                        }
+                    }
+                }
+                else {
+                    if (bi.get_low() < first.get_low()) {
+                        three = bi.generate_bi(three, Bi(), bi);
+                        status = PRE_AFTER_LEFT_HIGHLOW;
+                    }
+                    else {
+                        if (bi.get_low() < three.get_low()) {
+                            three = bi.generate_bi(three, Bi(), bi);
+                            status = PRE_AFTER_LEFT_NORMAL;
+                        }
+                    }
+                }
+                break;
+            }
+            break;
+        }
+    }
+    switch (status) {
+    case PRE_LEFT:
+        if (first.get_type() == BiType::UP)
+            first.set_type(BiType::TEMP_UP);
+        else
+            first.set_type(BiType::TEMP_DOWN);
+        ret_list.push_back(first);
+        break;
+    case PRE_AFTER_LEFT:
+        if (first.get_type() == BiType::UP) {
+            first.set_type(BiType::TEMP_UP);
+            second.set_type(BiType::TEMP_DOWN);
+        }
+        else {
+            first.set_type(BiType::TEMP_DOWN);
+            second.set_type(BiType::TEMP_UP);
+        }
+        ret_list.push_back(first);
+        ret_list.push_back(second);
+        break;
+    case PRE_AFTER_LEFT_HIGHLOW:
+        if (first.get_type() == BiType::UP) {
+            first.set_type(BiType::TEMP_UP);
+            second.set_type(BiType::TEMP_DOWN);
+            three.set_type(BiType::TEMP_UP);
+        }
+        else {
+            first.set_type(BiType::TEMP_DOWN);
+            second.set_type(BiType::TEMP_UP);
+            three.set_type(BiType::TEMP_DOWN);
+        }
+        ret_list.push_back(first);
+        ret_list.push_back(second);
+        ret_list.push_back(three);
+        break;
+    case PRE_AFTER_LEFT_NORMAL:
+        if (first.get_type() == BiType::UP) {
+            first.set_type(BiType::TEMP_UP);
+            second.set_type(BiType::TEMP_DOWN);
+            three.set_type(BiType::TEMP_UP);
+        }
+        else {
+            first.set_type(BiType::TEMP_DOWN);
+            second.set_type(BiType::TEMP_UP);
+            three.set_type(BiType::TEMP_DOWN);
+        }
+        ret_list.push_back(first);
+        ret_list.push_back(second);
+        ret_list.push_back(three);
+        break;
+    }
+    return(ret_list);
+}
+
+
+
 BiChuLi::BiChuLi() {
     this->fxcl = FenXingChuLi();
     this->status = BiChuLiStatus::START;
@@ -313,6 +562,7 @@ void BiChuLi::handle(vector<Kxian1>& kxianList) {
             break;
         }
     }
+    //this->biList = pre_bi_process(this->biList);
     //this->biList = this->__remove_baohan_bi();
 }
 

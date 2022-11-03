@@ -1,14 +1,63 @@
 ﻿#include "XianDuan.h"
 
-using namespace std;
+bool is_bi_equal(float bi1_len, float bi2_len) {
+    float radio;
+
+    if (bi1_len <= bi2_len) {
+        radio = bi1_len / bi2_len;
+    }
+    else {
+        radio = bi2_len / bi1_len;
+    }
+
+    if (radio >= 0.618) {
+        return(true);
+    }
+    else {
+        return(false);
+    }
+}
+
+vector<Bi_ZhongShu> find_bi_zhongshu(vector<Bi> biList) {
+    int i, j, count;
+    Bi bi1, bi2;
+    Bi_ZhongShu bi_zhongshu;
+    Bi input, output;
+    vector<Bi_ZhongShu> ret_zhongshu_list;
+
+    count = biList.size();
+    //判断是否有中枢
+    for (i = 0; i < count; i++) {
+        bi1 = biList[i];
+        for (j = i + 1; j < count; j++) {
+            bi2 = biList[j];
+            if (!is_bi_equal(bi1.get_length(), bi2.get_length())) {
+                break;
+            }
+        }
+        if (j - i > 3) {
+            OutputDebugPrintf("发现中枢: %d %d", i, j);
+            if (i == 0) {
+                input = Bi();
+            }
+            else {
+                input = biList[i - 1];
+            }
+            bi_zhongshu = Bi_ZhongShu(input, biList[i], biList[i + 1], biList[i + 2]);
+            ret_zhongshu_list.push_back(bi_zhongshu);
+        }
+    }
+    return(ret_zhongshu_list);
+}
+
 
 XianDuanChuLi::XianDuanChuLi() {
     this->last_xd = XianDuan();
     this->last_bi = Bi();
     this->bicl = BiChuLi();
     this->status = XianDuanChuLiStatus::START;
-
 }
+
 
 void XianDuanChuLi::handle(vector<Kxian1>& kxianList) {
     FindXianDuanReturn ret_fd;
@@ -16,6 +65,8 @@ void XianDuanChuLi::handle(vector<Kxian1>& kxianList) {
     Bi tmp_bi = Bi();
     Bi bi = Bi();
     vector<Bi> bi_list;
+    vector <Bi> pre_bi_list;
+    vector<Bi_ZhongShu> zhongshu_list;
     this->bicl.handle(kxianList);
 
     bi_list = this->bicl.biList;
@@ -186,22 +237,6 @@ bool __isMiddleEquale(Bi start, Bi left, Bi after_left) {
         }
     }
     return(false);
-}
-
-bool is_bi_equal(float bi1_len, float bi2_len) {
-    float radio;
-
-    if (bi1_len <= bi2_len){
-        radio = bi1_len / bi2_len;
-    } else {
-        radio = bi2_len / bi1_len;
-    }
-
-    if (radio >= 0.618){
-        return(true);
-    } else {
-        return(false);
-    }
 }
 
 
@@ -710,16 +745,69 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan(Bi bi) {
 
     switch(this->status) {
         case XianDuanChuLiStatus::START:
+            XianDuanType last_xd_type;
             this->start = bi;
+            if (!this->key_xianduan_list.empty()) {
+                last_xd = this->key_xianduan_list.back();
+                last_xd_type = last_xd.get_type();
+                if ((last_xd_type == XianDuanType::DOWN && bi_type == BiType::UP && last_xd.get_high() < bi_high) ||
+                    (last_xd_type == XianDuanType::UP && bi_type == BiType::DOWN && last_xd.get_low() > bi_low)) {
+                    this->start = bi.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
+                    this->left = bi;
+                    return(this->failure_xd());
+                }
+            }
             this->status = XianDuanChuLiStatus::LEFT;
             break;
 
         case XianDuanChuLiStatus::LEFT:
             this->left = bi;
-            if ((bi_type == BiType::UP && bi_high > this->start.get_high()) || (bi_type == BiType::DOWN && bi_low < this->start.get_low())) {
-                return(this->failure_xd());
+            if (is_bi_equal(this->start.get_length(), bi_length)) {
+                this->status = XianDuanChuLiStatus::LEFT_EQUAL;
             }
-            this->status = XianDuanChuLiStatus::AFTER_LEFT;
+            else {
+                if ((bi_type == BiType::UP && bi_high > this->start.get_high()) || (bi_type == BiType::DOWN && bi_low < this->start.get_low())) {
+                    return(this->failure_xd());
+                }
+                else
+                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
+            }
+            break;
+
+        case XianDuanChuLiStatus::LEFT_EQUAL:
+            if (is_bi_equal(this->left.get_length(), bi_length)) {
+                this->after_left = bi;
+                this->__enter_zhongshu(Bi(), this->start, this->left, this->after_left, 'A');
+                this->status = XianDuanChuLiStatus::A;
+            }
+            else {
+                switch (bi_type) {
+                case BiType::UP:
+                    if (bi_high > this->start.get_high()) {
+                        this->start = bi.generate_bi(this->start, this->left, bi);
+                        this->status = XianDuanChuLiStatus::LEFT;
+                    }
+                    else {
+                        this->after_left = bi;
+                        this->status = XianDuanChuLiStatus::LEFT_EQUAL_NORMAL;
+                    }
+                    break;
+                case BiType::DOWN:
+                    if (bi_low < this->start.get_low()) {
+                        this->start = bi.generate_bi(this->start, this->left, bi);
+                        this->status = XianDuanChuLiStatus::LEFT;
+                    }
+                    else {
+                        this->after_left = bi;
+                        this->status = XianDuanChuLiStatus::LEFT_EQUAL_NORMAL;
+                    }
+                    break;
+                }
+            }
+            break;
+
+        case XianDuanChuLiStatus::LEFT_EQUAL_NORMAL:
+            OutputDebugPrintf("LEFT_EQUAL_NORMAL 未处理"); 
             break;
 
         case XianDuanChuLiStatus::AFTER_LEFT:
@@ -1958,7 +2046,8 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan1(Bi bi) {
                 this->left = this->after_middle;
                 this->after_left = bi;
                 this->status = XianDuanChuLiStatus::MIDDLE_EQUAL;
-                this->key_xianduan_list.pop_back();
+                if (!this->key_xianduan_list.empty())
+                    this->key_xianduan_list.pop_back();
             }
             else {
                 ret_xd.xd1 = XianDuan(this->start, this->after_left);

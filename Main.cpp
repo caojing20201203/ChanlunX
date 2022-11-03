@@ -135,6 +135,46 @@ void Func15(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
     Bi3_xianduan_bi(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
+//==============================================================================
+//输出函数16号：轨道高
+//==============================================================================
+void Func16(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    GuiDao_Gao(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
+//==============================================================================
+//输出函数17号：轨道低
+//==============================================================================
+void Func17(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    GuiDao_Di(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
+//==============================================================================
+//输出函数18号：通道线中轨
+//==============================================================================
+void Func18(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    GuiDao_Zhong(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
+//==============================================================================
+//输出函数19号：通道线中轨
+//==============================================================================
+void Func19(int nCount, float* pOut, float* pHigh, float* pLow, float* pClose)
+{
+    GuiDao_Status(nCount, pOut, pHigh, pLow, pClose);
+}
+
+//===============================================================================
+//输出函数20号： 组合笔
+//===============================================================================
+void Func20(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi3_CompositeBi(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
 static PluginTCalcFuncInfo Info[] =
 {
     { 1, &Func1},
@@ -152,6 +192,11 @@ static PluginTCalcFuncInfo Info[] =
     {13, &Func13},
     {14, &Func14},
     {15, &Func15},
+    {16, &Func16},
+    {17, &Func17},
+    {18, &Func18},
+    {19, &Func19},
+    {20, &Func20},
     { 0, NULL}
 };
 

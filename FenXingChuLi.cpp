@@ -198,10 +198,12 @@ void FenXingChuLi::handle(vector<Kxian1>& kxianList) {
                 this->keyFenXingList.push_back(fx);
                 break;
             case FenXingType::FAILURE_BOTTOM:
-                this->keyFenXingList.pop_back();
+                if (!this->keyFenXingList.empty())
+                    this->keyFenXingList.pop_back();
                 break;
             case FenXingType::FAILURE_TOP:
-                this->keyFenXingList.pop_back();
+                if (!this->keyFenXingList.empty())
+                    this->keyFenXingList.pop_back();
                 break;
             }
         }
@@ -621,7 +623,14 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         if (this->two.get_high() == this->max_high)
                             tmp_fx.set_high_low_type(HighLowType::NEW_HIGH);
                         this->three = kxian;
-                        this->status = FenXingChuLiStatus::FOUR;
+                        if (kx_gao < this->two.get_low()) {
+                            //第三根K线和第二根K线有缺口
+                            tmp_fx.set_type(FenXingType::VERIFY_TOP);
+                            this->__init_fenxing(kxian);
+                        }
+                        else {
+                            this->status = FenXingChuLiStatus::FOUR;
+                        }
                         /*
                         if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
                             tmp_fx.set_type(FenXingType::NEW_BOTTOM);
@@ -695,7 +704,12 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         if (this->two.get_low() == this->min_low)
                             tmp_fx.set_high_low_type(HighLowType::NEW_LOW);
                         this->three = kxian;
-                        this->status = FenXingChuLiStatus::FOUR;
+                        if (kx_di > this->two.get_high()) {
+                            //第三根K线和第二根K线有缺口
+                            tmp_fx.set_type(FenXingType::VERIFY_BOTTOM);
+                            this->__init_fenxing(kxian);
+                        } else 
+                            this->status = FenXingChuLiStatus::FOUR;
                         /*
                         if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
                             tmp_fx.set_type(FenXingType::NEW_BOTTOM);
@@ -1095,7 +1109,7 @@ void Bi3_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn)
         pOut[position_start] = 3;
         break;
     }
-    for (unsigned int i = 1; i < count; i++) {
+    for (unsigned int i = 0; i < count; i++) {
         fx = fenXingChuLi.keyFenXingList[i];
         position_stop = fx.get_stop_position();
         switch (fx.get_type()) {
@@ -1147,7 +1161,7 @@ void Bi3_fenxing_highlow(int nCount, float* pOut, float* pHigh, float* pLow, flo
     if (count > 0) {
         fx = fenXingChuLi.keyFenXingList[0];
 
-        position_start = fx.get_stop_position();
+        position_start = fx.get_start_position();
         switch (fx.get_type()) {
         case FenXingType::VERIFY_BOTTOM:
             pOut[position_start] = fx.get_low();
@@ -1158,7 +1172,7 @@ void Bi3_fenxing_highlow(int nCount, float* pOut, float* pHigh, float* pLow, flo
         }
     }
 
-    for (unsigned int i = 1; i < count; i++) {
+    for (unsigned int i = 0; i < count; i++) {
         FenXing fx = fenXingChuLi.keyFenXingList[i];
         position_stop = fx.get_stop_position();
         switch (fx.get_type()) {
@@ -1175,6 +1189,475 @@ void Bi3_fenxing_highlow(int nCount, float* pOut, float* pHigh, float* pLow, flo
         }
     }
 }
+
+//轨道上轨
+void GuiDao_Gao(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
+    BaoHanChuLi baohanChuli;
+    int position_start = 0, position_stop = 0;
+    FenXingChuLi fenXingChuLi;
+    FenXing fx;
+    float last_gao = 0, gao = 0;
+    int start_count = 0;
+
+    for (int i = 0; i < nCount; i++) {
+        baohanChuli.add(pHigh[i], pLow[i]);
+    }
+
+    fenXingChuLi.handle(baohanChuli.kxianList);
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    unsigned int count = fenXingChuLi.keyFenXingList.size();
+    if (count > 0) {
+        fx = fenXingChuLi.keyFenXingList[0];
+        if (fx.get_type() == FenXingType::VERIFY_TOP) {
+            position_start = fx.get_start_position();
+            last_gao = fx.get_high();
+            start_count = 1;
+        }
+        else {
+            if (count > 1) {
+                fx = fenXingChuLi.keyFenXingList[1];
+                if (fx.get_type() == FenXingType::VERIFY_TOP) {
+                    position_start = fx.get_start_position();
+                    last_gao = fx.get_high();
+                    start_count = 2;
+                }
+            }
+        }
+    }
+    for (unsigned int i = start_count; i < count; i++) {
+        FenXing fx = fenXingChuLi.keyFenXingList[i];
+        switch (fx.get_type()) {
+        case FenXingType::VERIFY_TOP:
+        case FenXingType::TOP:
+            position_stop = fx.get_stop_position();
+            gao = fx.get_high();
+            if (gao > last_gao) {
+                for (int pos = position_start; pos <= position_stop; pos++) {
+                    pOut[pos] = gao;
+                }
+            }
+            else {
+                for (int pos = position_start; pos <= position_stop; pos++) {
+                    pOut[pos] = last_gao;
+                }
+            }
+            last_gao = gao;
+            position_start = position_stop;
+            break;
+        }
+    }
+    for (unsigned int pos = position_stop; pos < nCount; pos++) {
+        pOut[pos] = gao;
+    }
+}
+
+//轨道下轨
+void GuiDao_Di(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
+    BaoHanChuLi baohanChuli;
+    int position_start = 0, position_stop = 0;
+    FenXingChuLi fenXingChuLi;
+    FenXing fx;
+    float last_di = 0, di = 0;
+    int start_count = 1;
+
+    for (int i = 0; i < nCount; i++) {
+        baohanChuli.add(pHigh[i], pLow[i]);
+    }
+
+    fenXingChuLi.handle(baohanChuli.kxianList);
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    unsigned int count = fenXingChuLi.keyFenXingList.size();
+    if (count > 0) {
+        fx = fenXingChuLi.keyFenXingList[0];
+        if (fx.get_type() == FenXingType::VERIFY_BOTTOM) {
+            position_start = fx.get_start_position();
+            last_di = fx.get_low();
+            start_count = 1;
+        }
+        else {
+            if (count > 1) {
+                fx = fenXingChuLi.keyFenXingList[1];
+                if (fx.get_type() == FenXingType::VERIFY_BOTTOM) {
+                    position_start = fx.get_start_position();
+                    last_di = fx.get_low();
+                    start_count = 2;
+                }
+            }
+        }
+    }
+    for (unsigned int i = start_count; i < count; i++) {
+        FenXing fx = fenXingChuLi.keyFenXingList[i];
+        switch (fx.get_type()) {
+        case FenXingType::VERIFY_BOTTOM:
+        case FenXingType::BOTTOM:
+            position_stop = fx.get_stop_position();
+            di = fx.get_low();
+            if (di > last_di) {
+                for (int pos = position_start; pos <= position_stop; pos++) {
+                    pOut[pos] = last_di;
+                }
+            }
+            else {
+                for (int pos = position_start; pos <= position_stop; pos++) {
+                    pOut[pos] = di;
+                }
+            }
+            last_di = di;
+            position_start = position_stop;
+        }
+    }
+    for (unsigned int pos = position_stop; pos < nCount; pos++) {
+        pOut[pos] = di;
+    }
+}
+
+//轨道中轨
+void GuiDao_Zhong(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
+    BaoHanChuLi baohanChuli;
+    int gao_position_start = 0, gao_position_stop = 0, di_position_start = 0, di_position_stop = 0;
+    FenXingChuLi fenXingChuLi;
+    FenXing fx, fx1;
+    float last_di = 0, di = 0, last_gao = 0, gao = 0;
+    int start_count = 1;
+    float* gaoArray = new float[nCount]();
+    float* diArray = new float[nCount]();
+
+    for (int i = 0; i < nCount; i++) {
+        baohanChuli.add(pHigh[i], pLow[i]);
+    }
+
+    fenXingChuLi.handle(baohanChuli.kxianList);
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    unsigned int count = fenXingChuLi.keyFenXingList.size();
+    if (count > 0) {
+        fx = fenXingChuLi.keyFenXingList[0];
+        switch (fx.get_type()) {
+        case FenXingType::VERIFY_BOTTOM:
+        case FenXingType::BOTTOM:
+            last_di = fx.get_low();
+            di_position_start = fx.get_start_position();
+            if (count > 1) {
+                fx1 = fenXingChuLi.keyFenXingList[1];
+                if (fx1.get_type() == FenXingType::VERIFY_TOP) {
+                    last_gao = fx1.get_high();
+                    gao_position_start = fx1.get_start_position();
+                }
+            }
+            break;
+        case FenXingType::VERIFY_TOP:
+        case FenXingType::TOP:
+            last_gao = fx.get_high();
+            gao_position_start = fx.get_start_position();
+            if (count > 1) {
+                fx1 = fenXingChuLi.keyFenXingList[1];
+                if (fx1.get_type() == FenXingType::VERIFY_BOTTOM) {
+                    last_di = fx1.get_low();
+                    di_position_start = fx1.get_start_position();
+                }
+            }
+            break;
+        }
+    }
+    for (unsigned int i = 2; i < count; i++) {
+        fx = fenXingChuLi.keyFenXingList[i];
+        switch (fx.get_type()) {
+        case FenXingType::VERIFY_BOTTOM:
+            di_position_stop = fx.get_stop_position();
+            di = fx.get_low();
+            if (di > last_di) {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = last_di;
+                }
+            }
+            else {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = di;
+                }
+            }
+            last_di = di;
+            di_position_start = di_position_stop;
+            break;
+        case FenXingType::VERIFY_TOP:
+            gao = fx.get_high();
+            gao_position_stop = fx.get_stop_position();
+            if (gao > last_gao) {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = gao;
+                }
+            }
+            else {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = last_gao;
+                }
+            }
+            last_gao = gao;
+            gao_position_start = gao_position_stop;
+            break;
+        case FenXingType::BOTTOM:
+            di = fx.get_low();
+            di_position_stop = fx.get_stop_position();
+            if (di > last_di) {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = last_di;
+                }
+            }
+            else {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = di;
+                }
+            }
+            for (int pos = gao_position_start; pos < nCount; pos++) {
+                gaoArray[pos] = gao;
+            }
+            for (int pos = di_position_stop; pos < nCount; pos++) {
+                diArray[pos] = di;
+            }
+            break;
+        case FenXingType::TOP:
+            gao = fx.get_high();
+            gao_position_stop = fx.get_stop_position();
+            if (gao > last_gao) {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = gao;
+                }
+            }
+            else {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = last_gao;
+                }
+            }
+            for (int pos = di_position_start; pos < nCount; pos++) {
+                diArray[pos] = di;
+            }
+            for (int pos = gao_position_stop; pos < nCount; pos++) {
+                gaoArray[pos] = gao;
+            }
+            break;
+        }
+    }
+    switch (fx.get_type()) {
+    case FenXingType::VERIFY_TOP:
+        for (unsigned int pos = fx.get_stop_position(); pos < nCount; pos++) {
+            gaoArray[pos] = gao;
+        }
+        for (unsigned int pos = di_position_stop; pos < nCount; pos++) {
+            diArray[pos] = di;
+        }
+        break;
+    case FenXingType::VERIFY_BOTTOM:
+        for (unsigned int pos = fx.get_stop_position(); pos < nCount; pos++) {
+            diArray[pos] = di;
+        }
+        for (unsigned int pos = gao_position_stop; pos < nCount; pos++) {
+            gaoArray[pos] = gao;
+        }
+    }
+
+    for (unsigned int pos = 0; pos < nCount; pos++) {
+        pOut[pos] = (gaoArray[pos] + diArray[pos]) / 2;
+    }
+}
+
+//轨道线状态
+void GuiDao_Status(int nCount, float* pOut, float* pHigh, float* pLow, float* pClose) {
+    BaoHanChuLi baohanChuli;
+    int gao_position_start = 0, gao_position_stop = 0, di_position_start = 0, di_position_stop = 0;
+    FenXingChuLi fenXingChuLi;
+    FenXing fx, fx1;
+    float last_di = 0, di = 0, last_gao = 0, gao = 0;
+    int start_count = 1;
+    float* gaoArray = new float[nCount]();
+    float* diArray = new float[nCount]();
+    float* zhongArray = new float[nCount]();
+
+    for (int i = 0; i < nCount; i++) {
+        baohanChuli.add(pHigh[i], pLow[i]);
+    }
+
+    fenXingChuLi.handle(baohanChuli.kxianList);
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    unsigned int count = fenXingChuLi.keyFenXingList.size();
+    if (count > 0) {
+        fx = fenXingChuLi.keyFenXingList[0];
+        switch (fx.get_type()) {
+        case FenXingType::VERIFY_BOTTOM:
+        case FenXingType::BOTTOM:
+            last_di = fx.get_low();
+            di_position_start = fx.get_stop_position();
+            if (count > 1) {
+                fx1 = fenXingChuLi.keyFenXingList[1];
+                if (fx1.get_type() == FenXingType::VERIFY_TOP) {
+                    last_gao = fx1.get_high();
+                    gao_position_start = fx1.get_stop_position();
+                }
+            }
+            break;
+        case FenXingType::VERIFY_TOP:
+        case FenXingType::TOP:
+            last_gao = fx.get_high();
+            gao_position_start = fx.get_stop_position();
+            if (count >= 1) {
+                fx1 = fenXingChuLi.keyFenXingList[1];
+                if (fx1.get_type() == FenXingType::VERIFY_BOTTOM) {
+                    last_di = fx1.get_low();
+                    di_position_start = fx1.get_stop_position();
+                }
+            }
+            break;
+        }
+    }
+    for (unsigned int i = 2; i < count; i++) {
+        fx = fenXingChuLi.keyFenXingList[i];
+        switch (fx.get_type()) {
+        case FenXingType::VERIFY_BOTTOM:
+            di_position_stop = fx.get_stop_position();
+            di = fx.get_low();
+            if (di > last_di) {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = last_di;
+                }
+            }
+            else {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = di;
+                }
+            }
+            last_di = di;
+            di_position_start = di_position_stop;
+            break;
+        case FenXingType::VERIFY_TOP:
+            gao = fx.get_high();
+            gao_position_stop = fx.get_stop_position();
+            if (gao > last_gao) {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = gao;
+                }
+            }
+            else {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = last_gao;
+                }
+            }
+            last_gao = gao;
+            gao_position_start = gao_position_stop;
+            break;
+        case FenXingType::BOTTOM:
+            di = fx.get_low();
+            di_position_stop = fx.get_stop_position();
+            if (di > last_di) {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = last_di;
+                }
+            }
+            else {
+                for (int pos = di_position_start; pos <= di_position_stop; pos++) {
+                    diArray[pos] = di;
+                }
+            }
+            for (int pos = gao_position_start; pos < nCount; pos++) {
+                gaoArray[pos] = gao;
+            }
+            for (int pos = di_position_stop; pos < nCount; pos++) {
+                diArray[pos] = di;
+            }
+            break;
+        case FenXingType::TOP:
+            gao = fx.get_high();
+            gao_position_stop = fx.get_stop_position();
+            if (gao > last_gao) {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = gao;
+                }
+            }
+            else {
+                for (int pos = gao_position_start; pos <= gao_position_stop; pos++) {
+                    gaoArray[pos] = last_gao;
+                }
+            }
+            for (int pos = di_position_start; pos < nCount; pos++) {
+                diArray[pos] = di;
+            }
+            for (int pos = gao_position_stop; pos < nCount; pos++) {
+                gaoArray[pos] = gao;
+            }
+            break;
+        }
+    }
+    switch (fx.get_type()) {
+    case FenXingType::VERIFY_TOP:
+        for (unsigned int pos = fx.get_stop_position(); pos < nCount; pos++) {
+            gaoArray[pos] = gao;
+        }
+        for (unsigned int pos = di_position_stop; pos < nCount; pos++) {
+            diArray[pos] = di;
+        }
+        break;
+    case FenXingType::VERIFY_BOTTOM:
+        for (unsigned int pos = fx.get_stop_position(); pos < nCount; pos++) {
+            diArray[pos] = di;
+        }
+        for (unsigned int pos = gao_position_stop; pos < nCount; pos++) {
+            gaoArray[pos] = gao;
+        }
+    }
+
+    for (unsigned int pos = 0; pos < nCount; pos++) {
+        zhongArray[pos] = (gaoArray[pos] + diArray[pos]) / 2;
+    }
+    if (pClose[nCount - 1] > zhongArray[nCount - 1])
+        pOut[nCount - 1] = 1;
+    else
+        pOut[nCount - 1] = 0;
+
+    gao = gaoArray[nCount - 1];
+    for (int pos = nCount - 2; pos > 0; pos--) {
+        if (gao != gaoArray[pos]) {
+            last_gao = gaoArray[pos];
+            break;
+        }
+    }
+    di = diArray[nCount - 1];
+    for (int pos = nCount - 2; pos > 0; pos--) {
+        if (di != diArray[pos]) {
+            last_di = diArray[pos];
+            break;
+        }
+    }
+    if (gao > last_gao) {
+        if (di > last_di) {
+            //上行
+            pOut[nCount - 2] = 1;
+        }
+        else {
+            //扩张
+            pOut[nCount - 2] = 2;
+        }
+    }
+    else {
+        if (di > last_di) {
+            //收敛
+            pOut[nCount - 2] = 3;
+        }
+        else {
+            //下行
+            pOut[nCount - 2] = 4;
+        }
+
+    }
+}
+
 
 void Bi4_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
     BaoHanChuLi baohanChuli;

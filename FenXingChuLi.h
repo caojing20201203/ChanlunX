@@ -166,6 +166,10 @@ public:
 void Bi3_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void Bi3_fenxing_highlow(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void Bi4_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void GuiDao_Gao(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void GuiDao_Di(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void GuiDao_Zhong(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void GuiDao_Status(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 
 #pragma pack(pop)
 
