@@ -175,6 +175,13 @@ void Func20(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
     Bi3_CompositeBi(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
+//===============================================================================
+//输出函数21号： 组合笔--被动
+//===============================================================================
+void Func21(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi4_CompositeBi(nCount, pOut, pHigh, pLow, pIgnore);
+}
 static PluginTCalcFuncInfo Info[] =
 {
     { 1, &Func1},
@@ -197,6 +204,7 @@ static PluginTCalcFuncInfo Info[] =
     {18, &Func18},
     {19, &Func19},
     {20, &Func20},
+    {21, &Func21},
     { 0, NULL}
 };
 

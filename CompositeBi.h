@@ -115,6 +115,10 @@ class CompositeBi{
         vector<Bi> get_bi_list() {
             return(this->bi_list);
         }
+
+        CompositeBi generate_bi(CompositeBi bi1, CompositeBi bi3){
+            return(CompositeBi(bi1.get_start_bi(), bi3.get_stop_bi()));
+        }
 };
 
 enum class FindCompositeBiReturnType {None, Failure, One, Two, Three};
@@ -139,3 +143,4 @@ class CompositeBiChuLi {
 };
 
 void Bi3_CompositeBi(int nCount, float *pOut, float *pHigh, float *pLow, float *pIn);
+void Bi4_CompositeBi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);

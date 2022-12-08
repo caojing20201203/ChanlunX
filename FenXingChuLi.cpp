@@ -608,35 +608,32 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                             tmp_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
                         }
                         this->__init_fenxing(kxian);
-
                     }
                     else {
-                        /*
                         if (this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low() && this->two.get_high() < this->max_high) {
                             tmp_fx = this->fx;
                             tmp_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
                             this->__init_fenxing(kxian);
                         }
                         else {
-                        */
-                        tmp_fx = FenXing(this->one, this->two, kxian, kxian);
-                        if (this->two.get_high() == this->max_high)
-                            tmp_fx.set_high_low_type(HighLowType::NEW_HIGH);
-                        this->three = kxian;
-                        if (kx_gao < this->two.get_low()) {
-                            //第三根K线和第二根K线有缺口
-                            tmp_fx.set_type(FenXingType::VERIFY_TOP);
-                            this->__init_fenxing(kxian);
+                            tmp_fx = FenXing(this->one, this->two, kxian, kxian);
+                            if (this->two.get_high() == this->max_high)
+                                tmp_fx.set_high_low_type(HighLowType::NEW_HIGH);
+                            this->three = kxian;
+                            if (kx_gao < this->two.get_low()) {
+                                //第三根K线和第二根K线有缺口
+                                tmp_fx.set_type(FenXingType::VERIFY_TOP);
+                                this->__init_fenxing(kxian);
+                            }
+                            else {
+                                this->status = FenXingChuLiStatus::FOUR;
+                            }
+                            /*
+                            if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
+                                tmp_fx.set_type(FenXingType::NEW_BOTTOM);
+                            }
+                            */
                         }
-                        else {
-                            this->status = FenXingChuLiStatus::FOUR;
-                        }
-                        /*
-                        if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
-                            tmp_fx.set_type(FenXingType::NEW_BOTTOM);
-                        }
-                        */
-                        //}
                     }
                     if (this->firstBarStatus)
                         this->firstBarStatus = false;
@@ -692,29 +689,29 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         this->__init_fenxing(kxian);
                     }
                     else {
-                        /*
                         if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high() && this->two.get_low() > this->min_low) {
                             tmp_fx = this->fx;
                             tmp_fx.set_type(FenXingType::FAILURE_VERIFY_TOP);
                             this->__init_fenxing(kxian);
                         }
                         else {
-                        */
-                        tmp_fx = FenXing(this->one, this->two, kxian, kxian);
-                        if (this->two.get_low() == this->min_low)
-                            tmp_fx.set_high_low_type(HighLowType::NEW_LOW);
-                        this->three = kxian;
-                        if (kx_di > this->two.get_high()) {
-                            //第三根K线和第二根K线有缺口
-                            tmp_fx.set_type(FenXingType::VERIFY_BOTTOM);
-                            this->__init_fenxing(kxian);
-                        } else 
-                            this->status = FenXingChuLiStatus::FOUR;
-                        /*
-                        if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
-                            tmp_fx.set_type(FenXingType::NEW_BOTTOM);
+                            tmp_fx = FenXing(this->one, this->two, kxian, kxian);
+                            if (this->two.get_low() == this->min_low)
+                                tmp_fx.set_high_low_type(HighLowType::NEW_LOW);
+                            this->three = kxian;
+                            if (kx_di > this->two.get_high()) {
+                                //第三根K线和第二根K线有缺口
+                                tmp_fx.set_type(FenXingType::VERIFY_BOTTOM);
+                                this->__init_fenxing(kxian);
                             }
-                        */ 
+                            else
+                                this->status = FenXingChuLiStatus::FOUR;
+                            /*
+                            if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
+                                tmp_fx.set_type(FenXingType::NEW_BOTTOM);
+                                }
+                            */
+                        }
                     }
                     if (this->firstBarStatus)
                         this->firstBarStatus = false;
