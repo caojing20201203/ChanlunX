@@ -155,3 +155,6 @@ class CompositeBiChuLi {
 
 void Bi3_CompositeBi(int nCount, float *pOut, float *pHigh, float *pLow, float *pIn);
 void Bi4_CompositeBi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_Composite_GuiDaoGao(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_Composite_GuiDaoDi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void Bi3_Composite_GuiDaoZhong(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);

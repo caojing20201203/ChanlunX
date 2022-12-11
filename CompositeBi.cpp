@@ -517,3 +517,112 @@ void Bi4_CompositeBi(int nCount, float* pOut, float* pHigh, float* pLow, float* 
         }
     }
 }
+
+void Bi3_Composite_GuiDaoGao(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
+    BaoHanChuLi baoHanChuLi;
+    CompositeBiChuLi composite_bi_chuli;
+    CompositeBi composite_bi;
+    Bi bi;
+    int start_pos, stop_pos;
+    int temp_start_num = 0;
+    float gao;
+
+    for (int i = 0; i < nCount; i++) {
+        baoHanChuLi.add(pHigh[i], pLow[i]);
+    }
+
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    int count = composite_bi_chuli.composite_bi_list.size();
+    if (!composite_bi_chuli.composite_bi_list.empty()) {
+        for (int i = 0; i < count; i++) {
+            composite_bi = composite_bi_chuli.composite_bi_list[i];
+            gao = composite_bi.get_high();
+            start_pos = composite_bi.get_start_pos();
+            stop_pos = composite_bi.get_stop_pos();
+            for (int j = start_pos; j <= stop_pos; j++) {
+                pOut[j] = gao;
+            }
+        }
+        for (int i = stop_pos; i < nCount; i++)
+            pOut[i] = gao;
+    }
+}
+
+
+void Bi3_Composite_GuiDaoDi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
+    BaoHanChuLi baoHanChuLi;
+    CompositeBiChuLi composite_bi_chuli;
+    CompositeBi composite_bi;
+    Bi bi;
+    int start_pos, stop_pos;
+    int temp_start_num = 0;
+    float di;
+
+    for (int i = 0; i < nCount; i++) {
+        baoHanChuLi.add(pHigh[i], pLow[i]);
+    }
+
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    int count = composite_bi_chuli.composite_bi_list.size();
+    if (!composite_bi_chuli.composite_bi_list.empty()) {
+        for (int i = 0; i < count; i++) {
+            composite_bi = composite_bi_chuli.composite_bi_list[i];
+            di = composite_bi.get_low();
+            start_pos = composite_bi.get_start_pos();
+            stop_pos = composite_bi.get_stop_pos();
+            for (int j = start_pos; j <= stop_pos; j++) {
+                pOut[j] = di;
+            }
+        }
+        for (int i = stop_pos; i < nCount; i++) {
+            pOut[i] = di;
+        }
+    }
+}
+
+
+void Bi3_Composite_GuiDaoZhong(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
+    BaoHanChuLi baoHanChuLi;
+    CompositeBiChuLi composite_bi_chuli;
+    CompositeBi composite_bi;
+    Bi bi;
+    int start_pos, stop_pos;
+    int temp_start_num = 0;
+    float gao, di, zhong;
+
+    for (int i = 0; i < nCount; i++) {
+        baoHanChuLi.add(pHigh[i], pLow[i]);
+    }
+
+    for (int i = 0; i < nCount; i++) {
+        pOut[i] = 0;
+    }
+
+    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    int count = composite_bi_chuli.composite_bi_list.size();
+    if (!composite_bi_chuli.composite_bi_list.empty()) {
+        composite_bi = composite_bi_chuli.composite_bi_list[0];
+        for (int i = 0; i < count; i++) {
+            composite_bi = composite_bi_chuli.composite_bi_list[i];
+            gao = composite_bi.get_high();
+            di = composite_bi.get_low();
+            zhong = (gao + di) / 2;
+            start_pos = composite_bi.get_start_pos();
+            stop_pos = composite_bi.get_stop_pos();
+            for (int j = start_pos; j <= stop_pos; j++) {
+                if (zhong > 0)
+                    pOut[j] = zhong;
+            }
+        }
+        for (int i = stop_pos; i < nCount; i++)
+            pOut[i] = zhong;
+    }
+}

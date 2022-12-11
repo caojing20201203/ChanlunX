@@ -182,6 +182,31 @@ void Func21(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
 {
     Bi4_CompositeBi(nCount, pOut, pHigh, pLow, pIgnore);
 }
+
+//=================================================================================
+//输出函数22号：组合笔轨道高
+//=================================================================================
+void Func22(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi3_Composite_GuiDaoGao(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
+//=================================================================================
+//输出函数23号：组合笔轨道低
+//=================================================================================
+void Func23(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi3_Composite_GuiDaoDi(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
+//=================================================================================
+//输出函数24号：组合笔轨道中
+//=================================================================================
+void Func24(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi3_Composite_GuiDaoZhong(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
 static PluginTCalcFuncInfo Info[] =
 {
     { 1, &Func1},
@@ -205,6 +230,9 @@ static PluginTCalcFuncInfo Info[] =
     {19, &Func19},
     {20, &Func20},
     {21, &Func21},
+    {22, &Func22},
+    {23, &Func23},
+    {24, &Func24},
     { 0, NULL}
 };
 
