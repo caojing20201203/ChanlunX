@@ -9,6 +9,7 @@ CompositeBiChuLi::CompositeBiChuLi(){
     this->middle = Bi();
     this->after_middle = Bi();
     this->right = Bi();
+    this->bi_count = 0;
 }
 
 void CompositeBiChuLi::CompositeBiChuLi::handle(vector<Kxian1>& kxianList){
@@ -42,7 +43,6 @@ void CompositeBiChuLi::CompositeBiChuLi::handle(vector<Kxian1>& kxianList){
     }
     switch (this->status) {
     case CompositeBiChuLiStatus::START:
-        
         break;
     case CompositeBiChuLiStatus::LEFT:
         ret_fd.type = FindCompositeBiReturnType::One;
@@ -133,34 +133,24 @@ FindCompositeBiReturn CompositeBiChuLi::__find_CompositeBi(Bi bi){
                 if ((bi_type == BiType::UP && bi_high > last_comp_bi.get_high()) ||
                     (bi_type == BiType::DOWN && bi_low < last_comp_bi.get_low())) {
                     if (count >= 2) {
-                        before_last_comp_bi = this->composite_bi_list[count-2];
+                        before_last_comp_bi = this->composite_bi_list[count - 2];
                         if ((bi_type == BiType::UP && bi_high > before_last_comp_bi.get_high() && bi_low > before_last_comp_bi.get_low()) ||
                             (bi_type == BiType::DOWN && bi_low < before_last_comp_bi.get_low() && bi_high < before_last_comp_bi.get_high())) {
                             this->composite_bi_list.pop_back();
                             this->composite_bi_list.pop_back();
+                            this->bi_count = before_last_comp_bi.get_count() + last_comp_bi.get_count() + 1;
                             ret_comp_bi.type = FindCompositeBiReturnType::One;
                             ret_comp_bi.csBi1 = CompositeBi(before_last_comp_bi.get_start_bi(), bi);
+                            ret_comp_bi.csBi1.set_count(this->bi_count);
                             status = CompositeBiChuLiStatus::START;
-                        }
-                        else {
-                            this->start = bi;
-                            this->status = CompositeBiChuLiStatus::LEFT;
+                            return(ret_comp_bi);
                         }
                     }
-                    else {
-                        this->start = bi;
-                        this->status = CompositeBiChuLiStatus::LEFT;
-                    }
-                }
-                else {
-                    this->start = bi;
-                    this->status = CompositeBiChuLiStatus::LEFT;
                 }
             }
-            else {
-                this->start = bi;
-                this->status = CompositeBiChuLiStatus::LEFT;
-            }
+            this->start = bi;
+            this->status = CompositeBiChuLiStatus::LEFT;
+            this->bi_count = 1;
             break;
         case CompositeBiChuLiStatus::LEFT:
             if ((bi_type == BiType::UP && bi_high > this->start.get_high()) || (bi_type == BiType::DOWN && bi_low < this->start.get_low())){
@@ -228,11 +218,21 @@ FindCompositeBiReturn CompositeBiChuLi::__find_CompositeBi(Bi bi){
                         if (this->start.get_type() == BiType::DOWN) {
                             if (!this->composite_bi_list.empty()) {
                                 last_comp_bi = this->composite_bi_list.back();
-                                this->composite_bi_list.pop_back();
-                                ret_comp_bi.type = FindCompositeBiReturnType::One;
-                                ret_comp_bi.csBi1 = CompositeBi(last_comp_bi.get_start_bi(), bi);
-                                ret_comp_bi.csBi1.set_kind(CompositeBiKide::FiveBi);
-                                this->status = CompositeBiChuLiStatus::START;
+                                if (last_comp_bi.get_low() < this->start.get_low()) {
+                                    this->composite_bi_list.pop_back();
+                                    ret_comp_bi.type = FindCompositeBiReturnType::One;
+                                    ret_comp_bi.csBi1 = CompositeBi(last_comp_bi.get_start_bi(), bi);
+                                    ret_comp_bi.csBi1.set_kind(CompositeBiKide::FiveBi);
+                                    this->status = CompositeBiChuLiStatus::START;
+                                }
+                                else {
+                                    ret_comp_bi.type = FindCompositeBiReturnType::Two;
+                                    ret_comp_bi.csBi1 = CompositeBi(this->start, this->start);
+                                    ret_comp_bi.csBi1.set_kind(CompositeBiKide::SignlBi);
+                                    ret_comp_bi.csBi2 = CompositeBi(this->left, bi);
+                                    ret_comp_bi.csBi2.set_kind(CompositeBiKide::ThreeBi);
+                                    this->status = CompositeBiChuLiStatus::START;
+                                }
                             }
                             else {
                                 ret_comp_bi.type = FindCompositeBiReturnType::One;
@@ -252,8 +252,12 @@ FindCompositeBiReturn CompositeBiChuLi::__find_CompositeBi(Bi bi){
                     }
                     else {
                         if (bi_high > this->left.get_high()) {
-                            this->left = bi.generate_bi(this->left, this->after_left, bi);
-                            this->status = CompositeBiChuLiStatus::AFTER_LEFT;
+                            this->status = CompositeBiChuLiStatus::START;
+                            ret_comp_bi.type = FindCompositeBiReturnType::Two;
+                            ret_comp_bi.csBi1 = CompositeBi(this->start, this->start);
+                            ret_comp_bi.csBi1.set_kind(CompositeBiKide::SignlBi);
+                            ret_comp_bi.csBi2 = CompositeBi(this->left, bi);
+                            ret_comp_bi.csBi2.set_kind(CompositeBiKide::ThreeBi);
                         }
                         else {
                             this->middle = bi;
@@ -267,11 +271,21 @@ FindCompositeBiReturn CompositeBiChuLi::__find_CompositeBi(Bi bi){
                             if (this->start.get_type() == BiType::UP) {
                                 if (!this->composite_bi_list.empty()) {
                                     last_comp_bi = this->composite_bi_list.back();
-                                    this->composite_bi_list.pop_back();
-                                    ret_comp_bi.type = FindCompositeBiReturnType::One;
-                                    ret_comp_bi.csBi1 = CompositeBi(last_comp_bi.get_start_bi(), bi);
-                                    ret_comp_bi.csBi1.set_kind(CompositeBiKide::FiveBi);
-                                    this->status = CompositeBiChuLiStatus::START;
+                                    if (last_comp_bi.get_high() > this->start.get_high()) {
+                                        this->composite_bi_list.pop_back();
+                                        ret_comp_bi.type = FindCompositeBiReturnType::One;
+                                        ret_comp_bi.csBi1 = CompositeBi(last_comp_bi.get_start_bi(), bi);
+                                        ret_comp_bi.csBi1.set_kind(CompositeBiKide::FiveBi);
+                                        this->status = CompositeBiChuLiStatus::START;
+                                    }
+                                    else {
+                                        ret_comp_bi.type = FindCompositeBiReturnType::Two;
+                                        ret_comp_bi.csBi1 = CompositeBi(this->start, this->start);
+                                        ret_comp_bi.csBi1.set_kind(CompositeBiKide::SignlBi);
+                                        ret_comp_bi.csBi2 = CompositeBi(this->left, bi);
+                                        ret_comp_bi.csBi2.set_kind(CompositeBiKide::ThreeBi);
+                                        this->status = CompositeBiChuLiStatus::START;
+                                    }
                                 }
                                 else {
                                     ret_comp_bi.type = FindCompositeBiReturnType::One;
@@ -290,9 +304,13 @@ FindCompositeBiReturn CompositeBiChuLi::__find_CompositeBi(Bi bi){
                             }
                         } else {
                             if (bi_low < this->left.get_low()){
-                                this->left = bi.generate_bi(this->left, this->after_left, bi);
-                                this->status = CompositeBiChuLiStatus::AFTER_LEFT;
-                            }
+                                this->status = CompositeBiChuLiStatus::START;
+                                ret_comp_bi.type = FindCompositeBiReturnType::Two;
+                                ret_comp_bi.csBi1 = CompositeBi(this->start, this->start);
+                                ret_comp_bi.csBi1.set_kind(CompositeBiKide::SignlBi);
+                                ret_comp_bi.csBi2 = CompositeBi(this->left, bi);
+                                ret_comp_bi.csBi2.set_kind(CompositeBiKide::ThreeBi);
+                             }
                             else {
                                 this->middle = bi;
                                 this->status = CompositeBiChuLiStatus::AFTER_LEFT_NORMAL_NORMAL;

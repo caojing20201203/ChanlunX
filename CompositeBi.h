@@ -14,6 +14,7 @@ class CompositeBi{
         int start_pos, stop_pos, verify_pos;
         float high, low, length;
         CompositeBiKide kind;
+        int bi_count;
 
     public:
         CompositeBi(){
@@ -27,6 +28,7 @@ class CompositeBi{
             this->stop_pos = 0;
             this->verify_pos = 0;
             this->kind = CompositeBiKide::None;
+            this->bi_count = 0;
         }
 
         CompositeBi(Bi start_bi, Bi stop_bi) {
@@ -119,6 +121,14 @@ class CompositeBi{
         CompositeBi generate_bi(CompositeBi bi1, CompositeBi bi3){
             return(CompositeBi(bi1.get_start_bi(), bi3.get_stop_bi()));
         }
+
+        int get_count() {
+            return(this->bi_count);
+        }
+
+        void set_count(int count) {
+            this->bi_count = count;
+        }
 };
 
 enum class FindCompositeBiReturnType {None, Failure, One, Two, Three};
@@ -136,6 +146,7 @@ class CompositeBiChuLi {
         BiChuLi bicl;
         Bi start, left, after_left, middle, after_middle, right;
         FindCompositeBiReturn __find_CompositeBi(Bi bi);
+        int bi_count;
     public:
         CompositeBiChuLi();
         void handle(vector<Kxian1>& kxlist);
