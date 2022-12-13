@@ -149,7 +149,7 @@ class CompositeBiChuLi {
         int bi_count;
     public:
         CompositeBiChuLi();
-        void handle(vector<Kxian1>& kxlist);
+        void handle(vector<Kxian1>& kxlist, bool IncludeTempBi);
         vector<CompositeBi> composite_bi_list;
 };
 

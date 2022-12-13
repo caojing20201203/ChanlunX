@@ -12,7 +12,7 @@ CompositeBiChuLi::CompositeBiChuLi(){
     this->bi_count = 0;
 }
 
-void CompositeBiChuLi::CompositeBiChuLi::handle(vector<Kxian1>& kxianList){
+void CompositeBiChuLi::CompositeBiChuLi::handle(vector<Kxian1>& kxianList, bool IncludeTempBi){
     FindCompositeBiReturn ret_fd;
     CompositeBi com_bi = CompositeBi();
     Bi bi = Bi();
@@ -41,53 +41,55 @@ void CompositeBiChuLi::CompositeBiChuLi::handle(vector<Kxian1>& kxianList){
                 break;
         }
     }
-    switch (this->status) {
-    case CompositeBiChuLiStatus::START:
-        break;
-    case CompositeBiChuLiStatus::LEFT:
-        ret_fd.type = FindCompositeBiReturnType::One;
-        ret_fd.csBi1 = CompositeBi(this->start, this->start);
-        if (this->start.get_type() == BiType::UP)
-            ret_fd.csBi1.set_type(CompositeBiType::TEMP_UP);
-        else
-            ret_fd.csBi1.set_type(CompositeBiType::TEMP_DOWN);
-        this->composite_bi_list.push_back(ret_fd.csBi1);
-        break;
-    case CompositeBiChuLiStatus::AFTER_LEFT:
-        ret_fd.type = FindCompositeBiReturnType::Two;
-        ret_fd.csBi1 = CompositeBi(this->start, this->start);
-        ret_fd.csBi2 = CompositeBi(this->left, this->left);
-        if (this->start.get_type() == BiType::UP) {
-            ret_fd.csBi1.set_type(CompositeBiType::TEMP_UP);
-            ret_fd.csBi2.set_type(CompositeBiType::TEMP_DOWN);
+    if (IncludeTempBi == true) {
+        switch (this->status) {
+        case CompositeBiChuLiStatus::START:
+            break;
+        case CompositeBiChuLiStatus::LEFT:
+            ret_fd.type = FindCompositeBiReturnType::One;
+            ret_fd.csBi1 = CompositeBi(this->start, this->start);
+            if (this->start.get_type() == BiType::UP)
+                ret_fd.csBi1.set_type(CompositeBiType::TEMP_UP);
+            else
+                ret_fd.csBi1.set_type(CompositeBiType::TEMP_DOWN);
+            this->composite_bi_list.push_back(ret_fd.csBi1);
+            break;
+        case CompositeBiChuLiStatus::AFTER_LEFT:
+            ret_fd.type = FindCompositeBiReturnType::Two;
+            ret_fd.csBi1 = CompositeBi(this->start, this->start);
+            ret_fd.csBi2 = CompositeBi(this->left, this->left);
+            if (this->start.get_type() == BiType::UP) {
+                ret_fd.csBi1.set_type(CompositeBiType::TEMP_UP);
+                ret_fd.csBi2.set_type(CompositeBiType::TEMP_DOWN);
+            }
+            else {
+                ret_fd.csBi1.set_type(CompositeBiType::TEMP_DOWN);
+                ret_fd.csBi2.set_type(CompositeBiType::TEMP_UP);
+            }
+            this->composite_bi_list.push_back(ret_fd.csBi1);
+            this->composite_bi_list.push_back(ret_fd.csBi2);
+            break;
+        case CompositeBiChuLiStatus::AFTER_LEFT_HIGHLOW:
+        case CompositeBiChuLiStatus::AFTER_LEFT_NORMAL:
+            ret_fd.type = FindCompositeBiReturnType::Three;
+            ret_fd.csBi1 = CompositeBi(this->start, this->start);
+            ret_fd.csBi2 = CompositeBi(this->left, this->left);
+            ret_fd.csBi3 = CompositeBi(this->after_left, this->after_left);
+            if (this->start.get_type() == BiType::UP) {
+                ret_fd.csBi1.set_type(CompositeBiType::TEMP_UP);
+                ret_fd.csBi2.set_type(CompositeBiType::TEMP_DOWN);
+                ret_fd.csBi3.set_type(CompositeBiType::TEMP_UP);
+            }
+            else {
+                ret_fd.csBi1.set_type(CompositeBiType::TEMP_DOWN);
+                ret_fd.csBi2.set_type(CompositeBiType::TEMP_UP);
+                ret_fd.csBi3.set_type(CompositeBiType::TEMP_DOWN);
+            }
+            this->composite_bi_list.push_back(ret_fd.csBi1);
+            this->composite_bi_list.push_back(ret_fd.csBi2);
+            this->composite_bi_list.push_back(ret_fd.csBi3);
+            break;
         }
-        else {
-            ret_fd.csBi1.set_type(CompositeBiType::TEMP_DOWN);
-            ret_fd.csBi2.set_type(CompositeBiType::TEMP_UP);
-        }
-        this->composite_bi_list.push_back(ret_fd.csBi1);
-        this->composite_bi_list.push_back(ret_fd.csBi2);
-        break;
-    case CompositeBiChuLiStatus::AFTER_LEFT_HIGHLOW:
-    case CompositeBiChuLiStatus::AFTER_LEFT_NORMAL:
-        ret_fd.type = FindCompositeBiReturnType::Three;
-        ret_fd.csBi1 = CompositeBi(this->start, this->start);
-        ret_fd.csBi2 = CompositeBi(this->left, this->left);
-        ret_fd.csBi3 = CompositeBi(this->after_left, this->after_left);
-        if (this->start.get_type() == BiType::UP) {
-            ret_fd.csBi1.set_type(CompositeBiType::TEMP_UP);
-            ret_fd.csBi2.set_type(CompositeBiType::TEMP_DOWN);
-            ret_fd.csBi3.set_type(CompositeBiType::TEMP_UP);
-        }
-        else {
-            ret_fd.csBi1.set_type(CompositeBiType::TEMP_DOWN);
-            ret_fd.csBi2.set_type(CompositeBiType::TEMP_UP);
-            ret_fd.csBi3.set_type(CompositeBiType::TEMP_DOWN);
-        }
-        this->composite_bi_list.push_back(ret_fd.csBi1);
-        this->composite_bi_list.push_back(ret_fd.csBi2);
-        this->composite_bi_list.push_back(ret_fd.csBi3);
-        break;
     }
 }
 
@@ -412,7 +414,7 @@ void Bi3_CompositeBi(int nCount, float *pOut, float *pHigh, float *pLow, float *
         pOut[i] = 0;
     }
 
-    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    composite_bi_chuli.handle(baoHanChuLi.kxianList, true);
     int count = composite_bi_chuli.composite_bi_list.size();
     if (!composite_bi_chuli.composite_bi_list.empty()){
         composite_bi = composite_bi_chuli.composite_bi_list[0];
@@ -473,7 +475,7 @@ void Bi4_CompositeBi(int nCount, float* pOut, float* pHigh, float* pLow, float* 
         pOut[i] = 0;
     }
 
-    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    composite_bi_chuli.handle(baoHanChuLi.kxianList, true);
     int count = composite_bi_chuli.composite_bi_list.size();
     if (!composite_bi_chuli.composite_bi_list.empty()) {
         composite_bi = composite_bi_chuli.composite_bi_list[0];
@@ -535,7 +537,7 @@ void Bi3_Composite_GuiDaoGao(int nCount, float* pOut, float* pHigh, float* pLow,
         pOut[i] = 0;
     }
 
-    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    composite_bi_chuli.handle(baoHanChuLi.kxianList, false);
     int count = composite_bi_chuli.composite_bi_list.size();
     if (!composite_bi_chuli.composite_bi_list.empty()) {
         for (int i = 0; i < count; i++) {
@@ -570,7 +572,7 @@ void Bi3_Composite_GuiDaoDi(int nCount, float* pOut, float* pHigh, float* pLow, 
         pOut[i] = 0;
     }
 
-    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    composite_bi_chuli.handle(baoHanChuLi.kxianList, false);
     int count = composite_bi_chuli.composite_bi_list.size();
     if (!composite_bi_chuli.composite_bi_list.empty()) {
         for (int i = 0; i < count; i++) {
@@ -606,7 +608,7 @@ void Bi3_Composite_GuiDaoZhong(int nCount, float* pOut, float* pHigh, float* pLo
         pOut[i] = 0;
     }
 
-    composite_bi_chuli.handle(baoHanChuLi.kxianList);
+    composite_bi_chuli.handle(baoHanChuLi.kxianList, false);
     int count = composite_bi_chuli.composite_bi_list.size();
     if (!composite_bi_chuli.composite_bi_list.empty()) {
         composite_bi = composite_bi_chuli.composite_bi_list[0];

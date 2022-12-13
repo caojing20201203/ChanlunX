@@ -793,9 +793,8 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                 }
                 else {
                     if (this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low() && this->fx.get_high_low_type() == HighLowType::NONE) {
-                        tmp_fx = this->temp_fx;
-                        tmp_fx.set_free(kxian);
-                        tmp_fx.set_type(FenXingType::VERIFY_TOP);
+                        tmp_fx = this->fx;
+                        tmp_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
                         this->__init_fenxing(kxian);
                     }
                     else {
@@ -843,9 +842,8 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                 }
                 else {
                     if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high() && this->fx.get_high_low_type() == HighLowType::NONE) {
-                        tmp_fx = this->temp_fx;
-                        tmp_fx.set_free(kxian);
-                        tmp_fx.set_type(FenXingType::VERIFY_BOTTOM);
+                        tmp_fx = this->fx;
+                        tmp_fx.set_type(FenXingType::FAILURE_VERIFY_TOP);
                         this->__init_fenxing(kxian);
                     }
                     else {
