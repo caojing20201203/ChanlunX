@@ -1,48 +1,48 @@
 #pragma once
-#include "XianDuan.h"
+#include "CompositeBi.h"
 
 class ZhongShu {
     private:
         float high, low, max_high, min_low;
         int start_pos, stop_pos;
-        XianDuan input_xd, output_xd;
-        XianDuan max_xd, min_xd;
+        CompositeBi input_bi, output_bi;
+        CompositeBi max_bi, min_bi;
         float length;
     public:
-        vector<XianDuan> xd_list;
+        vector<CompositeBi> comp_bi_list;
         ZhongShu() {
-            this->input_xd = XianDuan();
-            this->output_xd = XianDuan();
+            this->input_bi = CompositeBi();
+            this->output_bi = CompositeBi();
             this->high = 0;
             this->low = 0;
             this->max_high = 0;
             this->min_low = 0;
             this->start_pos = 0;
             this->stop_pos = 0;
-            this->max_xd = XianDuan();
-            this->min_xd = XianDuan();
+            this->max_bi = CompositeBi();
+            this->min_bi = CompositeBi();
             this->length = 0;
-            this->xd_list.clear();
+            this->comp_bi_list.clear();
         }
 
-        ZhongShu(XianDuan in, XianDuan xd1, XianDuan xd2, XianDuan xd3) {
-            this->input_xd = in;
-            this->high = min(xd1.get_high(), xd3.get_high());
-            this->low = max(xd1.get_low(), xd3.get_low());
-            this->max_high = max(xd1.get_high(), xd3.get_high());
-            this->min_low = min(xd1.get_low(), xd3.get_low());
-            this->xd_list.push_back(xd1);
-            this->xd_list.push_back(xd2);
-            this->xd_list.push_back(xd3);
+        ZhongShu(CompositeBi in, CompositeBi bi1, CompositeBi bi2, CompositeBi bi3) {
+            this->input_bi = in;
+            this->high = min(bi1.get_high(), bi3.get_high());
+            this->low = max(bi1.get_low(), bi3.get_low());
+            this->max_high = max(bi1.get_high(), bi3.get_high());
+            this->min_low = min(bi1.get_low(), bi3.get_low());
+            this->comp_bi_list.push_back(bi1);
+            this->comp_bi_list.push_back(bi2);
+            this->comp_bi_list.push_back(bi3);
 
             this->start_pos = in.get_stop_pos();
-            this->stop_pos = xd3.get_stop_pos();
+            this->stop_pos = bi3.get_stop_pos();
             this->length = this->high - this->low;        
         } 
 
-        void stop(XianDuan xd) {
-            this->output_xd = xd;
-            this->stop_pos = xd.get_stop_pos();
+        void stop(CompositeBi comp_bi) {
+            this->output_bi = comp_bi;
+            this->stop_pos = comp_bi.get_stop_pos();
         }
 
         float get_length(){
@@ -73,16 +73,16 @@ class ZhongShu {
             this->min_low = min_low;
         }
 
-        XianDuan get_input() {
-            return(this->input_xd);
+        CompositeBi get_input() {
+            return(this->input_bi);
         }
 
-        void set_stop_pos(XianDuan xd){
-            this->stop_pos = xd.get_stop_pos();
+        void set_stop_pos(CompositeBi comp_bi){
+            this->stop_pos = comp_bi.get_stop_pos();
         }
 
-        XianDuan get_output() {
-            return(this->output_xd);
+        CompositeBi get_output() {
+            return(this->output_bi);
         }
 
         int get_start_pos() {
@@ -93,45 +93,21 @@ class ZhongShu {
             return(this->stop_pos);
         }
 
-        XianDuan get_max_xd(){
-            return(this->max_xd);
+        CompositeBi get_max_bi(){
+            return(this->max_bi);
         }
 
-        XianDuan get_min_xd(){
-            return(this->min_xd);
+        CompositeBi get_min_bi(){
+            return(this->min_bi);
         }
 
-        XianDuan find_next_xd(XianDuan xd){
-            int nCount = this->xd_list.size();
+        CompositeBi find_next_xd(CompositeBi comp_bi){
+            int nCount = this->comp_bi_list.size();
             for (int i = 0; i < nCount; i++){
-                if (this->xd_list[i] == xd){
-                    return(this->xd_list[i+1]);
+                if (this->comp_bi_list[i] == comp_bi){
+                    return(this->comp_bi_list[i+1]);
                 }
-            return(XianDuan());
+            return(CompositeBi());
             }
-        }
-};
-
-enum class FindZhongShuReturnType {None, THREE_BUY, THREE_SELL, ZhongShu_upgrade, ZhongShuSuccess, ZhongShuFailer };
-struct FindZhongShuReturn {
-    FindZhongShuReturnType type;
-    ZhongShu zhongshu;
-};
-
-enum class ZhongShuChuLiStatus {NONE, UP, DOWN, INSIDE, THREE_BUY, THREE_SELL};
-class ZhongShuChuLi {
-    private:
-        ZhongShu zhongshu;
-        ZhongShuChuLiStatus status;
-    public:
-        ZhongShuChuLi();
-        ZhongShuChuLi(XianDuan input, XianDuan xd1, XianDuan xd2, XianDuan xd3);
-        FindZhongShuReturn find_zhongshu(XianDuan xd);
-        ZhongShu get_zhongshu();
-        bool is_level_xd(XianDuan xd);
-        XianDuan last_xd;
-
-        ZhongShuChuLiStatus get_status(){
-            return(this->status);
         }
 };

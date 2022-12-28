@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "XianDuan.h"
+#include "CompositeBi.h"
 #include "ZhongShu.h"
 
 enum class ZouShiType {NONE, PANZHENG, UP, DOWN};
@@ -8,7 +8,7 @@ class ZouShi {
         ZouShiType type;
         float high, low, lenght;
         int start_pos, stop_pos;
-        XianDuan start_xd, stop_xd;
+        CompositeBi start_bi, stop_bi;
     public:
         ZouShi() {
             this->type = ZouShiType::NONE;
@@ -17,26 +17,30 @@ class ZouShi {
             this->lenght = 0;
             this->start_pos = 0;
             this->stop_pos = 0;
-            this->start_xd = XianDuan();
-            this->stop_xd = XianDuan();
+            this->start_bi = CompositeBi();
+            this->stop_bi = CompositeBi();
         }
 
-        ZouShi(ZouShiType type, XianDuan start_xd, XianDuan stop_xd) {
+        ZouShi(ZouShiType type, CompositeBi start_bi, CompositeBi stop_bi) {
             this->type = type;
-            this->start_xd = start_xd;
-            this->stop_xd = stop_xd;
-            if (start_xd.get_type() == XianDuanType::UP) {
-                this->low = start_xd.get_low();
-                this->high = stop_xd.get_high();
+            this->start_bi = start_bi;
+            this->stop_bi = stop_bi;
+            if (start_bi.get_type() == CompositeBiType::UP) {
+                this->low = start_bi.get_low();
+                this->high = stop_bi.get_high();
             } else {
-                if (start_xd.get_type() == XianDuanType::DOWN) {
-                    this->high = start_xd.get_high();
-                    this->low = stop_xd.get_low();
+                if (start_bi.get_type() == CompositeBiType::DOWN) {
+                    this->high = start_bi.get_high();
+                    this->low = stop_bi.get_low();
                 }
             }
             this->lenght = this->high - this->low;
-            this->start_pos = start_xd.get_start_pos();
-            this->stop_pos = stop_xd.get_stop_pos();
+            this->start_pos = start_bi.get_start_pos();
+            this->stop_pos = stop_bi.get_stop_pos();
+        }
+
+        ZouShiType get_type(){
+            return(this->type);
         }
 
         int get_start_pos() {
@@ -47,12 +51,12 @@ class ZouShi {
             return(this->stop_pos);
         }
 
-        XianDuan get_start_xd(){
-            return(this->start_xd);
+        CompositeBi get_start_xd(){
+            return(this->start_bi);
         }
 
-        XianDuan get_stop_xd() {
-            return(this->stop_xd);
+        CompositeBi get_stop_xd() {
+            return(this->stop_bi);
         }
 };
 
@@ -63,24 +67,24 @@ struct FindZouShiReturn{
     ZouShi zoushi2;
 };
 
-enum class ZouShiChuLiStatus {NONE, START, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
+enum class ZouShiChuLiStatus {NONE, START, LEFT, LEFT_EQUAL,  AFTER_LEFT, AFTER_LEFT_NORMAL, AFTER_LEFT_NORMAL_NORMAL, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
 class ZouShiChuLi {
     private:
-        XianDuanChuLi xdcl;
+        CompositeBiChuLi compbicl;
         ZouShiChuLiStatus status;
-        XianDuan a, b, c;
-        XianDuan A_xd1, A_xd2, A_xd3, B_xd1, B_xd2, B_xd3;
-        XianDuan a_0, a_1, a_2;
-        XianDuan b_0, b_1, b_2;
-        XianDuan c_0, c_1, c_2;
+        CompositeBi a, b, c;
+        CompositeBi A_xd1, A_xd2, A_xd3, B_xd1, B_xd2, B_xd3;
+        CompositeBi a_0, a_1, a_2;
+        CompositeBi b_0, b_1, b_2;
+        CompositeBi c_0, c_1, c_2;
         ZhongShu A, B;
-        ZhongShuChuLi zhongshucl;
     public:
         ZouShiChuLi();
-        XianDuan generate_xd(XianDuan xd1, XianDuan xd2, XianDuan xd3);
-        bool match_zhongshu_xianduan(XianDuan xd1, XianDuan xd2);
+        ZouShi get_last_zoushi();
+        CompositeBi generate_bi(CompositeBi bi1, CompositeBi bi3);
+        bool match_zhongshu_xianduan(CompositeBi bi1, CompositeBi bi2);
         void handle(vector<Kxian1>& kxianList);
-        FindZouShiReturn find_zoushi(XianDuan xd);
+        FindZouShiReturn find_zoushi(CompositeBi xd);
         vector<ZouShi> zoushi_list;
 };
 

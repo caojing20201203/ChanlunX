@@ -130,7 +130,7 @@ public:
 //enum class FenXingChuLiStatus { LEFT, MIDDLE, RIGHT, FREE };
 enum class FreeStatus {NONE, FREE_0, FREE_1, FREE_2};
 enum class FenXingChuLiStatus {START, ONE, TWO, HIGHLOW, LOWHIGH, THREE, FOUR, FIVE, SIX, FENXING_END};
-
+enum class FenXingChuLiState { NONE, TEMP_DI, DI, UP, TEMP_DING, DING, DOWN };
 class FenXingChuLi {
 private:
     //Kxian1 left, middle, right, free, last_bar;
@@ -152,6 +152,7 @@ private:
     FenXing __determ_fenxing(Kxian1 kx);
     FenXing __fenxing_process(Kxian1 kx);
     FenXing __kxian_process(Kxian1 kx);
+    FenXingChuLiState state;
 
 public:
     vector<Kxian1> kxianList;

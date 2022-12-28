@@ -1,23 +1,30 @@
 ﻿#include "ZouShi.h"
+#include "ZhongShu.h"
 
 using namespace std;
 
-XianDuan ZouShiChuLi::generate_xd(XianDuan xd1, XianDuan xd2, XianDuan xd3) {
-    XianDuan ret_xd = XianDuan();
+ ZouShi ZouShiChuLi::get_last_zoushi() {
+    if (!this->zoushi_list.empty())
+        return(this->zoushi_list.back());
+    return(ZouShi());
+ }
+
+ CompositeBi ZouShiChuLi::generate_bi(CompositeBi bi1, CompositeBi bi3) {
+    CompositeBi ret_bi = CompositeBi();
     Bi start_bi, stop_bi;
-    start_bi = xd1.get_start_bi();
-    stop_bi = xd3.get_stop_bi();
-    ret_xd = XianDuan(start_bi, stop_bi);
-    return(ret_xd);
+    start_bi = bi1.get_start_bi();
+    stop_bi = bi3.get_stop_bi();
+    ret_bi = CompositeBi(start_bi, stop_bi);
+    return(ret_bi);
 }
 
-bool ZouShiChuLi::match_zhongshu_xianduan(XianDuan xd1, XianDuan xd2) {
+bool ZouShiChuLi::match_zhongshu_xianduan(CompositeBi bi1, CompositeBi bi2) {
     float bilv = 0;
 
-    if (xd1.get_length() > xd2.get_length()) {
-        bilv = xd1.get_length() / xd2.get_length();
+    if (bi1.get_length() > bi2.get_length()) {
+        bilv = bi1.get_length() / bi2.get_length();
     } else {
-        bilv = xd2.get_length() / xd1.get_length();
+        bilv = bi2.get_length() / bi1.get_length();
     }
 
     if (bilv > 0.618)
@@ -27,60 +34,93 @@ bool ZouShiChuLi::match_zhongshu_xianduan(XianDuan xd1, XianDuan xd2) {
 }
 
 ZouShiChuLi::ZouShiChuLi(){
-    this->status = ZouShiChuLiStatus::a;
-    this->xdcl = XianDuanChuLi();
-    this->zhongshucl = ZhongShuChuLi();
+    this->status = ZouShiChuLiStatus::START;
+    this->compbicl = CompositeBiChuLi();
 }
 
 void ZouShiChuLi::handle(vector<Kxian1>& kxianList) {
     FindZouShiReturn ret_zoushi;
     ZouShi zoushi = ZouShi();
-    XianDuan xd = XianDuan();
-    this->xdcl.handle(kxianList);
+    CompositeBi comp_bi = CompositeBi();
+    this->compbicl.handle(kxianList, true);
 
-    int count = this->xdcl.key_xianduan_list.size();
+    int count = this->compbicl.composite_bi_list.size();
     for (int i = 0; i < count; i++) {
-        xd = this->xdcl.key_xianduan_list[i];
-        ret_zoushi = this->find_zoushi(xd);
+        comp_bi = this->compbicl.composite_bi_list[i];
+        ret_zoushi = this->find_zoushi(comp_bi);
     }
 }
 
-FindZouShiReturn ZouShiChuLi::find_zoushi(XianDuan xd) {
-    FindZhongShuReturn ret_zhongshu;
+FindZouShiReturn ZouShiChuLi::find_zoushi(CompositeBi comp_bi) {
     FindZouShiReturn ret_zoushi;
+    ZouShi last_zoushi;
 
     switch(this->status) {
-        case ZouShiChuLiStatus::a:
-            this->a = xd;
-            this->status = ZouShiChuLiStatus::A_xd1;
+        case ZouShiChuLiStatus::START:
+            this->a_0 = comp_bi;
+            this->status = ZouShiChuLiStatus::LEFT;
             break;
-        case ZouShiChuLiStatus::A_xd1:
-            if (this->match_zhongshu_xianduan(xd, this->a)) {
+
+        case ZouShiChuLiStatus::LEFT:
+            if (this->match_zhongshu_xianduan(comp_bi, this->a_0)) {
                 //和this->a相差不多
-                this->A_xd1 = this->a;
-                this->A_xd2 = xd;
-                this->status = ZouShiChuLiStatus::A_xd3;
+                this->a_1 = comp_bi;
+                this->status = ZouShiChuLiStatus::LEFT_EQUAL;
             } else {
-                if (xd.get_type() == XianDuanType::DOWN && xd.get_low() < this->a.get_low()) {
-                        //创新低
-                        this->status = ZouShiChuLiStatus::a;
-                        ret_zoushi.type = FindZouShiReturnType::Failure;
-                        ret_zoushi.zoushi1 = ZouShi(ZouShiType::DOWN, this->A_xd1, this->A_xd1);
-
+                if (comp_bi.get_type() == CompositeBiType::DOWN && comp_bi.get_low() < this->a_0.get_low()){
+                    //创新低
+                    this->status = ZouShiChuLiStatus::START;
+                    ret_zoushi.type = FindZouShiReturnType::Failure;
+                    ret_zoushi.zoushi1 = ZouShi(ZouShiType::DOWN, this->a_0, this->a_1);
                 } else {
-                    if (xd.get_type() == XianDuanType::UP && xd.get_high() > this->a.get_high()) {
+                    if (comp_bi.get_type() == CompositeBiType::UP && comp_bi.get_high() > this->a_0.get_high()){
                         //创新高
-                        this->status = ZouShiChuLiStatus::a;
+                        this->status = ZouShiChuLiStatus::START;
                         ret_zoushi.type = FindZouShiReturnType::Failure;
-                        ret_zoushi.zoushi1 = ZouShi(ZouShiType::UP, this->A_xd1, this->A_xd1);
-
+                        ret_zoushi.zoushi1 = ZouShi(ZouShiType::UP, this->a_0, this->a_1);
                     } else {
-                        this->A_xd1 = xd;
-                        this->status = ZouShiChuLiStatus::A_xd2;
+                        this->a_1 = comp_bi;
+                        this->status = ZouShiChuLiStatus::AFTER_LEFT;
                     }
                 }
             }
             break;
+
+        case ZouShiChuLiStatus::LEFT_EQUAL:
+            if (this->match_zhongshu_xianduan(this->a_1, comp_bi)){
+                this->A = ZhongShu(CompositeBi(), this->a_0, this->a_1, comp_bi);
+                this->status = ZouShiChuLiStatus::A;
+            } else {
+                if (comp_bi.get_type() == CompositeBiType::UP){
+                    if (comp_bi.get_high() > this->a_1.get_high()){
+                        if (this->a_0.get_low() < comp_bi.get_low()){
+                            this->a_0 = comp_bi.generate_bi(this->a_0, comp_bi);
+                            this->status = ZouShiChuLiStatus::LEFT;
+                        } else {
+                            last_zoushi = this->get_last_zoushi();
+                            if (last_zoushi.get_type() != ZouShiType::NONE){
+
+                            }
+                        }
+                    } else {
+                        this->a_2 = comp_bi;
+                        this->status = ZouShiChuLiStatus::AFTER_LEFT_NORMAL;
+                    }
+                } else {
+                    //下降笔
+                    if (comp_bi.get_low() < this->a_1.get_low()){
+                        if (this->a_0.get_high() > comp_bi.get_high()){
+                            this->a_0 = comp_bi.generate_bi(this->a_0, comp_bi);
+                            this->status = ZouShiChuLiStatus::LEFT;
+                        } else {
+                            this->A = ZhongShu(CompositeBi(), this->a_0, this->a_1, comp_bi);
+                            this->status = ZouShiChuLiStatus::A;   
+                        }
+                    }
+                }
+            }
+            break;
+            
         case ZouShiChuLiStatus::A_xd2:
             if (this->match_zhongshu_xianduan(xd, this->A_xd1)) {
                 this->A_xd2 = xd;
