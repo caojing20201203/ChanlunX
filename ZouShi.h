@@ -58,6 +58,14 @@ class ZouShi {
         CompositeBi get_stop_xd() {
             return(this->stop_bi);
         }
+
+        float get_high(){
+            return(this->high);
+        }
+
+        float get_low(){
+            return(this->low);
+        }
 };
 
 enum class FindZouShiReturnType {None, Failure, One, Two};
@@ -67,7 +75,7 @@ struct FindZouShiReturn{
     ZouShi zoushi2;
 };
 
-enum class ZouShiChuLiStatus {NONE, START, LEFT, LEFT_EQUAL,  AFTER_LEFT, AFTER_LEFT_NORMAL, AFTER_LEFT_NORMAL_NORMAL, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
+enum class ZouShiChuLiStatus {NONE, START, LEFT, LEFT_EQUAL, AFTER_LEFT_EQUAL, AFTER_LEFT, AFTER_LEFT_NORMAL, AFTER_LEFT_NORMAL_NORMAL, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
 class ZouShiChuLi {
     private:
         CompositeBiChuLi compbicl;

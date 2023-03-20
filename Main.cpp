@@ -170,9 +170,9 @@ void Func19(int nCount, float* pOut, float* pHigh, float* pLow, float* pClose)
 //===============================================================================
 //输出函数20号： 组合笔
 //===============================================================================
-void Func20(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+void Func20(int nCount, float* pOut, float* pHigh, float* pLow, float *pIn)
 {
-    Bi3_CompositeBi(nCount, pOut, pHigh, pLow, pIgnore);
+    Bi3_CompositeBi(nCount, pOut, pHigh, pLow, pIn);
 }
 
 //===============================================================================
@@ -207,6 +207,14 @@ void Func24(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
     Bi3_Composite_GuiDaoZhong(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
+//====================================================================================
+//输出函数25号：获得当前分型状态
+//====================================================================================
+void Func25(int nCount, float* pOut, float* pHigh, float* pLow, float* pIgnore)
+{
+    Bi4_fenxing_state(nCount, pOut, pHigh, pLow, pIgnore);
+}
+
 static PluginTCalcFuncInfo Info[] =
 {
     { 1, &Func1},
@@ -233,6 +241,7 @@ static PluginTCalcFuncInfo Info[] =
     {22, &Func22},
     {23, &Func23},
     {24, &Func24},
+    {25, &Func25},
     { 0, NULL}
 };
 

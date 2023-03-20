@@ -261,7 +261,6 @@
     <ClCompile Include="FenXingChuLi.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="XianDuan.cpp" />
-    <ClCompile Include="ZhongShu.cpp" />
     <ClCompile Include="ZouShi.cpp" />
   </ItemGroup>
   <ItemGroup>

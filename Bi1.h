@@ -128,7 +128,7 @@ public:
 };
 
 
-enum class BiChuLiStatus {START, FINDBI, FINDNEWBI};
+enum class BiChuLiStatus {START, END, FINDBI, FINDNEWBI};
 
 class BiChuLi {
 private:

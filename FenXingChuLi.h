@@ -9,7 +9,7 @@ using namespace std;
 
 #pragma pack(push, 1)
 
-enum class FenXingType { NONE, TOP, BOTTOM, FAILURE_TOP, FAILURE_BOTTOM, VERIFY_TOP, VERIFY_BOTTOM, FAILURE_VERIFY_TOP, FAILURE_VERIFY_BOTTOM, NEW_TOP, NEW_BOTTOM };
+enum class FenXingType { NONE, TOP, BOTTOM, FAILURE_TOP, FAILUER_TOP_VERIFY_BOTTOM, FAILURE_BOTTOM, FAILURE_BOTTOM_VERIFY_TOP, VERIFY_TOP, VERIFY_BOTTOM, FAILURE_VERIFY_TOP, FAILURE_VERIFY_BOTTOM, NEW_TOP, NEW_BOTTOM };
 enum class HighLowType {NONE, NEW_HIGH, NEW_LOW};
 
 //分型
@@ -130,7 +130,7 @@ public:
 //enum class FenXingChuLiStatus { LEFT, MIDDLE, RIGHT, FREE };
 enum class FreeStatus {NONE, FREE_0, FREE_1, FREE_2};
 enum class FenXingChuLiStatus {START, ONE, TWO, HIGHLOW, LOWHIGH, THREE, FOUR, FIVE, SIX, FENXING_END};
-enum class FenXingChuLiState { NONE, TEMP_DI, DI, UP, TEMP_DING, DING, DOWN };
+enum class FenXingChuLiState { NONE, BOTTOM, VERIFY_BOTTOM, UP, TOP, VERIFY_TOP, DOWN };
 class FenXingChuLi {
 private:
     //Kxian1 left, middle, right, free, last_bar;
@@ -150,9 +150,7 @@ private:
     FenXing __failure_verify_top(Kxian1 kx);
     FenXing __failue_verify_bottom(Kxian1 kx);
     FenXing __determ_fenxing(Kxian1 kx);
-    FenXing __fenxing_process(Kxian1 kx);
     FenXing __kxian_process(Kxian1 kx);
-    FenXingChuLiState state;
 
 public:
     vector<Kxian1> kxianList;
@@ -160,8 +158,12 @@ public:
     vector<FenXing> keyFenXingList;
     void handle(vector<Kxian1>& kxianList);
     FenXing __find_fenxing(Kxian1 kx);
+    FenXing __find_fenxing_old(Kxian1 kx);
     FenXingChuLi();
     bool firstBarStatus;
+    FenXingChuLiState state;
+    FenXing get_current_temp_fx();
+    FenXing get_current_fx();
 };
 
 void Bi3_fenxing(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
@@ -171,7 +173,7 @@ void GuiDao_Gao(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void GuiDao_Di(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void GuiDao_Zhong(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 void GuiDao_Status(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
-
+void Bi4_fenxing_state(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
 #pragma pack(pop)
 
 #endif

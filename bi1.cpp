@@ -705,6 +705,7 @@ void Bi3_bi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
 
     BaoHanChuLi baohanChuli;
     for (int i = 0; i < nCount; i++) {
+        OutputDebugPrintf(" %d %f %f ", i, pHigh[i], pLow[i]);
         baohanChuli.add(pHigh[i], pLow[i]);
     }
 
