@@ -540,7 +540,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
 
     case FenXingChuLiStatus::FOUR:
         if (this->state == FenXingChuLiState::BOTTOM) {
-            if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
+            if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high() && this->temp_fx.get_high_low_type() == HighLowType::NONE) {
                 ret_fx = this->fx;
                 ret_fx.set_type(FenXingType::FAILURE_BOTTOM_VERIFY_TOP);
                 this->one = this->last_bar;
@@ -592,7 +592,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
         }
         else {
             if (this->state == FenXingChuLiState::TOP) {
-                if (this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low()) {
+                if (this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low() && this->temp_fx.get_high_low_type() == HighLowType::NONE) {
                     ret_fx = this->fx;
                     ret_fx.set_type(FenXingType::FAILUER_TOP_VERIFY_BOTTOM);
                     this->one = this->last_bar;
