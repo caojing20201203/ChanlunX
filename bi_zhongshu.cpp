@@ -38,8 +38,6 @@ bool is_bi_equal_1(float bi1_len, float bi2_len) {
 }
 
 Bi Bi_ZhongShuChuLi::get_last_zs_bi() {
-    Bi_ZhongShuChuLiStatus status;
-
     switch (this->status) {
     case Bi_ZhongShuChuLiStatus::ZS8:
         this->status = Bi_ZhongShuChuLiStatus::ZS7;

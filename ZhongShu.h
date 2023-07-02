@@ -1,5 +1,12 @@
-#pragma once
+﻿#pragma once
 #include "CompositeBi.h"
+
+enum class FindZhongShuReturnType {None, THREE_BUY, THREE_SELL, MAX_HIGH, MIN_LOW, ZHONGSHU_UPGRADE, ZHONGSHU_SUCCESS, ZHONGSHU_FAILURE};
+struct FindZhongShuReturn {
+    FindZhongShuReturnType type;
+    CompositeBi b_1;
+    CompositeBi b_2;
+};
 
 class ZhongShu {
     private:
@@ -109,5 +116,52 @@ class ZhongShu {
                 }
             return(CompositeBi());
             }
+        }
+        FindZhongShuReturn find_zhongshu(CompositeBi bi){
+            CompositeBiType bi_type = bi.get_type();
+            float bi_high = bi.get_high();
+            float bi_low = bi.get_low();
+            CompositeBi last_bi;
+            FindZhongShuReturn ret_zs = FindZhongShuReturn();
+
+            ret_zs.type = FindZhongShuReturnType::None;
+            if (this->comp_bi_list.empty())
+                last_bi = CompositeBi();
+            else
+                last_bi = this->comp_bi_list.back();
+            
+            switch(bi_type){
+                case CompositeBiType::UP:
+                    if (bi_high > this->high) {
+                        if (bi_high > this->max_high) {
+                            this->max_high = bi_high;
+                            ret_zs.type = FindZhongShuReturnType::MAX_HIGH;
+                            ret_zs.b_1 = bi;
+                        } else {
+                            if (bi_high <= this->low) {
+                                ret_zs.type = FindZhongShuReturnType::THREE_SELL;
+                                ret_zs.b_1 = last_bi;
+                                ret_zs.b_2 = bi;
+                                this->stop(last_bi);
+                            }
+                        }
+                    }
+                    break;
+                case CompositeBiType::DOWN:
+                    if (bi_low < this->low) {
+                        if (bi_low < this->min_low) {
+                            this->min_low = bi_low;
+                        }
+                    } else {
+                        if (bi_low >= this->high){
+                            ret_zs.type = FindZhongShuReturnType::THREE_BUY;
+                            ret_zs.b_1 = last_bi;
+                            ret_zs.b_2 = bi;
+                            this->stop(last_bi);
+                        }
+                    }
+                    break;
+            }
+            return(ret_zs);
         }
 };

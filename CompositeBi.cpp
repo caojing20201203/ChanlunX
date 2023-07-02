@@ -107,6 +107,8 @@ char* getCompositebiChuLiStatus(CompositeBiChuLiStatus status) {
         return("AFTER_LEFT_NORMAL");
     case CompositeBiChuLiStatus::AFTER_LEFT_NORMAL_NORMAL:
         return("AFTER_LEFT_NORMAL_NORMAL");
+    default:
+        return("");
 
     }
 }
@@ -404,7 +406,7 @@ void Bi3_CompositeBi(int nCount, float *pOut, float *pHigh, float *pLow, float *
     CompositeBi composite_bi;
     Bi bi;
     int start_pos, stop_pos;
-    int temp_start_num = 0;
+    float temp_start_num = 0;
 
     for (int i = 0; i < nCount; i++){
         baoHanChuLi.add(pHigh[i], pLow[i]);
@@ -465,7 +467,7 @@ void Bi4_CompositeBi(int nCount, float* pOut, float* pHigh, float* pLow, float* 
     CompositeBi composite_bi;
     Bi bi;
     int start_pos, stop_pos;
-    int temp_start_num = 0;
+    float temp_start_num = 0;
 
     for (int i = 0; i < nCount; i++) {
         baoHanChuLi.add(pHigh[i], pLow[i]);

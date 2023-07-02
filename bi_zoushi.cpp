@@ -145,7 +145,8 @@ bool determ_bi_radio(Bi bi1, Bi bi2) {
 }
 
 float get_bi_radio(Bi bi1, Bi bi2) {
-    return(0.618);
+    float ret_value = (float)0.618;
+    return(ret_value);
 }
 
 Bi_ZouShi Bi_ZouShiChuLi::get_last_zoushi() {

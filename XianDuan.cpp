@@ -214,7 +214,6 @@ bool __is_zhongshu(Bi bi1, Bi bi2, Bi bi3) {
 
 
 bool __isMiddleEquale(Bi start, Bi left, Bi after_left) {
-    bool start_flag;
     float start_radio, left_radio;
 
     float start_len = start.get_length();
@@ -1758,7 +1757,6 @@ FindXianDuanReturn XianDuanChuLi::__find_xianduan1(Bi bi) {
     Bi_ZhongShu A_zs, B_zs;
     FindBiZhongShuReturn ret_zhongshu;
     XianDuan last_xd, before_last_xd;
-    bool process_status;
     Bi tmp_bi = Bi();
 
     BiType bi_type = bi.get_type();

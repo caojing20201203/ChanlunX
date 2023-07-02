@@ -27,13 +27,15 @@ char* get_pre_status(int status) {
         return("PRE_AFTER_LEFT_HIGHLOW");
     case PRE_AFTER_LEFT_NORMAL:
         return("PRE_AFTER_LEFT_NORMAL");
+    default:
+        return("");
     }
 }
 
 
 vector<Bi> pre_bi_process(vector<Bi> biList) {
     vector<Bi> ret_list;
-    int count, i, j;
+    int count;
     int status = PRE_START;
     count = biList.size();
     Bi first, second, three, bi;
@@ -590,6 +592,7 @@ Bi BiChuLi::__find_bi(FenXing fx) {
     FenXingType last_fx_type = this->last_fx.get_type();
     Bi bi = Bi();
     Bi last_bi;
+
 
     if (last_fx_type == FenXingType::NONE) {
         if (fx.get_type() == FenXingType::VERIFY_TOP || fx.get_type() == FenXingType::VERIFY_BOTTOM)

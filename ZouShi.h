@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <vector>
 #include "CompositeBi.h"
 #include "ZhongShu.h"
 
@@ -75,17 +76,19 @@ struct FindZouShiReturn{
     ZouShi zoushi2;
 };
 
-enum class ZouShiChuLiStatus {NONE, START, LEFT, LEFT_EQUAL, AFTER_LEFT_EQUAL, AFTER_LEFT, AFTER_LEFT_NORMAL, AFTER_LEFT_NORMAL_NORMAL, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
+//enum class ZouShiChuLiStatus {NONE, START, LEFT, LEFT_EQUAL, AFTER_LEFT_EQUAL, AFTER_LEFT, AFTER_LEFT_NORMAL, AFTER_LEFT_NORMAL_NORMAL, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
+enum class ZouShiChuLiStatus {a0, a1, a1_equal_a0, a1_equal_a0_normal, a2_equal_a1, a2_equal_a1_normal, a2, a2_normal, a3, LONGXIANDUAN, A, A_MAX_HIGH, THREE_BUY, THREE_SELL, A_MIN_LOW, b0, b1, b2, b3, B, c0, c1, c2};
 class ZouShiChuLi {
     private:
         CompositeBiChuLi compbicl;
         ZouShiChuLiStatus status;
         CompositeBi a, b, c;
         CompositeBi A_xd1, A_xd2, A_xd3, B_xd1, B_xd2, B_xd3;
-        CompositeBi a_0, a_1, a_2;
+        CompositeBi a_0, a_1, a_2, a_3;
         CompositeBi b_0, b_1, b_2;
         CompositeBi c_0, c_1, c_2;
         ZhongShu A, B;
+        CompositeBi normal_bi, normal_first_bi;
     public:
         ZouShiChuLi();
         ZouShi get_last_zoushi();
@@ -93,6 +96,8 @@ class ZouShiChuLi {
         bool match_zhongshu_xianduan(CompositeBi bi1, CompositeBi bi2);
         void handle(vector<Kxian1>& kxianList);
         FindZouShiReturn find_zoushi(CompositeBi xd);
+        void last_zoushi_process(CompositeBi bi1, CompositeBi bi2);
+        CompositeBi normal_process(CompositeBi bi);
         vector<ZouShi> zoushi_list;
 };
 
