@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool debug_bi_status = false;
+bool debug_bi_status = true;
 
 #define PRE_START           0
 #define PRE_LEFT            1
