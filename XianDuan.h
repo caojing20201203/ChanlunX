@@ -7,6 +7,24 @@ using namespace std;
 
 enum class XianDuanType { NONE, TEMP_UP, TEMP_DOWN, FAILURE_TEMP_UP, FAILURE_TEMP_DOWN, UP, DOWN, FAILURE_UP, FAILURE_DOWN, LONG_XIANDUAN };
 enum class XianDuanKind {NONE, SigleBi,ThreeBi,LONGXIANDUAN, PANZHENG, QUSHI};
+/*
+class ZhongShu {
+private:
+    Bi input;
+    Bi bi1;
+    Bi bi2;
+    Bi bi3;
+    Bi output;
+    float max_high, min_low, high, low;
+public:
+    ZhongShu(Bi input, Bi bi1, Bi bi2, Bi bi3, Bi output) {
+        this->max_high = max(bi1.get_high(), bi3.get_high());
+        this->high = min(bi1.get_high(), bi3.get_high());
+        this->min_low = min(bi1.get_low(), bi3.get_low());
+        this->low = max(bi1.get_low(), bi3.get_low());
+    }
+};
+*/
 class XianDuan {
 private:
     XianDuanType type = XianDuanType::NONE;
@@ -134,7 +152,7 @@ public:
     }
 };
 
-enum class XianDuanChuLiStatus { START, LEFT, LEFT_EQUAL, ZHONGSHU_NO_INPUT, LEFT_EQUAL_NORMAL, AFTER_LEFT, MIDDLE_EQUAL, MIDDLE_EQUAL_NORMAL, MIDDLE_HIGHLOW, MIDDLE_NORMAL, LEFT_INCLUDE_MIDDLE, AFTER_MIDDLE, RIGHT, RIGHT_NORMAL, RIGHT_NORMAL_NORMAL, RIGHT_NORMAL_NORMAL_NORMAL, RIGHT_NORMAL_NORMAL_NORMAL_NORMAL, AFTER_RIGHT, FREE, AFTER_FREE, AFTER_FREE_1, AFTER_FREE_2, AFTER_FREE_3, LONGXIANDUAN, LONGXIANDUAN_RIGHT, LONGXIANDUAN_RIGHT_NORMAL, LONGXIANDUAN_FREE, LONGXIANDUAN_AFTER_FREE, LONGXIANDUAN_AFTER_FREE_1, A, b_3, b_3_normal, B_b1, B_b2, B_b3,B_b4, B, c_3, c_3_normal, C_c1, C_c2, C_c3};
+enum class XianDuanChuLiStatus { a_1, a_2, a1_equal_a2, a_3, a2_equal_a3, a3_highlow_a1, a3_normal_a1, a_4, A};
 
 enum class FindXianDuanReturnType { None, Failure, NewXianDuan, XianDuanUpgrade, One, Two, Two_Bi, Three, FindZhongShu, ZhongShuSuccess, ZhongShuFailer, ZhongShuUpgrade };
 struct FindXianDuanReturn {
@@ -151,44 +169,29 @@ private:
     XianDuanChuLiStatus status;
     Bi last_bi;
 
-    Bi start = Bi();
-    Bi left = Bi();
-    Bi after_left = Bi();
-    Bi middle = Bi();
-    Bi  after_middle = Bi();
-    Bi right = Bi();
-    Bi after_right = Bi();
-    Bi free = Bi();
-    Bi after_free = Bi();
-    Bi after_free_1 = Bi();
-    Bi after_free_2 = Bi();
+    Bi a_1 = Bi();
+    Bi a_2 = Bi();
+    Bi a_3 = Bi();
+    Bi a_4 = Bi();
 
-    Bi a, b, b_1, b_2,b_3;
-    Bi B_b1, B_b2, B_b3, B_b4;
-    Bi c, c_1, c_2, c_3;
-    Bi C_c1, C_c2, C_c3, C_c4;
     BiChuLi bicl;
 
     Bi_ZhongShuChuLi A_zscl, B_zscl;
 
     FindXianDuanReturn find_xianduan(Bi bi);
     FindXianDuanReturn __find_xianduan(Bi bi);
-    FindXianDuanReturn __find_xianduan1(Bi bi);
-    void __backroll(Bi bi);
+
+
     void debug_xianduan(XianDuan xd);
     FindXianDuanReturn failure_xd();
-    FindXianDuanReturn __right_process(Bi bi);
-    FindXianDuanReturn __left_process(Bi bi);
-    bool __middle_process(Bi bi);
-    bool __determ_zhongshu(Bi bi);
+
     XianDuan get_last_xd(int num);
     void push_bi_list();
-    FindXianDuanReturn set_xianduan(FindXianDuanReturnType ret_type); 
-    FindXianDuanReturn __enter_zhongshu(Bi input, Bi bi1, Bi bi2, Bi bi3, char type);
+
 public:
     XianDuanChuLi();
     void handle(vector<Kxian1>& kxlist);
-    vector<Bi> get_xd_bi_list();
+
 
     vector<XianDuan> xianDuanList;
     vector<XianDuan> key_xianduan_list;
