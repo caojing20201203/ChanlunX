@@ -1,7 +1,9 @@
 ﻿#include "XianDuan.h"
 
-bool is_bi_equal(float bi1_len, float bi2_len) {
+bool is_bi_equal(Bi bi1, Bi bi2) {
     float radio;
+    float bi1_len = bi1.get_length();
+    float bi2_len = bi2.get_length();
 
     if (bi1_len <= bi2_len) {
         radio = bi1_len / bi2_len;
@@ -18,44 +20,11 @@ bool is_bi_equal(float bi1_len, float bi2_len) {
     }
 }
 
-vector<Bi_ZhongShu> find_bi_zhongshu(vector<Bi> biList) {
-    int i, j, count;
-    Bi bi1, bi2;
-    Bi_ZhongShu bi_zhongshu;
-    Bi input, output;
-    vector<Bi_ZhongShu> ret_zhongshu_list;
-
-    count = biList.size();
-    //判断是否有中枢
-    for (i = 0; i < count; i++) {
-        bi1 = biList[i];
-        for (j = i + 1; j < count; j++) {
-            bi2 = biList[j];
-            if (!is_bi_equal(bi1.get_length(), bi2.get_length())) {
-                break;
-            }
-        }
-        if (j - i > 3) {
-            OutputDebugPrintf("发现中枢: %d %d", i, j);
-            if (i == 0) {
-                input = Bi();
-            }
-            else {
-                input = biList[i - 1];
-            }
-            bi_zhongshu = Bi_ZhongShu(input, biList[i], biList[i + 1], biList[i + 2]);
-            ret_zhongshu_list.push_back(bi_zhongshu);
-        }
-    }
-    return(ret_zhongshu_list);
-}
-
-
 XianDuanChuLi::XianDuanChuLi() {
     this->last_xd = XianDuan();
     this->last_bi = Bi();
     this->bicl = BiChuLi();
-    this->status = XianDuanChuLiStatus::START;
+    this->status = XianDuanChuLiStatus::a_1;
 }
 
 
@@ -239,26 +208,26 @@ bool __isMiddleEquale(Bi start, Bi left, Bi after_left) {
 }
 
 
-FindXianDuanReturn XianDuanChuLi::failure_xd() {
+FindXianDuanReturn XianDuanChuLi::failure_xd(Bi bi1, Bi bi2) {
     FindXianDuanReturn ret_fd = FindXianDuanReturn();
     XianDuan last_xd, before_last_xd;
     Bi xd_start_bi = Bi(), bi;
 
     vector<Bi> xd_bi_list(20);
-
+    /*
     last_xd = this->get_last_xd(-1);
     if (last_xd.get_type() == XianDuanType::NONE) {
         ret_fd = this->set_xianduan(FindXianDuanReturnType::Two_Bi);
-        this->status = XianDuanChuLiStatus::START;
+        this->status = XianDuanChuLiStatus::a_1;
     }
     else {
         switch (last_xd.get_type()) {
         case XianDuanType::UP:
-            if (this->start.get_low() < last_xd.get_low()) {
+            if (this->a_1.get_low() < last_xd.get_low()) {
                 before_last_xd = this->get_last_xd(-2);
                 if (before_last_xd.get_type() == XianDuanType::NONE) {
                     ret_fd = this->set_xianduan(FindXianDuanReturnType::Two_Bi);
-                    this->status = XianDuanChuLiStatus::START;
+                    this->status = XianDuanChuLiStatus::a_1;
                 }
                 else {
                     if ((before_last_xd.get_type() == XianDuanType::UP && before_last_xd.get_high() < this->start.get_high())
@@ -348,212 +317,11 @@ FindXianDuanReturn XianDuanChuLi::failure_xd() {
             break;
         }
     }
+    */
     return(ret_fd);
 }
 
 void XianDuanChuLi::push_bi_list() {
-}
-
-
-vector<Bi>  XianDuanChuLi::get_xd_bi_list() {
-    vector<Bi> bi_list;
-    switch (this->status) {
-    case XianDuanChuLiStatus::START:
-        break;
-    case XianDuanChuLiStatus::LEFT:
-        bi_list.push_back(this->start);
-        break;
-    case XianDuanChuLiStatus::AFTER_LEFT:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        break;
-    case XianDuanChuLiStatus::MIDDLE_HIGHLOW:
-    case XianDuanChuLiStatus::MIDDLE_NORMAL:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        break;
-    case XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        break;
-    case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        break;
-    case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        break;
-    case XianDuanChuLiStatus::LONGXIANDUAN_FREE:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        break;
-    case XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        bi_list.push_back(this->after_right);
-        bi_list.push_back(this->free);
-        break;
-    case XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE_1:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        bi_list.push_back(this->after_right);
-        bi_list.push_back(this->free);
-        bi_list.push_back(this->after_free);
-        break;
-
-    case XianDuanChuLiStatus::AFTER_MIDDLE:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        break;
-    case XianDuanChuLiStatus::RIGHT:
-    case XianDuanChuLiStatus::RIGHT_NORMAL:
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL:
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        break;
-    case XianDuanChuLiStatus::AFTER_RIGHT:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        break;
-    case XianDuanChuLiStatus::FREE:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        bi_list.push_back(this->after_right);
-        break;
-    case XianDuanChuLiStatus::AFTER_FREE:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        bi_list.push_back(this->after_right);
-        bi_list.push_back(this->free);
-        break;
-
-    case XianDuanChuLiStatus::AFTER_FREE_1:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        bi_list.push_back(this->after_right);
-        bi_list.push_back(this->free);
-        bi_list.push_back(this->after_free);
-        break;
-
-    case XianDuanChuLiStatus::AFTER_FREE_2:
-        bi_list.push_back(this->start);
-        bi_list.push_back(this->left);
-        bi_list.push_back(this->after_left);
-        bi_list.push_back(this->middle);
-        bi_list.push_back(this->after_middle);
-        bi_list.push_back(this->right);
-        bi_list.push_back(this->after_right);
-        bi_list.push_back(this->free);
-        bi_list.push_back(this->after_free);
-        bi_list.push_back(this->after_free_1);
-        break;
-
-    }
-    return(bi_list);
-}
-
-FindXianDuanReturn XianDuanChuLi::set_xianduan(FindXianDuanReturnType type) {
-    FindXianDuanReturn ret_xd;
-    vector<Bi> xd_bi_list;
-
-    switch (type) {
-    case FindXianDuanReturnType::Two_Bi:
-        xd_bi_list.clear();
-        ret_xd.xd1 = XianDuan(this->start, this->start);
-        xd_bi_list.push_back(this->start);
-        ret_xd.xd1.set_kind(XianDuanKind::SigleBi);
-        ret_xd.xd1.save_bi_list(xd_bi_list);
-        ret_xd.xd2 = XianDuan(this->left, this->left);
-        xd_bi_list.clear();
-        xd_bi_list.push_back(this->left);
-        ret_xd.xd2.set_kind(XianDuanKind::SigleBi);
-        ret_xd.xd2.save_bi_list(xd_bi_list);
-        ret_xd.type = FindXianDuanReturnType::Two;
-        break;
-    case FindXianDuanReturnType::Two:
-        xd_bi_list.clear();
-        ret_xd.xd1 = XianDuan(this->start, this->after_left);
-        xd_bi_list.push_back(this->start);
-        xd_bi_list.push_back(this->left);
-        xd_bi_list.push_back(this->after_left);
-        ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-        ret_xd.xd1.save_bi_list(xd_bi_list);
-        ret_xd.xd2 = XianDuan(this->middle, this->right);
-        xd_bi_list.clear();
-        xd_bi_list.push_back(this->middle);
-        xd_bi_list.push_back(this->after_middle);
-        xd_bi_list.push_back(this->right);
-        ret_xd.xd2.set_kind(XianDuanKind::LONGXIANDUAN);
-        ret_xd.xd2.save_bi_list(xd_bi_list);
-        ret_xd.type = FindXianDuanReturnType::Two;
-        break;
-    case FindXianDuanReturnType::One:
-        ret_xd.xd1 = XianDuan(this->start, this->after_middle);
-        xd_bi_list.clear();
-        xd_bi_list.push_back(this->start);
-        xd_bi_list.push_back(this->left);
-        xd_bi_list.push_back(this->after_left);
-        xd_bi_list.push_back(this->middle);
-        xd_bi_list.push_back(this->after_middle);
-        ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-        ret_xd.xd1.save_bi_list(xd_bi_list);
-        ret_xd.type = FindXianDuanReturnType::One;
-        break;
-    }
-    return(ret_xd);
 }
 
 FindXianDuanReturn  XianDuanChuLi::find_xianduan(Bi bi) {
@@ -569,44 +337,12 @@ FindXianDuanReturn  XianDuanChuLi::find_xianduan(Bi bi) {
     case BiType::TEMP_DOWN:
     case BiType::TEMP_UP:
         break;
-    default:
-        this->__backroll(bi);
-    }
+   }
     ret_fd.type = FindXianDuanReturnType::None;
     return(ret_fd);
 }
 
-void XianDuanChuLi::__backroll(Bi bi) {
-    switch (this->status) {
-    case XianDuanChuLiStatus::START:
-        break;
-    case XianDuanChuLiStatus::LEFT:
-        this->status = XianDuanChuLiStatus::START;
-        break;
-    case XianDuanChuLiStatus::AFTER_LEFT:
-        this->status = XianDuanChuLiStatus::LEFT;
-        break;
-    case XianDuanChuLiStatus::MIDDLE_HIGHLOW:
-        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-        break;
-    case XianDuanChuLiStatus::MIDDLE_NORMAL:
-        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-    case XianDuanChuLiStatus::AFTER_MIDDLE:
-        //this->status = XianDuanChuLiStatus::MIDDLE;
-        break;
-    case XianDuanChuLiStatus::RIGHT:
-        this->status = XianDuanChuLiStatus::AFTER_MIDDLE;
-    case XianDuanChuLiStatus::AFTER_RIGHT:
-        // this->status = XianDuanChuLiStatus::RIGHT;
-        break;
-    case XianDuanChuLiStatus::FREE:
-        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-        break;
-    case XianDuanChuLiStatus::AFTER_FREE:
-        this->status = XianDuanChuLiStatus::FREE;
-        break;
-    }
-}
+
 
 void XianDuanChuLi::debug_xianduan(XianDuan xd) {
     XianDuanType xd_type = xd.get_type();
@@ -626,63 +362,6 @@ void XianDuanChuLi::debug_xianduan(XianDuan xd) {
     }
 }
 
-char* get_xianduan_status(XianDuanChuLiStatus status) {
-    switch (status) {
-    case XianDuanChuLiStatus::START:
-        return("START");
-    case XianDuanChuLiStatus::LEFT:
-        return("LEFT");
-    case XianDuanChuLiStatus::AFTER_LEFT:
-        return("AFTER_LEFT");
-    case XianDuanChuLiStatus::MIDDLE_HIGHLOW:
-        return("MIDDLE_HIGHLOW");
-    case XianDuanChuLiStatus::MIDDLE_NORMAL:
-        return("MIDDLE_NORMAL");
-    case XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE:
-        return("LEFT_INCLUDE_MIDDLE");
-    case XianDuanChuLiStatus::AFTER_MIDDLE:
-        return("AFTER_MIDDLE");
-    case XianDuanChuLiStatus::RIGHT:
-        return("RIGHT");
-    case XianDuanChuLiStatus::RIGHT_NORMAL:
-        return("RIGHT_NORMAL");
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL:
-        return("RIGHT_NORMAL_NORMAL");
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL:
-        return("RIGHT_NORMAL_NORMAL_NORMAL");
-    case XianDuanChuLiStatus::AFTER_RIGHT:
-        return("AFTER_RIGHT");
-    case XianDuanChuLiStatus::FREE:
-        return("FREE");
-    case XianDuanChuLiStatus::AFTER_FREE:
-        return("AFTER_FREE");
-    case XianDuanChuLiStatus::AFTER_FREE_1:
-        return("AFTER_FREE_1");
-    case XianDuanChuLiStatus::AFTER_FREE_2:
-        return("AFTER_FREE_2");
-    case XianDuanChuLiStatus::AFTER_FREE_3:
-        return("AFTER_FREE_3");
-    case XianDuanChuLiStatus::LONGXIANDUAN:
-        return("LONGXIANDUAN");
-    case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT:
-        return("LONGXIANDUAN_RIGHT");
-    case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL:
-        return("LONGXIANDUAN_AFTER_RIGHT");
-    case XianDuanChuLiStatus::LONGXIANDUAN_FREE:
-        return("LONGXIANDUAN_FREE");
-    case XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE:
-        return("LONGXIANDUAN_AFTER_FREE");
-    case XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE_1:
-        return("LONGXIANDUAN_AFTER_FREE_1");
-    case XianDuanChuLiStatus::A:
-        return("A");
-    case XianDuanChuLiStatus::B:
-        return("B");
-    default:
-        return("Not Process Item");
-    }
-}
-
 
 XianDuan XianDuanChuLi::get_last_xd(int num) {
     XianDuan ret_xd = XianDuan();
@@ -695,2868 +374,949 @@ XianDuan XianDuanChuLi::get_last_xd(int num) {
     return(ret_xd);
 }
 
-FindXianDuanReturn XianDuanChuLi::__enter_zhongshu(Bi input, Bi bi1, Bi bi2, Bi bi3, char type){
-    FindXianDuanReturn ret_xd = FindXianDuanReturn();
-    Bi_ZhongShu biZhongShu;
+vector<Bi> XianDuanChuLi::normal_process(Bi bi1, Bi bi2, Bi bi3){
+    vector<Bi> ret_bi_list;
+    Bi new_bi = Bi();
+    switch (bi3.get_type()) {
+    case BiType::UP:
+        if (bi3.get_high() > bi2.get_high()) {
+            new_bi = bi3.generate_bi(bi2, Bi(), bi3);
+            ret_bi_list.push_back(bi1);
+            ret_bi_list.push_back(new_bi);
+        }
+        break;
+    case BiType::DOWN:
+        if (bi3.get_low() < bi2.get_low()) {
+            new_bi = bi3.generate_bi(bi1, bi2, bi3);
+            ret_bi_list.push_back(new_bi);
+        }
+        break;
+    }
+    return(ret_bi_list);
+}
 
-    if (__is_zhongshu(bi1, bi2, bi3)){
-        if (input.get_type() == BiType::NONE) {
-            XianDuan last_xd = this->get_last_xd(-1);
-            if (last_xd.get_type() != XianDuanType::NONE) {
-                input = input.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
+vector<Bi> XianDuanChuLi::pre_zhongshu_process(Bi input, Bi bi1, Bi bi2, Bi bi3) {
+    vector<Bi> ret_bi_list;
+    Bi new_bi = Bi();
+    switch (bi3.get_type()) {
+        if (is_bi_equal(bi2, bi3)) {
+            ret_bi_list.push_back(input);
+            ret_bi_list.push_back(bi1);
+            ret_bi_list.push_back(bi2);
+            ret_bi_list.push_back(bi3);
+        }
+        else {
+            switch (bi3.get_type()) {
+            case BiType::UP:
+                if (bi3.get_high() > bi2.get_high()) {
+                    if (bi1.get_low() < bi3.get_low()) {
+                        ret_bi_list.push_back(input);
+                        new_bi = bi3.generate_bi(bi1, bi2, bi3);
+                        ret_bi_list.push_back(new_bi);
+                    }
+                    else {
+                        if (input.get_high() == 0) {
+                            ret_bi_list.push_back(bi3);
+                        }
+                        else {
+                            if (input.get_high() > bi1.get_high()) {
+                                new_bi = bi3.generate_bi(input, bi1, bi2);
+                                ret_bi_list.push_back(new_bi);
+                                ret_bi_list.push_back(bi3);
+                            }
+                            else {
+                                OutputDebugPrintf("pre_zhongshu_process 出现异常情况！");
+                            }
+                        }
+                    }
+                }
+                break;
+            case BiType::DOWN:
+                if (bi3.get_low() < bi2.get_low()) {
+                    if (bi1.get_high() > bi2.get_high()) {
+                        ret_bi_list.push_back(input);
+                        new_bi = bi3.generate_bi(bi1, bi2, bi3);
+                        ret_bi_list.push_back(new_bi);
+                    }
+                    else {
+                        if (input.get_low() == 0) {
+                            ret_bi_list.push_back(bi3);
+                        }
+                        else {
+                            if (input.get_low() < bi1.get_low()) {
+                                new_bi = bi3.generate_bi(input, bi1, bi2);
+                                ret_bi_list.push_back(new_bi);
+                                ret_bi_list.push_back(bi3);
+                            }
+                            else {
+                                OutputDebugPrintf("pre_zhongshu_process 出现异常情况！");
+                            }
+                        }
+                    }
+                }
+                break;
             }
         }
-        switch (type) {
-        case 'A':
-            this->A_zscl = Bi_ZhongShuChuLi(input, bi1, bi2, bi3);
-            ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::FindZhongShu;
-            this->status = XianDuanChuLiStatus::A;
+    }
+    return(ret_bi_list);
+}
+
+bool is_zhongshu_equal(ZhongShu zs, Bi bi) {
+    float zs_length = zs.get_high() - zs.get_low();
+    float radio;
+    if (zs_length >= bi.get_length())
+        radio = bi.get_length() / zs_length;
+    else
+        radio = zs_length / bi.get_length();
+    if (radio >= 0.618)
+        return(true);
+    else
+        return(false);
+}
+
+ FindZhongShuReturn XianDuanChuLi::zhongshu_process(ZhongShu zs, Bi bi) {
+     FindZhongShuReturn ret_zs;
+
+    if (!is_zhongshu_equal(zs, bi)) {
+        switch (bi.get_type()) {
+        case BiType::UP:
+            if (bi.get_high() <= zs.get_low()) {
+                //三卖
+                if (zs.get_input().get_type() == BiType::UP) {
+
+                }
+            }
             break;
-        case 'B':
-            this->B_zscl = Bi_ZhongShuChuLi(input, bi1, bi2, bi3);
-            ret_xd.zhongshu = this->B_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::FindZhongShu;
-            this->status = XianDuanChuLiStatus::B;
+        case BiType::DOWN:
+            if (bi.get_low() >= zs.get_high()) {
+                //三买
+                this->b_1 = this->last_bi;
+                this->b_2 = bi;
+                this->status = XianDuanChuLiStatus::b_3;
+            }
             break;
         }
-
+        this->last_bi = bi;
     }
-    return(ret_xd);
+    if (bi.get_high() > zs.get_max_high()) {
+        zs.set_max_bi(bi);
+    }
+    else {
+        if (bi.get_low() < zs.get_min_low()) {
+            zs.set_min_bi(bi);
+        }
+    }
 }
 
 FindXianDuanReturn XianDuanChuLi::__find_xianduan(Bi bi) {
     FindXianDuanReturn ret_xd;
-    FindBiZhongShuReturn ret_zhongshu;
     BiType bi_type = bi.get_type();
     float bi_high = bi.get_high();
     float bi_low = bi.get_low();
     float bi_length = bi.get_length();
     vector<Bi> xd_bi_list;
+    vector<Bi> normal_bi_list;
+    vector<Bi> pre_zhongshu_list;
     Bi input;
+    int count;
+    Bi tmp_bi;
+    XianDuan xd;
 
     if (bi_type == BiType::UP) {
-        OutputDebugPrintf("上升笔 %f %f %d %d %f %s ", bi.get_low(), bi.get_high(), bi.get_start_pos(), bi.get_stop_pos(), bi.get_length(), get_xianduan_status(this->status));
+        OutputDebugPrintf("上升笔 %f %f %d %d %f %s ", bi.get_low(), bi.get_high(), bi.get_start_pos(), bi.get_stop_pos(), bi.get_length(), this->status);
     }
     else {
-        OutputDebugPrintf("下降笔 %f %f %d %d %f %s ", bi.get_high(), bi.get_low(), bi.get_start_pos(), bi.get_stop_pos(), bi.get_length(), get_xianduan_status(this->status));
+        OutputDebugPrintf("下降笔 %f %f %d %d %f %s ", bi.get_high(), bi.get_low(), bi.get_start_pos(), bi.get_stop_pos(), bi.get_length(), this->status);
     }
 
     switch(this->status) {
-        case XianDuanChuLiStatus::START:
+        case XianDuanChuLiStatus::a_1:
             XianDuanType last_xd_type;
-            this->start = bi;
-            if (!this->key_xianduan_list.empty()) {
-                last_xd = this->key_xianduan_list.back();
-                last_xd_type = last_xd.get_type();
-                if ((last_xd_type == XianDuanType::DOWN && bi_type == BiType::UP && last_xd.get_high() < bi_high) ||
-                    (last_xd_type == XianDuanType::UP && bi_type == BiType::DOWN && last_xd.get_low() > bi_low)) {
-                    this->start = bi.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
-                    this->left = bi;
-                    return(this->failure_xd());
-                }
-            }
-            this->status = XianDuanChuLiStatus::LEFT;
+            this->a_1 = bi;
+            this->status = XianDuanChuLiStatus::a_2;
             break;
 
-        case XianDuanChuLiStatus::LEFT:
-            this->left = bi;
-            if (is_bi_equal(this->start.get_length(), bi_length)) {
-                this->status = XianDuanChuLiStatus::LEFT_EQUAL;
+        case XianDuanChuLiStatus::a_2:
+            if (is_bi_equal(this->a_1, bi)) {
+                this->a_2 = bi;
+                this->status = XianDuanChuLiStatus::a1_equal_a2;
             }
             else {
-                if ((bi_type == BiType::UP && bi_high > this->start.get_high()) || (bi_type == BiType::DOWN && bi_low < this->start.get_low())) {
-                    return(this->failure_xd());
+                switch (bi_type) {
+                case BiType::UP:
+                    if (bi_high > this->a_1.get_high()) {
+                        return(this->failure_xd(this->a_1, bi));
+                    }
+                    else {
+                        this->a_2 = bi;
+                        this->status = XianDuanChuLiStatus::a_3;
+                    }
+                    break;
+                case BiType::DOWN:
+                    if (bi_low < this->a_1.get_low()) {
+                        return(this->failure_xd(this->a_1, bi));
+                    }
+                    else {
+                        this->a_2 = bi;
+                        this->status = XianDuanChuLiStatus::a_3;
+                    }
+                    break;
                 }
-                else
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
             }
             break;
 
-        case XianDuanChuLiStatus::LEFT_EQUAL:
-            if (is_bi_equal(this->left.get_length(), bi_length)) {
-                this->after_left = bi;
-                this->__enter_zhongshu(Bi(), this->start, this->left, this->after_left, 'A');
+        case XianDuanChuLiStatus::a1_equal_a2:
+            pre_zhongshu_list = this->pre_zhongshu_process(Bi(), this->a_1, this->a_2, bi);
+            count = pre_zhongshu_list.size();
+            switch (count) {
+            case 4:
+                this->A = ZhongShu(pre_zhongshu_list[0], pre_zhongshu_list[1], pre_zhongshu_list[2], pre_zhongshu_list[3], Bi());
                 this->status = XianDuanChuLiStatus::A;
-            }
-            else {
-                switch (bi_type) {
-                case BiType::UP:
-                    if (bi_high > this->start.get_high()) {
-                        this->start = bi.generate_bi(this->start, this->left, bi);
-                        this->status = XianDuanChuLiStatus::LEFT;
-                    }
-                    else {
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::LEFT_EQUAL_NORMAL;
-                    }
-                    break;
-                case BiType::DOWN:
-                    if (bi_low < this->start.get_low()) {
-                        this->start = bi.generate_bi(this->start, this->left, bi);
-                        this->status = XianDuanChuLiStatus::LEFT;
-                    }
-                    else {
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::LEFT_EQUAL_NORMAL;
-                    }
-                    break;
+                break;
+            case 2:
+                tmp_bi = pre_zhongshu_list[0];
+                if (tmp_bi.get_high() == 0) {
+                    this->a_1 = pre_zhongshu_list[1];
+                    this->status = XianDuanChuLiStatus::a_2;
                 }
-            }
-            break;
-
-        case XianDuanChuLiStatus::LEFT_EQUAL_NORMAL:
-            OutputDebugPrintf("LEFT_EQUAL_NORMAL 未处理"); 
-            break;
-
-        case XianDuanChuLiStatus::AFTER_LEFT:
-            this->after_left = bi;
-            switch (bi_type) {
-                case BiType::UP:
-                    if (bi_high > this->start.get_high()){
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    } else {
-                        this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                    }
-                    break;
-                case BiType::DOWN:
-                    if (bi_low < this->start.get_low()){
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    } else {
-                        this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                    }
-                    break;
-            }
-            break;
-        
-        case XianDuanChuLiStatus::MIDDLE_HIGHLOW:
-            ret_xd = this->__enter_zhongshu(this->start, this->left, this->after_left, bi, 'A');
-            if (ret_xd.type == FindXianDuanReturnType::None){
-                switch (bi_type) {
+                else {
+                    this->a_1 = tmp_bi;
+                    this->a_2 = pre_zhongshu_list[2];
+                    switch (this->a_2.get_type()) {
                     case BiType::UP:
-                        if (bi_high > this->start.get_high()) {
-                            ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                            xd_bi_list = ret_xd.xd1.get_bi_list();
-                            xd_bi_list.push_back(this->start);
-                            xd_bi_list.push_back(this->left);
-                            xd_bi_list.push_back(this->after_left);
-                            ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-                            ret_xd.type = FindXianDuanReturnType::One;
-                            this->start = bi;
-                            this->status = XianDuanChuLiStatus::LEFT;
-                        } else {
-                            if (bi_high < this->start.get_low()) {
-                                this->middle = bi;
-                                this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                            } else {
-                                this->__middle_process(bi);
-                            }
+                        if (this->a_2.get_high() > this->a_1.get_high()) {
+                            return(this->failure_xd(this->a_1, this->a_2));
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::a_3;
                         }
                         break;
-
                     case BiType::DOWN:
-                        if (bi_low < this->start.get_low()) {
-                            ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                            xd_bi_list = ret_xd.xd1.get_bi_list();
-                            xd_bi_list.push_back(this->start);
-                            xd_bi_list.push_back(this->left);
-                            xd_bi_list.push_back(this->after_left);
-                            ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-                            ret_xd.type = FindXianDuanReturnType::One;
-                            this->start = bi;
-                            this->status = XianDuanChuLiStatus::LEFT;
-                        } else {
-                            if (bi_low > this->start.get_high()) {
-                                this->middle = bi;
-                                this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                            } else {
-                                this->__middle_process(bi);
-                            }
+                        if (this->a_2.get_low() < this->a_1.get_low()) {
+                            return(this->failure_xd(this->a_1, this->a_2));
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::a_3;
                         }
                         break;
-                }
-            }
-            break;
-
-        case XianDuanChuLiStatus::MIDDLE_NORMAL:
-            ret_xd = this->__enter_zhongshu(this->start, this->left, this->after_left, bi, 'A');
-            if (ret_xd.type == FindXianDuanReturnType::None) {
-                switch (bi_type) {
-                case BiType::UP:
-                    if (bi.get_high() > this->start.get_high()) {
-                        //创新高
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                        return(this->failure_xd());
                     }
-                    if (bi.get_high() <= this->left.get_high()) {
-                        //left 包含middle
-                        this->middle = bi;
-                        this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
-                    }
-                    else {
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                    }
-                    break;
-                case BiType::DOWN:
-                    if (bi.get_low() < this->start.get_low()) {
-                        //创新低
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                        return(this->failure_xd());
-                    }
-                    if (bi.get_low() >= this->left.get_low()) {
-                        //left 包含middle
-                        this->middle = bi;
-                        this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
-                    }
-                    else {
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                    }
-                    break;
-                }
-            }
-            break;
-
-        case XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE:
-            switch (bi.get_type()) {
-            case BiType::UP:
-                switch (this->start.get_type()) {
-                case BiType::UP:
-                    if (bi.get_high() > this->start.get_high()) {
-                        this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    }
-                    else {
-                        if (bi.get_high() > this->after_left.get_high()) {
-                            this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                            this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                        }
-                    }
-                    break;
-                case BiType::DOWN:
-                    if (bi.get_high() > this->start.get_high()) {
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                        return(this->failure_xd());
-                    }
-                    else {
-                        if (bi.get_high() > this->after_left.get_high()) {
-                            this->after_left = bi.generate_bi(this->after_left, bi, bi);
-                            this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                        }
-                    }
-                    break;
                 }
                 break;
+            case 1:
+                this->a_1 = pre_zhongshu_list[0];
+                this->status = XianDuanChuLiStatus::a_2;
+                break;
+            }
+            break;
 
-            case BiType::DOWN:
-                switch (this->start.get_type()) {
+        case XianDuanChuLiStatus::a2_equal_a3:
+            pre_zhongshu_list = this->pre_zhongshu_process(Bi(), this->a_1, this->a_2, bi);
+            count = pre_zhongshu_list.size();
+            switch (count) {
+            case 4:
+                this->A = ZhongShu(pre_zhongshu_list[0], pre_zhongshu_list[1], pre_zhongshu_list[2], pre_zhongshu_list[3], Bi());
+                this->status = XianDuanChuLiStatus::A;
+                break;
+            case 2:
+                tmp_bi = pre_zhongshu_list[0];
+                if (tmp_bi.get_high() == 0) {
+                    this->a_1 = pre_zhongshu_list[1];
+                    this->status = XianDuanChuLiStatus::a_2;
+                }
+                else {
+                    this->a_1 = tmp_bi;
+                    this->a_2 = pre_zhongshu_list[2];
+                    switch (this->a_2.get_type()) {
+                    case BiType::UP:
+                        if (this->a_2.get_high() > this->a_1.get_high()) {
+                            return(this->failure_xd(this->a_1, this->a_2));
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::a_3;
+                        }
+                        break;
+                    case BiType::DOWN:
+                        if (this->a_2.get_low() < this->a_1.get_low()) {
+                            return(this->failure_xd(this->a_1, this->a_2));
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::a_3;
+                        }
+                        break;
+                    }
+                }
+                break;
+            case 1:
+                this->a_1 = pre_zhongshu_list[0];
+                this->status = XianDuanChuLiStatus::a_2;
+                break;
+            }
+            break;
+
+        case XianDuanChuLiStatus::a_3:
+            this->a_3 = bi;
+            if (is_bi_equal(this->a_2, bi)) {
+                this->status = XianDuanChuLiStatus::a2_equal_a3;
+            }
+            else {
+                switch (bi_type) {
                 case BiType::UP:
-                    if (bi.get_low() < this->start.get_low()) {
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                        return(this->failure_xd());
+                    if (bi_high > this->a_1.get_high())
+                        this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                    else
+                        this->status = XianDuanChuLiStatus::a3_normal_a1;
+                    break;
+                case BiType::DOWN:
+                    if (bi_low < this->a_1.get_low())
+                        this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                    else
+                        this->status = XianDuanChuLiStatus::a3_normal_a1;
+                    break;
+                }
+            }
+            break;
+
+        case XianDuanChuLiStatus::a3_highlow_a1:
+            switch (bi_type) {
+            case BiType::UP:
+                if (bi_high < this->a_1.get_low()) {
+                    this->a_4 = bi;
+                    this->status = XianDuanChuLiStatus::longxianduan;
+                }
+                else {
+                    this->a_1 = bi.generate_bi(this->a_1, this->a_2, this->a_3);
+                    if (is_bi_equal(this->a_1, bi)) {
+                        this->a_2 = bi;
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
                     }
                     else {
-                        if (bi.get_low() < this->left.get_low()) {
-                            this->after_left = bi.generate_bi(this->left, this->after_left, bi);
-                            this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
+                        if (bi.get_high() > this->a_1.get_high()) {
+                            return(this->failure_xd(this->a_1, bi));
                         }
+                        else {
+                            this->a_2 = bi;
+                            this->status = XianDuanChuLiStatus::a_3;
+                        }
+                    }
+                }
+                break;
+            case BiType::DOWN:
+                if (bi_low > this->a_1.get_high()) {
+                    this->a_4 = bi;
+                    this->status = XianDuanChuLiStatus::longxianduan;
+                }
+                else {
+                    this->a_1 = bi.generate_bi(this->a_1, this->a_2, this->a_3);
+                    if (is_bi_equal(this->a_1, bi)) {
+                        this->a_2 = bi;
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
+                    else {
+                        if (bi.get_low() < this->a_1.get_low()) {
+                            return(this->failure_xd(this->a_1, bi));
+                        }
+                        else {
+                            this->a_2 = bi;
+                            this->status = XianDuanChuLiStatus::a_3;
+                        }
+                    }
+                }
+                break;
+            }
+            break;
+
+        case XianDuanChuLiStatus::a3_normal_a1:
+            switch (bi_type) {
+            case BiType::UP:
+                if (bi_high > this->a_2.get_high()) {
+                    this->a_2 = bi.generate_bi(this->a_2, this->a_3, bi);
+                    if (is_bi_equal(this->a_1, this->a_2)) {
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
+                    else {
+                        if (this->a_2.get_high() > this->a_1.get_high()) {
+                            return(this->failure_xd(this->a_1, this->a_2));
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::a_2;
+                        }
+                    }
+                }
+                else {
+                    normal_bi_list = this->normal_process(this->a_2, this->a_3, bi);
+                    count = normal_bi_list.size();
+                    switch (count) {
+                    case 2:
+                        this->a_2 = normal_bi_list[0];
+                        this->a_3 = normal_bi_list[1];
+                        if (is_bi_equal(this->a_2, this->a_3)) {
+                            this->status = XianDuanChuLiStatus::a2_equal_a3;
+                        }
+                        else {
+                            switch (this->a_3.get_type()) {
+                            case BiType::UP:
+                                if (this->a_3.get_high() > this->a_1.get_high()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            case BiType::DOWN:
+                                if (this->a_3.get_low() < this->a_1.get_low()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    case 1:
+                        this->a_2 = normal_bi_list[0];
+                        switch (this->a_2.get_type()) {
+                        case BiType::UP:
+                            if (this->a_2.get_high() > this->a_1.get_high()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        case BiType::DOWN:
+                            if (this->a_2.get_low() < this->a_1.get_low()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                break;
+            case BiType::DOWN:
+                if (bi_low < this->a_2.get_low()) {
+                    this->a_2 = bi.generate_bi(this->a_2, this->a_3, bi);
+                    if (is_bi_equal(this->a_1, this->a_2)) {
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
+                    else {
+                        if (bi.get_low() < this->a_1.get_low()) {
+                            return(this->failure_xd(this->a_1, this->a_2));
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::a_2;
+                        }
+                    }
+                }
+                else {
+                    normal_bi_list = this->normal_process(this->a_2, this->a_3, bi);
+                    count = normal_bi_list.size();
+                    switch (count) {
+                    case 2:
+                        this->a_2 = normal_bi_list[0];
+                        this->a_3 = normal_bi_list[1];
+                        if (is_bi_equal(this->a_2, this->a_3)) {
+                            this->status = XianDuanChuLiStatus::a2_equal_a3;
+                        }
+                        else {
+                            switch (this->a_3.get_type()) {
+                            case BiType::UP:
+                                if (this->a_3.get_high() > this->a_1.get_high()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            case BiType::DOWN:
+                                if (this->a_3.get_low() < this->a_1.get_low()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    case 1:
+                        this->a_2 = normal_bi_list[0];
+                        switch (this->a_2.get_type()) {
+                        case BiType::UP:
+                            if (this->a_2.get_high() > this->a_1.get_high()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        case BiType::DOWN:
+                            if (this->a_2.get_low() < this->a_1.get_low()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                break;
+            }
+            break;
+
+        case XianDuanChuLiStatus::longxianduan:
+            if (is_bi_equal(this->a_4, bi)) {
+                this->a_1 = bi.generate_bi(this->a_1, this->a_2, this->a_3);
+                this->a_2 = this->a_4;
+                this->a_3 = bi;
+                this->status = XianDuanChuLiStatus::a2_equal_a3;
+            }
+            else {
+                switch (bi_type) {
+                case BiType::UP:
+                    if (bi_high > this->a_3.get_high()) {
+                        //长线段处理
+                        last_xd = XianDuan(this->a_1, bi);
+                        last_xd.set_kind(XianDuanKind::LONGXIANDUAN);
+                        ret_xd.type = FindXianDuanReturnType::One;
+                        ret_xd.xd1 = last_xd;
+                        this->status = XianDuanChuLiStatus::a_1;
+                    }
+                    else {
+                        this->a_5 = bi;
+                        this->status = XianDuanChuLiStatus::longxianduan_normal;
                     }
                     break;
                 case BiType::DOWN:
-                    if (bi.get_low() < this->start.get_low()) {
-                        this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
+                    if (bi_low < this->a_3.get_low()) {
+                        //长线段处理
+                        last_xd = XianDuan(this->a_1, bi);
+                        last_xd.set_kind(XianDuanKind::LONGXIANDUAN);
+                        ret_xd.type = FindXianDuanReturnType::One;
+                        ret_xd.xd1 = last_xd;
+                        this->status = XianDuanChuLiStatus::a_1;
                     }
                     else {
-                        if (bi.get_low() < this->after_left.get_low()) {
-                            this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                            this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                        }
+                        this->a_5 = bi;
+                        this->status = XianDuanChuLiStatus::longxianduan_normal;
                     }
                     break;
+                }
+            }
+            break;
+
+        case XianDuanChuLiStatus::longxianduan_normal:
+            this->a_1 = bi.generate_bi(this->a_1, this->a_2, this->a_3);
+            switch (bi_type) {
+            case BiType::UP:
+                if (bi_high > this->a_4.get_high()) {
+                    tmp_bi = bi.generate_bi(this->a_4, this->a_5, bi);
+                    if (is_bi_equal(this->a_1, tmp_bi)) {
+                        this->a_2 = tmp_bi;
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
+                    else {
+                        if (tmp_bi.get_high() > this->a_1.get_high()) {
+                            return(this->failure_xd(this->a_1, tmp_bi));
+                        }
+                        else {
+                            this->a_2 = tmp_bi;
+                            this->status = XianDuanChuLiStatus::a_3;
+                        }
+                    }
+                }
+                else {
+                    normal_bi_list = this->normal_process(this->a_4, this->a_5, bi);
+                    this->a_1 = bi.generate_bi(this->a_1, this->a_2, this->a_3);
+                    count = normal_bi_list.size();
+                    switch (count) {
+                    case 2:
+                        this->a_2 = normal_bi_list[0];
+                        this->a_3 = normal_bi_list[1];
+                        if (is_bi_equal(this->a_2, this->a_3)) {
+                            this->status = XianDuanChuLiStatus::a2_equal_a3;
+                        }
+                        else {
+                            switch (this->a_3.get_type()) {
+                            case BiType::UP:
+                                if (this->a_3.get_high() > this->a_1.get_high()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            case BiType::DOWN:
+                                if (this->a_3.get_low() < this->a_1.get_low()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    case 1:
+                        this->a_2 = normal_bi_list[0];
+                        switch (this->a_2.get_type()) {
+                        case BiType::UP:
+                            if (this->a_2.get_high() > this->a_1.get_high()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        case BiType::DOWN:
+                            if (this->a_2.get_low() < this->a_1.get_low()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        }
+                    }
+
+                }
+                break;
+            case BiType::DOWN:
+                if (bi_low < this->a_4.get_low()) {
+                    tmp_bi = bi.generate_bi(this->a_4, this->a_5, bi);
+                    if (is_bi_equal(this->a_1, tmp_bi)) {
+                        this->a_2 = tmp_bi;
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
+                    else {
+                        if (tmp_bi.get_low() < this->a_1.get_low()) {
+                            return(this->failure_xd(this->a_1, tmp_bi));
+                        }
+                        else {
+                            this->a_2 = tmp_bi;
+                            this->status = XianDuanChuLiStatus::a_3;
+                        }
+                    }
+                }
+                else {
+                    normal_bi_list =this->normal_process(this->a_4, this->a_5, bi);
+                    this->a_1 = bi.generate_bi(this->a_1, this->a_2, this->a_3);
+                    count = normal_bi_list.size();
+                    switch (count) {
+                    case 2:
+                        this->a_2 = normal_bi_list[0];
+                        this->a_3 = normal_bi_list[1];
+                        if (is_bi_equal(this->a_2, this->a_3)) {
+                            this->status = XianDuanChuLiStatus::a2_equal_a3;
+                        }
+                        else {
+                            switch (this->a_3.get_type()) {
+                            case BiType::UP:
+                                if (this->a_3.get_high() > this->a_1.get_high()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            case BiType::DOWN:
+                                if (this->a_3.get_low() < this->a_1.get_low()) {
+                                    this->status = XianDuanChuLiStatus::a3_highlow_a1;
+                                }
+                                else {
+                                    this->status = XianDuanChuLiStatus::a3_normal_a1;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    case 1:
+                        this->a_2 = normal_bi_list[0];
+                        switch (this->a_2.get_type()) {
+                        case BiType::UP:
+                            if (this->a_2.get_high() > this->a_1.get_high()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        case BiType::DOWN:
+                            if (this->a_2.get_low() < this->a_1.get_low()) {
+                                return(this->failure_xd(this->a_1, this->a_2));
+                            }
+                            else {
+                                this->status = XianDuanChuLiStatus::a_2;
+                            }
+                            break;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
                 }
                 break;
             }
             break;
 
         case XianDuanChuLiStatus::A:
-            ret_zhongshu = this->A_zscl.find_Bi_ZhongShu(bi);
-            switch (ret_zhongshu.type) {
-            case FindBiZhongShuReturnType::THREE_BUY:
-                this->a = ret_zhongshu.bi_zhongshu.get_input();
-                this->b_1 = ret_zhongshu.bi_zhongshu.get_output();
-                this->A_zscl.get_Bi_ZhongShu().stop(this->b_1);
-                this->b_2 = bi;
-                ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-                this->status = XianDuanChuLiStatus::b_3;
-                break;
-            case FindBiZhongShuReturnType::THREE_SELL:
-                this->a = ret_zhongshu.bi_zhongshu.get_input();
-                this->b_1 = ret_zhongshu.bi_zhongshu.get_output();
-                this->b_2 = bi;
-                ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-                this->status = XianDuanChuLiStatus::b_3;
-                break;
-            case FindBiZhongShuReturnType::ZhongShuSuccess:
-                this->a = ret_zhongshu.bi_zhongshu.get_input();
-                this->b = bi;
-                if (this->a.get_type() != this->b.get_type()) {
-                    if (this->a.get_type() == BiType::UP) {
-                        Bi max_bi = ret_zhongshu.bi_zhongshu.get_max_bi();
-                        ret_xd.xd1 = XianDuan(this->a, max_bi);
-                        ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-                        Bi max_next_bi = ret_zhongshu.bi_zhongshu.find_next_bi(max_bi);
-                        ret_xd.xd2 = XianDuan(max_next_bi, this->b);
-                        ret_xd.type = FindXianDuanReturnType::Two;
-                    }
-                    else {
-                        Bi min_bi = ret_zhongshu.bi_zhongshu.get_min_bi();
-                        ret_xd.xd1 = XianDuan(this->a, min_bi);
-                        ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                        Bi min_next_bi = ret_zhongshu.bi_zhongshu.find_next_bi(min_bi);
-                        ret_xd.xd2 = XianDuan(min_next_bi, this->b);
-                        ret_xd.xd2.set_kind(XianDuanKind::ThreeBi);
-                        ret_xd.type = FindXianDuanReturnType::Two;
-                    }
-                    if (!this->zhongshu_list.empty()) {
-                        this->zhongshu_list.pop_back();
-                    }
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    ret_xd.xd1 = XianDuan(this->a, this->b);
-                    ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                    last_bi = this->b;
-                    if (!this->zhongshu_list.empty()) {
-                        this->zhongshu_list.pop_back();
-                        this->zhongshu_list.push_back(this->A_zscl.get_Bi_ZhongShu());
-                    }
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                break;
-            case FindBiZhongShuReturnType::ZhongShuFailer:
-                this->a = ret_zhongshu.bi_zhongshu.get_input();
-                this->b = ret_zhongshu.bi_zhongshu.get_output();
-                ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-                this->start = bi;
-                last_bi = bi;
-                this->status = XianDuanChuLiStatus::LEFT;
-                break;
-            case FindBiZhongShuReturnType::ZHONSHU_UPGRADE:
-                ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuUpgrade;
-                this->status = XianDuanChuLiStatus::START;
-                break;
-            default:
-                if (!this->zhongshu_list.empty()) {
-                    this->zhongshu_list.pop_back();
-                    this->zhongshu_list.push_back(this->A_zscl.get_Bi_ZhongShu());
-                }
-                break;
-            }
+            this->zhongshu_process(this->A, bi);
             break;
 
         case XianDuanChuLiStatus::b_3:
-            switch (bi.get_type()) {
-            case BiType::UP:
-                if (bi.get_high() > this->b_1.get_high()) {
-                    this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                    if (this->b.get_length() > this->a.get_length())
-                        this->status = XianDuanChuLiStatus::B_b1;
-                    else {
-                        ret_xd.xd1 = XianDuan(this->a, this->b);
-                        ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                        ret_xd.xd1.get_bi_list().push_back(this->a);
-                        ret_xd.xd1.get_bi_list().push_back(this->b);
-                        ret_xd.type = FindXianDuanReturnType::One;
-                        this->status = XianDuanChuLiStatus::START;
+            if (is_bi_equal(this->b_2, bi)) {
+                this->b_3 = bi;
+                this->status = XianDuanChuLiStatus::b2_equal_b3;
+            }
+            else {
+                switch (bi_type) {
+                case BiType::UP:
+                    if (bi_high > this->b_1.get_high()) {
+                        this->b = bi.generate_bi(this->b_1, this->b_2, bi);
+                        this->A.set_output(this->b);
+                        this->status = XianDuanChuLiStatus::b;
                     }
-                }
-                else {
-                    this->b_3 = bi;
-                    this->status = XianDuanChuLiStatus::b_3_normal;
-                }
-                break;
+                    else {
+                        this->b_3 = bi;
+                        this->status = XianDuanChuLiStatus::b_3_normal;
 
-            case BiType::DOWN:
-                if (bi.get_low() < this->b_1.get_low()) {
-                    this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                    if (this->b.get_length() > this->a.get_length())
-                        this->status = XianDuanChuLiStatus::B_b1;
-                    else {
-                        ret_xd.xd1 = XianDuan(this->a, this->b);
-                        ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                        ret_xd.xd1.get_bi_list().push_back(this->a);
-                        ret_xd.xd1.get_bi_list().push_back(this->b);
-                        ret_xd.type = FindXianDuanReturnType::One;
-                        this->status = XianDuanChuLiStatus::START;
                     }
+                    break;
+                case BiType::DOWN:
+                    if (bi_low < this->b_1.get_low()) {
+                        //中枢完成
+                        this->b = bi.generate_bi(this->b_1, this->b_2, bi);
+                        this->A.set_output(this->b);
+                        this->status = XianDuanChuLiStatus::b;
+                    }
+                    else {
+                        this->b_3 = bi;
+                        this->status = XianDuanChuLiStatus::b_3_normal;
+                    }
+                    break;
                 }
-                else {
-                    this->b_3 = bi;
-                    this->status = XianDuanChuLiStatus::b_3_normal;
-                }
-                break;
             }
             break;
 
         case XianDuanChuLiStatus::b_3_normal:
-            switch (bi.get_type()) {
-            case BiType::UP:
-                if (this->b_2.get_type() == BiType::UP) {
-                    if (bi.get_high() > this->b_2.get_high()) {
-                        if (bi.get_high() < this->A_zscl.get_Bi_ZhongShu().get_low()) {
-                            this->b_2 = bi.generate_bi(this->b_2, this->b_3, bi);
-                            this->status = XianDuanChuLiStatus::b_3;
-                        }
-                        else {
-                            this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                            ret_xd.xd1 = XianDuan(this->a, this->b);
-                            ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                            ret_xd.xd1.get_bi_list().push_back(this->a);
-                            ret_xd.xd1.get_bi_list().push_back(this->b);
-                            ret_xd.type = FindXianDuanReturnType::One;
-                            this->start = this->b_2;
-                            this->left = this->b_3;
-                            this->after_left = bi;
-                            this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                        }
-                    }
+            normal_bi_list = this->normal_process(this->b_2, this->b_3, bi);
+            count = normal_bi_list.size();
+            switch (count) {
+            case 2:
+                this->b = this->b_1;
+                this->b_2 = normal_bi_list[0];
+                this->b_3 = normal_bi_list[1];
+                if (is_bi_equal(this->b_2, this->b_3)) {
+                    this->status = XianDuanChuLiStatus::b2_equal_b3;
                 }
                 else {
-                    //b_2是下降笔
-                    if (bi.get_high() > this->b_2.get_high()) {
-                        this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                        this->status = XianDuanChuLiStatus::B_b1;
-                    }
-                    else {
-                        if (bi.get_high() > this->b_3.get_high()) {
-                            this->b_3 = bi.generate_bi(this->b_3, bi, bi);
+                    switch (this->b_3.get_type()) {
+                    case BiType::UP:
+                        if (this->b_3.get_high() > this->b.get_high()) {
+                            this->b = bi.generate_bi(this->b, this->b_2, this->b_3);
+                            this->status = XianDuanChuLiStatus::b;
+                        }
+                        else {
                             this->status = XianDuanChuLiStatus::b_3_normal;
                         }
+                        break;
+                    case BiType::DOWN:
+                        if (this->b_3.get_low() < this->b.get_low()) {
+                            this->b = bi.generate_bi(this->b, this->b_2, this->b_3);
+                            this->status = XianDuanChuLiStatus::b;
+                        }
+                        else {
+                            this->status = XianDuanChuLiStatus::b_3_normal;
+                        }
+                        break;
                     }
                 }
                 break;
-            case BiType::DOWN:
-                if (this->b_2.get_type() == BiType::DOWN) {
-                    if (bi.get_low() < this->b_2.get_low()) {
-                        if (bi.get_low() > this->A_zscl.get_Bi_ZhongShu().get_high()) {
-                            this->b_2 = bi.generate_bi(this->b_2, this->b_3, bi);
+            case 1:
+                this->b_2 = normal_bi_list[0];
+                switch (this->b_2.get_type()) {
+                case BiType::UP:
+                    tmp_bi = bi.generate_bi(this->a_1, this->a_2, this->b);
+                    if (is_bi_equal(tmp_bi, this->b_2)) {
+                        this->a_1 = tmp_bi;
+                        this->a_2 = this->b_2;
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
+                    else {
+                        if (this->b_2.get_high() < this->A.get_low()) {
+                            this->b_1 = this->b;
                             this->status = XianDuanChuLiStatus::b_3;
                         }
                         else {
-                            this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                            ret_xd.xd1 = XianDuan(this->a, this->b);
-                            ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                            ret_xd.xd1.get_bi_list().push_back(this->a);
-                            ret_xd.xd1.get_bi_list().push_back(this->b);
+                            last_xd = XianDuan(this->a_1, this->b);
+                            last_xd.set_kind(XianDuanKind::PANZHENG);
+                            ret_xd.xd1 = last_xd;
                             ret_xd.type = FindXianDuanReturnType::One;
-                            this->start = this->b_2;
-                            this->left = this->b_3;
-                            this->after_left = bi;
-                            this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
+                            this->a_1 = this->b_2;
+                            this->status = XianDuanChuLiStatus::a_2;
                         }
                     }
+                    break;
+                case BiType::DOWN:
+                    tmp_bi = bi.generate_bi(this->a_1, this->b_2, this->b);
+                    if (is_bi_equal(tmp_bi, this->b_2)) {
+                        this->a_1 = tmp_bi;
+                        this->a_2 = this->b_2;
+                        this->status = XianDuanChuLiStatus::a1_equal_a2;
+                    }
                     else {
-                        //b_2 是上升笔
-                        if (bi.get_low() < this->b_2.get_low()) {
-                            this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                            this->status = XianDuanChuLiStatus::B_b1;
+                        if (this->b_2.get_low() > this->A.get_high()) {
+                            this->b_1 = this->b;
+                            this->status = XianDuanChuLiStatus::b_3;
                         }
                         else {
-                            if (bi.get_low() < this->b_3.get_low()) {
-                                this->b_3 = bi.generate_bi(this->b_3, bi, bi);
-                                this->status = XianDuanChuLiStatus::b_3_normal;
-                            }
+                            last_xd = XianDuan(this->a_1, this->b);
+                            last_xd.set_kind(XianDuanKind::PANZHENG);
+                            ret_xd.xd1 = last_xd;
+                            ret_xd.type = FindXianDuanReturnType::One;
+                            this->a_1 = this->b_2;
+                            this->status = XianDuanChuLiStatus::a_2;
                         }
                     }
+                    break;
                 }
                 break;
             }
             break;
 
-        case XianDuanChuLiStatus::B_b1:
+        case XianDuanChuLiStatus::b:
             switch (bi_type) {
             case BiType::UP:
-                if (bi_high < this->A_zscl.get_Bi_ZhongShu().get_low()) {
-                    this->B_b1 = bi;
-                    this->status = XianDuanChuLiStatus::B_b2;
+                tmp_bi = bi.generate_bi(this->a_1, this->a_2, bi);
+                if (is_bi_equal(tmp_bi, bi)) {
+                    this->a_1 = tmp_bi;
+                    this->a_2 = bi;
+                    this->status = XianDuanChuLiStatus::a1_equal_a2;
                 }
                 else {
-                    this->start = bi;
-                    this->status = XianDuanChuLiStatus::LEFT;
-                }
-                break;
-            case BiType::DOWN:
-                if (bi_low > this->A_zscl.get_Bi_ZhongShu().get_high()) {
-                    this->B_b1 = bi;
-                    this->status = XianDuanChuLiStatus::B_b2;
-                }
-                else {
-                    this->start = bi;
-                    this->status = XianDuanChuLiStatus::LEFT;
-                }
-                break;
-            }
-            break;
-
-        case XianDuanChuLiStatus::B_b2:
-            switch (bi_type) {
-            case BiType::UP:
-                if (bi_high > this->B_b1.get_high()) {
-                    this->b = bi.generate_bi(this->b, this->B_b1, bi);
-                    this->status = XianDuanChuLiStatus::B_b1;
-                }
-                else {
-                    this->B_b2 = bi;
-                    this->status = XianDuanChuLiStatus::B_b3;
-                }
-                break;
-            case BiType::DOWN:
-                if (bi_low < this->B_b1.get_low()) {
-                    this->b = bi.generate_bi(this->b, this->B_b1, bi);
-                    this->status = XianDuanChuLiStatus::B_b1;
-                }
-                else {
-                    this->B_b2 = bi;
-                    this->status = XianDuanChuLiStatus::B_b3;
-                }
-                break;
-            }
-            break;
-
-        case XianDuanChuLiStatus::B_b3:
-            switch (bi_type) {
-            case BiType::UP:
-                if (bi_high > this->A_zscl.get_Bi_ZhongShu().get_low()) {
-                    this->start = bi.generate_bi(this->B_b1, this->B_b2, bi);
-                    this->status = XianDuanChuLiStatus::LEFT;
-                }
-                else {
-                    ret_xd = this->__enter_zhongshu(this->b, this->B_b1, this->B_b2, bi, 'B');
-                    if (ret_xd.type == FindXianDuanReturnType::FindZhongShu) {
-                        return(ret_xd);
+                    if (bi_high < this->A.get_low()) {
+                        this->b_2 = bi;
+                        this->status = XianDuanChuLiStatus::b_3;
                     }
                     else {
-                        this->B_b3 = bi;
-                        this->status = XianDuanChuLiStatus::B_b4;
+                        last_xd = XianDuan(this->a_1, this->b);
+                        last_xd.set_kind(XianDuanKind::PANZHENG);
+                        ret_xd.xd1 = last_xd;
+                        ret_xd.type = FindXianDuanReturnType::One;
+                        this->a_1 = this->b_2;
+                        this->status = XianDuanChuLiStatus::a_2;
                     }
                 }
                 break;
             case BiType::DOWN:
-                if (bi_low < this->A_zscl.get_Bi_ZhongShu().get_high()) {
-                    this->start = bi.generate_bi(this->B_b1, this->B_b2, bi);
-                    this->status = XianDuanChuLiStatus::LEFT;
+                tmp_bi = bi.generate_bi(this->a_1, this->a_2, bi);
+                if (is_bi_equal(tmp_bi, bi)) {
+                    this->a_1 = tmp_bi;
+                    this->a_2 = bi;
+                    this->status = XianDuanChuLiStatus::a1_equal_a2;
                 }
                 else {
-                    ret_xd = this->__enter_zhongshu(this->b, this->B_b1, this->B_b2, bi, 'B');
-                    if (ret_xd.type == FindXianDuanReturnType::FindZhongShu) {
-                        return(ret_xd);
+                    if (bi_low > this->A.get_high()) {
+                        this->b_2 = bi;
+                        this->status = XianDuanChuLiStatus::b_3;
                     }
-                    this->B_b3 = bi;
-                    this->status = XianDuanChuLiStatus::B_b4;
+                    else {
+                        last_xd = XianDuan(this->a_1, this->b);
+                        last_xd.set_kind(XianDuanKind::PANZHENG);
+                        ret_xd.xd1 = last_xd;
+                        ret_xd.type = FindXianDuanReturnType::One;
+                        this->a_1 = this->b_2;
+                        this->status = XianDuanChuLiStatus::a_2;
+                    }
                 }
+                break;
+            }
+            break;
+
+        case XianDuanChuLiStatus::b2_equal_b3:
+            pre_zhongshu_list = this->pre_zhongshu_process(this->b_1, this->b_2, this->b_3, bi);
+            count = pre_zhongshu_list.size();
+            switch (count) {
+            case 4:
+                this->B = ZhongShu(pre_zhongshu_list[0], pre_zhongshu_list[1], pre_zhongshu_list[2], pre_zhongshu_list[3], Bi());
+                this->status = XianDuanChuLiStatus::B;
+                break;
+            case 2:
+                this->b_1 = pre_zhongshu_list[0];
+                this->b_2 = pre_zhongshu_list[1];
+                switch (this->b_2.get_type()) {
+                case BiType::UP:
+                    if (this->b_2.get_high() > this->A.get_low()) {
+                        last_xd = XianDuan(this->a_1, this->b_1);
+                        ret_xd.type = FindXianDuanReturnType::One;
+                        ret_xd.xd1 = last_xd;
+                        this->a_1 = this->b_2;
+                        this->status = XianDuanChuLiStatus::a_2;
+                    }
+                    else {
+                        this->status = XianDuanChuLiStatus::a_3;
+                    }
+                    break;
+                case BiType::DOWN:
+                    if (this->b_2.get_low() < this->A.get_high()) {
+                        last_xd = XianDuan(this->a_1, this->b_1);
+                        ret_xd.type = FindXianDuanReturnType::One;
+                        ret_xd.xd1 = last_xd;
+                        this->a_1 = this->b_2;
+                        this->status = XianDuanChuLiStatus::a_2;
+                    }
+                    else {
+                        this->status = XianDuanChuLiStatus::a_3;
+                    }
+                    break;
+                }
+                break;
+            case 1:
+                this->b_1 = pre_zhongshu_list[0];
+                this->status = XianDuanChuLiStatus::b;
                 break;
             }
             break;
 
         case XianDuanChuLiStatus::B:
-            ret_zhongshu = this->B_zscl.find_Bi_ZhongShu(bi);
-            switch (ret_zhongshu.type) {
-            case FindBiZhongShuReturnType::THREE_BUY:
-                this->b = ret_zhongshu.bi_zhongshu.get_input();
-                this->c_1 = ret_zhongshu.bi_zhongshu.get_output();
-                this->B_zscl.get_Bi_ZhongShu().stop(this->b_1);
-                this->c_2 = bi;
-                ret_xd.zhongshu = this->B_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-                this->status = XianDuanChuLiStatus::c_3;
-                break;
-            case FindBiZhongShuReturnType::THREE_SELL:
-                this->b = ret_zhongshu.bi_zhongshu.get_input();
-                this->c_1 = ret_zhongshu.bi_zhongshu.get_output();
-                this->c_2 = bi;
-                ret_xd.zhongshu = this->B_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-                this->status = XianDuanChuLiStatus::c_3;
-                break;
-            case FindBiZhongShuReturnType::ZHONSHU_UPGRADE:
-                ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-                ret_xd.type = FindXianDuanReturnType::ZhongShuUpgrade;
-                this->status = XianDuanChuLiStatus::START;
-                break;
-            }
-
-        case XianDuanChuLiStatus::LONGXIANDUAN:
-            if (bi.get_type() == BiType::UP) {
-                if (bi.get_high() > this->middle.get_high()) {
-                    this->after_middle = bi;
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    this->after_middle = bi;
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                }
+            if (is_bi_equal(this->b_3, bi)) {
+                
             }
             else {
-                //下降笔
-                if (bi.get_low() < this->middle.get_low()) {
-                    this->after_middle = bi;
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                    this->status = XianDuanChuLiStatus::START;
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    this->after_middle = bi;
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                }
-            }
-            break;
+                switch (bi_type) {
+                case BiType::UP:
+                    if (bi_high <= this->B.get_low()) {
 
-        case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT:
-            if (bi.get_type() == BiType::UP) {
-                if (bi.get_high() > this->start.get_high()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    return(this->failure_xd());
-                }
-                else {
-                    if (bi.get_high() > this->middle.get_high()) {
-                        if (bi.get_high() < this->start.get_low()) {
-                            this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN;
+                    }
+                    else {
+                        if (bi_high < this->B.get_high()) {
+
                         }
                         else {
-                            this->right = bi;
-                            this->status = XianDuanChuLiStatus::AFTER_RIGHT;
+
                         }
                     }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                    }
-                }
-            }
-            else {
-                //下降笔
-                if (bi.get_low() < this->start.get_low()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    return(this->failure_xd());
-                }
-                else {
-                    if (bi.get_low() < this->middle.get_low()) {
-                        if (bi.get_low() > this->start.get_high()) {
-                            this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                        }
-                        else {
-                            this->right = bi;
-                            this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                        }
-                    }
-                    else {
-                        this->right = bi;
-                        this->after_right = Bi();
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                    }
+                    break;
+                case BiType::DOWN:
+                    break;
                 }
             }
             break;
-
-        case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL:
-            switch (bi_type) {
-            case BiType::UP:
-                if (this->start.get_type() == BiType::UP) {
-                    if (bi_high > this->middle.get_high()) {
-                        this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                        ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                        this->status = XianDuanChuLiStatus::START;
-                    }
-                    else {
-                        if (bi_high > this->after_middle.get_high()) {
-                            this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                        }
-                    }
-                }
-                else {
-                    if (bi_high > this->start.get_high()) {
-                        this->right = bi.generate_bi(this->right, Bi(), bi);
-                        ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                        this->status = XianDuanChuLiStatus::START;
-                    }
-                    else {
-                        if (bi_high > this->middle.get_high()) {
-                            if (bi_high < this->start.get_low()) {
-                                this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                                this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                            }
-                            else {
-                                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                            }
-                        }
-                    }
-                }
-                break;
-            case BiType::DOWN:
-                if (this->start.get_type() == BiType::DOWN) {
-                    if (bi_low < this->middle.get_low()) {
-                        this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                        ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                        this->status = XianDuanChuLiStatus::START;
-                    }
-                    else {
-                        if (bi_low < this->after_middle.get_low()) {
-                            this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                        }
-                    }
-                }
-                else {
-                    if (bi_low < this->start.get_low()) {
-                        this->right = bi.generate_bi(this->right, Bi(), bi);
-                        ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                        this->status = XianDuanChuLiStatus::START;
-                    }
-                    else {
-                        if (bi_low < this->middle.get_low()) {
-                            if (bi_low > this->start.get_high()) {
-                                this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                                this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                            }
-                            else {
-                                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                            }
-                        }
-                    }
-                }
-                break;
-            }
-            break;
-
-        case XianDuanChuLiStatus::AFTER_MIDDLE:
-            switch (bi_type) {
-            case BiType::UP:
-                if (bi_high > this->middle.get_high()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = this->middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    this->after_middle = bi;
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-                break;
-            case BiType::DOWN:
-                if (bi_low < this->middle.get_low()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = this->middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    this->after_middle = bi;
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-                break;
-            }
-            break;
-
-    case XianDuanChuLiStatus::RIGHT:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->middle.get_high()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    xd_bi_list.clear();
-                    xd_bi_list.push_back(this->start);
-                    xd_bi_list.push_back(this->left);
-                    xd_bi_list.push_back(this->after_left);
-                    ret_xd.xd1.save_bi_list(xd_bi_list);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->start = this->middle;
-                    this->left = this->after_middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (this->middle.get_high() < this->start.get_low()) {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::RIGHT_NORMAL;
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() < this->middle.get_low()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    xd_bi_list.clear();
-                    xd_bi_list.push_back(this->start);
-                    xd_bi_list.push_back(this->left);
-                    xd_bi_list.push_back(this->after_left);
-                    ret_xd.xd1.save_bi_list(xd_bi_list);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->start = this->middle;
-                    this->left = this->after_middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (this->middle.get_low() > this->start.get_high()) {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::RIGHT_NORMAL;
-                    }
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::RIGHT_NORMAL:
-        switch (bi_type) {
-        case BiType::UP:
-            if (this->start.get_type() == BiType::UP) {
-                if (bi.get_high() > this->middle.get_high()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = this->middle;
-                    this->after_left = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (bi.get_high() > this->right.get_high()) {
-                        this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                        this->status = XianDuanChuLiStatus::RIGHT;
-                    }
-                }
-            }
-            else {
-                if (bi_high > this->middle.get_high()) {
-                    this->right = bi.generate_bi(this->right, Bi(), bi);
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-            }
-            break;
-        case BiType::DOWN:
-            if (this->start.get_type() == BiType::DOWN) {
-                if (bi_low < this->middle.get_low()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = this->middle;
-                    this->after_left = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (bi_low < this->right.get_low()) {
-                        this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                        this->status = XianDuanChuLiStatus::RIGHT;
-                    }
-                }
-            }
-            else {
-                if (bi_low < this->middle.get_low()) {
-                    this->right = bi.generate_bi(this->right, Bi(), bi);
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_RIGHT:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->middle.get_high()) {
-                //创新高
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.xd2 = XianDuan(this->middle, this->right);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->middle);
-                xd_bi_list.push_back(this->after_middle);
-                xd_bi_list.push_back(this->right);
-                ret_xd.xd2.save_bi_list(xd_bi_list);
-                ret_xd.xd2.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->start = bi;
-                this->status = XianDuanChuLiStatus::LEFT;
-            }
-            else {
-                if (this->middle.get_low() > this->start.get_high()) {
-                    this->after_right = bi;
-                    this->status = XianDuanChuLiStatus::FREE;
-                }
-                else {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                //创新低
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.xd2 = XianDuan(this->middle, this->right);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->middle);
-                xd_bi_list.push_back(this->after_middle);
-                xd_bi_list.push_back(this->right);
-                ret_xd.xd2.save_bi_list(xd_bi_list);
-                ret_xd.xd2.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->start = bi;
-                this->status = XianDuanChuLiStatus::LEFT;
-            }
-            else {
-                if (this->middle.get_high() < this->start.get_low()) {
-                    this->after_right = bi;
-                    this->status = XianDuanChuLiStatus::FREE;
-                }
-                else {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::FREE:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->start.get_high()) {
-                //创新高
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            if (bi.get_high() > this->after_right.get_high()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->left = this->after_right;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = this->middle;
-                this->left = this->after_middle;
-                this->after_left = this->right;
-                this->middle = this->after_right;
-                this->after_middle = bi;
-                if (this->middle.get_low() > this->start.get_high())
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                else
-                    this->status = XianDuanChuLiStatus::RIGHT;
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                //创新低
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            if (bi.get_low() < this->after_right.get_low()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->left = this->after_right;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = this->middle;
-                this->left = this->after_middle;
-                this->after_left = this->right;
-                this->middle = this->after_right;
-                this->after_middle = bi;
-                if (this->middle.get_high() < this->start.get_low())
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                else
-                    this->status = XianDuanChuLiStatus::RIGHT;
-            }
-        }
-        break;
     }
     this->last_bi = bi;
     return(ret_xd);
 }
 
-FindXianDuanReturn XianDuanChuLi::__find_xianduan1(Bi bi) {
-    XianDuan xd = XianDuan();
-    FindXianDuanReturn ret_xd;
-    Bi_ZhongShu A_zs, B_zs;
-    FindBiZhongShuReturn ret_zhongshu;
-    XianDuan last_xd, before_last_xd;
-    Bi tmp_bi = Bi();
-
-    BiType bi_type = bi.get_type();
-    float bi_high = bi.get_high();
-    float bi_low = bi.get_low();
-    vector<Bi> xd_bi_list;
-    Bi input;
-
-    if (bi.get_type() == BiType::UP) {
-        OutputDebugPrintf("上升笔 %f %f %d %d %f %s ", bi.get_low(), bi.get_high(), bi.get_start_pos(), bi.get_stop_pos(), bi.get_length(), get_xianduan_status(this->status));
-    }
-    else {
-        OutputDebugPrintf("下降笔 %f %f %d %d %f %s ", bi.get_high(), bi.get_low(), bi.get_start_pos(), bi.get_stop_pos(), bi.get_length(), get_xianduan_status(this->status));
-    }
-    
-    switch (this->status) {
-    case XianDuanChuLiStatus::START:
-        /*
-        process_status = false;
-        last_xd = this->get_last_xd(-1);
-        switch (bi_type) {
-        case BiType::UP:
-            if (last_xd.get_type() == XianDuanType::DOWN) {
-                before_last_xd = this->get_last_xd(-2);
-                if (before_last_xd.get_type() == XianDuanType::UP) {
-                    Bi start = bi.generate_bi(before_last_xd.get_start_bi(), Bi(), before_last_xd.get_stop_bi());
-                    Bi left = bi.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
-                    if (__isMiddleEquale(start, left, bi)) {
-                        this->start = start;
-                        this->left = left;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_EQUAL;
-                        process_status = true;
-                    }
-                    else {
-                        if (before_last_xd.get_low() < last_xd.get_low()) {
-                            this->start = start;
-                            this->left = left ;
-                            this->after_left = bi;
-                            this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                            process_status = true;
-                        }
-                    }
-                }
-                else {
-                    if (last_xd.get_kind() == XianDuanKind::PANZHENG) {
-                        if (bi.get_high() < this->A_zscl.get_Bi_ZhongShu().get_low()) {
-                            this->b_1 = this->A_zscl.get_Bi_ZhongShu().get_output();
-                            this->b_2 = bi;
-                            this->status = XianDuanChuLiStatus::b_3;
-                            process_status = true;
-                        }
-                    }
-                }
-            }
-            break;
-        case BiType::DOWN:
-            if (last_xd.get_type() == XianDuanType::UP) {
-                before_last_xd = this->get_last_xd(-2);
-                if (before_last_xd.get_type() == XianDuanType::DOWN) {
-                    Bi start = bi.generate_bi(before_last_xd.get_start_bi(), Bi(), before_last_xd.get_stop_bi());
-                    Bi left = bi.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
-                    if (__isMiddleEquale(start, left, bi)) {
-                        this->start = start;
-                        this->left = left;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_EQUAL;
-                        process_status = true;
-                    } else {
-                        if (before_last_xd.get_high() > last_xd.get_high()) {
-                            this->start = bi.generate_bi(before_last_xd.get_start_bi(), Bi(), before_last_xd.get_stop_bi());
-                            this->left = bi.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
-                            this->after_left = bi;
-                            this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                            process_status = true;
-                        }
-                        else {
-                            if (last_xd.get_kind() == XianDuanKind::PANZHENG) {
-                                if (bi.get_high() < this->A_zscl.get_Bi_ZhongShu().get_low()) {
-                                    this->b_1 = this->A_zscl.get_Bi_ZhongShu().get_output();
-                                    this->b_2 = bi;
-                                    this->status = XianDuanChuLiStatus::b_3;
-                                    process_status = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        if (process_status == false) {
-            this->start = bi;
-            this->status = XianDuanChuLiStatus::LEFT;
-        }
-        */
-        this->start = bi;
-        this->status = XianDuanChuLiStatus::LEFT;
-        break;
-
-    case XianDuanChuLiStatus::LEFT:
-        if (this->start.get_type() == BiType::UP && bi.get_low() < this->start.get_low() || (this->start.get_type() == BiType::DOWN && bi.get_high() > this->start.get_high())) {
-            /*
-            if (this->key_xianduan_list.empty()) {
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                ret_xd.xd1 = XianDuan(this->start, this->start);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::SigleBi);
-                this->left = bi;
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->left);
-                ret_xd.xd2 = XianDuan(this->left, this->left);
-                ret_xd.xd2.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->status = XianDuanChuLiStatus::START;
-            }
-            else {
-                this->left = bi;
-                return(this->failure_xd());
-            }
-            */
-            this->left = bi;
-            return(this->failure_xd());
-        }
-        else {
-            this->left = bi;
-            this->status = XianDuanChuLiStatus::AFTER_LEFT;
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_LEFT:
-        this->after_left = bi;
-        switch (bi_type) {
-        case BiType::UP:
-            if (bi.get_high() > this->start.get_high()) {
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                last_bi = bi;
-                return(ret_xd);
-            }
-            else {
-                this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-            }
-            break;
-        case BiType::DOWN:
-            if (bi.get_low() < this->start.get_low()) {
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                last_bi = bi;
-                return(ret_xd);
-            }
-            else {
-                this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::MIDDLE_EQUAL:
-        if (is_bi_equal(bi.get_length(), this->after_left.get_length())) {
-            this->A_zscl = Bi_ZhongShuChuLi(this->start, this->left, this->after_left, bi);
-            this->status = XianDuanChuLiStatus::A;
-        }
-        else {
-            switch (bi_type) {
-            case BiType::UP:
-                if (bi.get_high() > this->start.get_high()) {
-                    if (this->start.get_low() < bi.get_low())
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                    else {
-                        this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                        this->left = bi;
-                        last_bi = bi;
-                    }
-                    return(this->failure_xd());
-                }
-                else {
-                    this->middle = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_EQUAL_NORMAL;
-                }
-                break;
-            case BiType::DOWN:
-                if (bi.get_low() < this->start.get_low()) {
-                    if (this->start.get_high() > bi.get_high())
-                        this->left = bi.generate_bi(this->left, this->after_left, bi);
-                    else {
-                        this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                        this->left = bi;
-                        last_bi = bi;
-                    }
-                    return(this->failure_xd());
-                }
-                else {
-                    this->middle = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_EQUAL_NORMAL;
-                }
-                break;
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::MIDDLE_EQUAL_NORMAL:
-        switch (bi_type) {
-        case BiType::UP:
-            if (this->start.get_type() == BiType::UP) {
-                if (bi_high > this->middle.get_high()) {
-                    this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                    if (is_bi_equal(this->left.get_length(), this->after_left.get_length())) {
-                        this->status = XianDuanChuLiStatus::MIDDLE_EQUAL;
-                    }
-                    else {
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    }
-                }
-            }
-            else {
-                if (bi_high > this->start.get_high()) {
-                    this->right = bi;
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    if (bi_high > this->middle.get_high()) {
-                        this->middle = bi.generate_bi(this->middle, Bi(), bi);
-                        if (is_bi_equal(this->after_left.get_length(), this->middle.get_length())) {
-                            this->A_zscl = Bi_ZhongShuChuLi(this->start, this->left, this->after_left, this->middle);
-                            this->status = XianDuanChuLiStatus::A;
-                        }
-                        else {
-                            if (this->middle.get_high() > this->left.get_high()) {
-                                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                                this->left = this->middle;
-                                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                            }
-                        }
-                    }
-                }
-            }
-            break;
-        case BiType::DOWN:
-            if (this->start.get_type() == BiType::DOWN) {
-                if (bi_low < this->middle.get_low()) {
-                    this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                    if (is_bi_equal(this->left.get_length(), this->after_left.get_length())) {
-                        this->status = XianDuanChuLiStatus::MIDDLE_EQUAL;
-                    }
-                    else {
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    }
-                }
-            }
-            else {
-                if (bi_low < this->start.get_low()) {
-                    this->right = bi;
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    if (bi_low < this->middle.get_low()) {
-                        this->middle = bi.generate_bi(this->middle, Bi(), bi);
-                        if (is_bi_equal(this->after_left.get_length(), this->middle.get_length())) {
-                            this->A_zscl = Bi_ZhongShuChuLi(this->start, this->left, this->after_left, this->middle);
-                            this->status = XianDuanChuLiStatus::A;
-                        }
-                        else {
-                            if (this->middle.get_low() < this->left.get_low()) {
-                                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                                this->left = this->middle;
-                                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                            }
-                        }
-
-                    }
-
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::MIDDLE_HIGHLOW:
-        tmp_bi = bi.generate_bi(this->start, this->left, this->after_left);
-        if (is_bi_equal(tmp_bi.get_length(), bi.get_length())) {
-            XianDuan tmp_xd = this->get_last_xd(-1);
-            if (tmp_xd.get_type() != XianDuanType::NONE && is_bi_equal(tmp_xd.get_length(), tmp_bi.get_length()) == false) {
-                this->start = bi.generate_bi(tmp_xd.get_start_bi(), Bi(), tmp_xd.get_stop_bi());
-                this->left = this->after_middle;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_EQUAL;
-                if (!this->key_xianduan_list.empty())
-                    this->key_xianduan_list.pop_back();
-            }
-            else {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list = ret_xd.xd1.get_bi_list();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-                ret_xd.xd2 = XianDuan(bi, bi);
-                xd_bi_list = ret_xd.xd2.get_bi_list();
-                xd_bi_list.push_back(bi);
-                ret_xd.xd2.set_kind(XianDuanKind::LONGXIANDUAN);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->status = XianDuanChuLiStatus::START;
-            }
-        }
-        else {
-            switch (bi_type) {
-            case BiType::UP:
-                if (bi_high > this->start.get_high()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    xd_bi_list = ret_xd.xd1.get_bi_list();
-                    xd_bi_list.push_back(this->start);
-                    xd_bi_list.push_back(this->left);
-                    xd_bi_list.push_back(this->after_left);
-                    ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->start = bi;
-                    this->status = XianDuanChuLiStatus::LEFT;
-                }
-                else {
-                    if (bi_high < this->start.get_low()) {
-                        this->middle = bi;
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->__middle_process(bi);
-                    }
-                }
-                break;
-            case BiType::DOWN:
-                if (bi_low < this->start.get_low()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    xd_bi_list = ret_xd.xd1.get_bi_list();
-                    xd_bi_list.push_back(this->start);
-                    xd_bi_list.push_back(this->left);
-                    xd_bi_list.push_back(this->after_left);
-                    ret_xd.xd1.set_kind(XianDuanKind::LONGXIANDUAN);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->start = bi;
-                    this->status = XianDuanChuLiStatus::LEFT;
-                }
-                else {
-                    if (bi_low > this->start.get_high()) {
-                        this->middle = bi;
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->__middle_process(bi);
-                    }
-                }
-                break;
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::MIDDLE_NORMAL:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                //创新高
-                this->left = bi.generate_bi(this->left, this->after_left, bi);
-                return(this->failure_xd());
-            }
-            if (bi.get_high() <= this->left.get_high()) {
-                //left 包含middle
-                this->middle = bi;
-                this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
-            }
-            else {
-                this->left = bi.generate_bi(this->left, this->after_left, bi);
-                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                //创新低
-                this->left = bi.generate_bi(this->left, this->after_left, bi);
-                return(this->failure_xd());
-            }
-            if (bi.get_low() >= this->left.get_low()) {
-                //left 包含middle
-                this->middle = bi;
-                this->status = XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE;
-            }
-            else {
-                this->left = bi.generate_bi(this->left, this->after_left, bi);
-                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::LEFT_INCLUDE_MIDDLE:
-        switch (bi.get_type()) {
-        case BiType::UP:
-            switch (this->start.get_type()) {
-            case BiType::UP:
-                if (bi.get_high() > this->start.get_high()) {
-                    this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (bi.get_high() > this->after_left.get_high()) {
-                        this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                        this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                    }
-                }
-                break;
-            case BiType::DOWN:
-                if (bi.get_high() > this->start.get_high()) {
-                    this->left = bi.generate_bi(this->left, this->after_left, bi);
-                    return(this->failure_xd());
-                }
-                else {
-                    if (bi.get_high() > this->after_left.get_high()) {
-                        this->after_left = bi.generate_bi(this->after_left, bi, bi);
-                        this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                    }
-                }
-                break;
-            }
-            break;
-
-        case BiType::DOWN:
-            switch (this->start.get_type()) {
-            case BiType::UP:
-                if (bi.get_low() < this->start.get_low()) {
-                    this->left = bi.generate_bi(this->left, this->after_left, bi);
-                    return(this->failure_xd());
-                }
-                else {
-                    if (bi.get_low() < this->left.get_low()) {
-                        this->after_left = bi.generate_bi(this->left, this->after_left, bi);
-                        this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                    }
-                }
-                break;
-            case BiType::DOWN:
-                if (bi.get_low() < this->start.get_low()) {
-                    this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (bi.get_low() < this->after_left.get_low()) {
-                        this->after_left = bi.generate_bi(this->after_left, this->middle, bi);
-                        this->status = XianDuanChuLiStatus::MIDDLE_NORMAL;
-                    }
-                }
-                break;
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::A:
-        ret_zhongshu =  this->A_zscl.find_Bi_ZhongShu(bi);
-        switch (ret_zhongshu.type) {
-        case FindBiZhongShuReturnType::THREE_BUY:
-            this->a = ret_zhongshu.bi_zhongshu.get_input();
-            this->b_1 = ret_zhongshu.bi_zhongshu.get_output();
-            this->A_zscl.get_Bi_ZhongShu().stop(this->b_1);
-            this->b_2 = bi;
-            ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-            this->status = XianDuanChuLiStatus::b_3;
-            break;
-        case FindBiZhongShuReturnType::THREE_SELL:
-            this->a = ret_zhongshu.bi_zhongshu.get_input();
-            this->b_1 = ret_zhongshu.bi_zhongshu.get_output();
-            this->b_2 = bi;
-            ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-            this->status = XianDuanChuLiStatus::b_3;
-            break;
-        case FindBiZhongShuReturnType::ZhongShuSuccess:
-            this->a = ret_zhongshu.bi_zhongshu.get_input();
-            this->b = bi;
-            ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-            last_bi = this->b;
-            this->status = XianDuanChuLiStatus::START;
-            break;
-        case FindBiZhongShuReturnType::ZhongShuFailer:
-            this->a = ret_zhongshu.bi_zhongshu.get_input();
-            this->b = ret_zhongshu.bi_zhongshu.get_output();
-            ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::ZhongShuSuccess;
-            this->start = bi;
-            last_bi = bi;
-            this->status = XianDuanChuLiStatus::LEFT;
-            break;
-        case FindBiZhongShuReturnType::ZHONSHU_UPGRADE:
-            ret_xd.zhongshu = this->A_zscl.get_Bi_ZhongShu();
-            ret_xd.type = FindXianDuanReturnType::ZhongShuUpgrade;
-            this->status = XianDuanChuLiStatus::START;
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::b_3:
-        switch (bi.get_type()) {
-        case BiType::UP:
-            if (bi.get_high() > this->b_1.get_high()) {
-                this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                if (this->b.get_length() > this->a.get_length())
-                    this->status = XianDuanChuLiStatus::B_b1;
-                else {
-                    ret_xd.xd1 = XianDuan(this->a, this->b);
-                    ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                    ret_xd.xd1.get_bi_list().push_back(this->a);
-                    ret_xd.xd1.get_bi_list().push_back(this->b);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->status = XianDuanChuLiStatus::START;
-                }
-            }
-            else {
-                this->b_3 = bi;
-                this->status = XianDuanChuLiStatus::b_3_normal;
-            }
-            break;
-
-        case BiType::DOWN:
-            if (bi.get_low() < this->b_1.get_low()) {
-                this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                if (this->b.get_length() > this->a.get_length())
-                    this->status = XianDuanChuLiStatus::B_b1;
-                else {
-                    ret_xd.xd1 = XianDuan(this->a, this->b);
-                    ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                    ret_xd.xd1.get_bi_list().push_back(this->a);
-                    ret_xd.xd1.get_bi_list().push_back(this->b);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->status = XianDuanChuLiStatus::START;
-                }
-            }
-            else {
-                this->b_3 = bi;
-                this->status = XianDuanChuLiStatus::b_3_normal;
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::b_3_normal:
-        switch (bi.get_type()) {
-        case BiType::UP:
-            if (this->b_2.get_type() == BiType::UP) {
-                if (bi.get_high() > this->b_2.get_high()) {
-                    if (bi.get_high() < this->A_zscl.get_Bi_ZhongShu().get_low()) {
-                        this->b_2 = bi.generate_bi(this->b_2, this->b_3, bi);
-                        this->status = XianDuanChuLiStatus::b_3;
-                    }
-                    else {
-                        this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                        ret_xd.xd1 = XianDuan(this->a, this->b);
-                        ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                        ret_xd.xd1.get_bi_list().push_back(this->a);
-                        ret_xd.xd1.get_bi_list().push_back(this->b);
-                        ret_xd.type = FindXianDuanReturnType::One;
-                        this->start = this->b_2;
-                        this->left = this->b_3;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    }
-                }
-            }
-            else {
-                //b_2是下降笔
-                if (bi.get_high() > this->b_2.get_high()) {
-                    this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                    this->status = XianDuanChuLiStatus::B_b1;
-                }
-                else {
-                    if (bi.get_high() > this->b_3.get_high()) {
-                        this->b_3 = bi.generate_bi(this->b_3, bi, bi);
-                        this->status = XianDuanChuLiStatus::b_3_normal;
-                    }
-                }
-            }
-            break;
-        case BiType::DOWN:
-            if (this->b_2.get_type() == BiType::DOWN) {
-                if (bi.get_low() < this->b_2.get_low()) {
-                    if (bi.get_low() > this->A_zscl.get_Bi_ZhongShu().get_high()) {
-                        this->b_2 = bi.generate_bi(this->b_2, this->b_3, bi);
-                        this->status = XianDuanChuLiStatus::b_3;
-                    }
-                    else {
-                        this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                        ret_xd.xd1 = XianDuan(this->a, this->b);
-                        ret_xd.xd1.set_kind(XianDuanKind::PANZHENG);
-                        ret_xd.xd1.get_bi_list().push_back(this->a);
-                        ret_xd.xd1.get_bi_list().push_back(this->b);
-                        ret_xd.type = FindXianDuanReturnType::One;
-                        this->start = this->b_2;
-                        this->left = this->b_3;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    }
-                }
-                else {
-                    //b_2 是上升笔
-                    if (bi.get_low() < this->b_2.get_low()) {
-                        this->b = bi.generate_bi(this->b_1, this->b_2, bi);
-                        this->status = XianDuanChuLiStatus::B_b1;
-                    }
-                    else {
-                        if (bi.get_low() < this->b_3.get_low()) {
-                            this->b_3 = bi.generate_bi(this->b_3, bi, bi);
-                            this->status = XianDuanChuLiStatus::b_3_normal;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->middle.get_high()) {
-                this->after_middle = bi;
-                ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                this->status = XianDuanChuLiStatus::START;
-            }
-            else {
-                this->after_middle = bi;
-                this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                this->after_middle = bi;
-                ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                this->status = XianDuanChuLiStatus::START;
-                this->status = XianDuanChuLiStatus::START;
-            }
-            else {
-                this->after_middle = bi;
-                this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->middle.get_high()) {
-                    if (bi.get_high() < this->start.get_low()) {
-                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                }
-                else {
-                    this->right = bi;
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() < this->middle.get_low()) {
-                    if (bi.get_low() > this->start.get_high()) {
-                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                }
-                else {
-                    this->right = bi;
-                    this->after_right = Bi();
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL:
-        switch (bi_type) {
-        case BiType::UP:
-            if (this->start.get_type() == BiType::UP) {
-                if (bi_high > this->middle.get_high()) {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    if (bi_high > this->after_middle.get_high()) {
-                        this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                    }
-                }
-            }
-            else {
-                if (bi_high > this->start.get_high()) {
-                    this->right = bi.generate_bi(this->right, Bi(), bi);
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    if (bi_high > this->middle.get_high()) {
-                        if (bi_high < this->start.get_low()) {
-                            this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                        }
-                        else {
-                            this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                            this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                            this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                        }
-                    }
-                }
-            }
-            break;
-        case BiType::DOWN:
-            if (this->start.get_type() == BiType::DOWN) {
-                if (bi_low < this->middle.get_low()) {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::One);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    if (bi_low < this->after_middle.get_low()) {
-                        this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                    }
-                }
-            }
-            else {
-                if (bi_low < this->start.get_low()) {
-                    this->right = bi.generate_bi(this->right, Bi(), bi);
-                    ret_xd = this->set_xianduan(FindXianDuanReturnType::Two);
-                    this->status = XianDuanChuLiStatus::START;
-                }
-                else {
-                    if (bi_low < this->middle.get_low()) {
-                        if (bi_low > this->start.get_high()) {
-                            this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                        }
-                        else {
-                            this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                            this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                            this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN_FREE:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->middle.get_high()) {
-                    this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                    if (bi.get_high() < this->start.get_low()) {
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->__middle_process(this->middle);
-                    }
-                }
-                else {
-                    if (bi.get_high() > this->right.get_high()) {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                    }
-                    else {
-                        this->free = bi;
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE;
-                        break;
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() < this->middle.get_low()) {
-                    if (bi.get_low() > this->start.get_high()) {
-                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                }
-                else {
-                    this->free = bi;
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE;
-                }
-            }
-            break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->middle.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = this->middle;
-                this->after_left = bi.generate_bi(this->after_middle, this->right, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_high() > this->right.get_high()) {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-                else {
-                    if (bi.get_high() > this->free.get_high()) {
-                        this->after_right = bi.generate_bi(this->after_right, this->free, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_FREE;
-                    }
-                    else {
-                        this->after_free = bi;
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE_1;
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = this->middle;
-                this->after_left = bi.generate_bi(this->after_middle, this->right, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_low() < this->right.get_low()) {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-                else {
-                    if (bi.get_low() < this->free.get_low()) {
-                        this->after_right = bi.generate_bi(this->after_right, this->free, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_FREE;
-                    }
-                    else {
-                        this->after_free = bi;
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE_1;
-                    }
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE_1:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->middle.get_high()) {
-                    if (bi.get_high() < this->start.get_low()) {
-                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                    }
-                }
-                else {
-                    if (bi.get_high() > this->right.get_high()) {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                    }
-                    else {
-                        if (bi.get_high() > this->free.get_high()) {
-                            this->free = bi.generate_bi(this->free, this->after_free, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE;
-                        }
-                        else {
-                            this->after_free_1 = bi;
-                            OutputDebugPrintf("LONGXIANDUAN_AFTER_FREE_2 未处理");
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() > this->middle.get_low()) {
-                    if (bi.get_low() > this->start.get_high()) {
-                        this->middle = bi.generate_bi(this->middle, this->after_middle, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN;
-                    }
-                    else {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                }
-                else {
-                    if (bi.get_low() < this->right.get_low()) {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT_NORMAL;
-                    }
-                    else {
-                        if (bi.get_low() < this->free.get_low()) {
-                            this->free = bi.generate_bi(this->free, this->after_free, bi);
-                            this->status = XianDuanChuLiStatus::LONGXIANDUAN_AFTER_FREE;
-                        }
-                        else {
-                            this->after_free_1 = bi;
-                            OutputDebugPrintf("LONGXIANDUAN_AFTER_FREE_2 未处理");
-                        }
-                    }
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_MIDDLE:
-        switch (bi_type) {
-        case BiType::UP:
-            if (bi_high > this->middle.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = this->middle;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            } else {
-                this->after_middle = bi;
-                this->status = XianDuanChuLiStatus::RIGHT;
-            }
-            break;
-        case BiType::DOWN:
-            if (bi_low < this->middle.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = this->middle;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                this->after_middle = bi;
-                this->status = XianDuanChuLiStatus::RIGHT;
-            }
-            break;
-        }
-        break;
-
-    case XianDuanChuLiStatus::RIGHT:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->middle.get_high()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    xd_bi_list.clear();
-                    xd_bi_list.push_back(this->start);
-                    xd_bi_list.push_back(this->left);
-                    xd_bi_list.push_back(this->after_left);
-                    ret_xd.xd1.save_bi_list(xd_bi_list);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->start = this->middle;
-                    this->left = this->after_middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (this->middle.get_high() < this->start.get_low()) {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::RIGHT_NORMAL;
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() < this->middle.get_low()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    xd_bi_list.clear();
-                    xd_bi_list.push_back(this->start);
-                    xd_bi_list.push_back(this->left);
-                    xd_bi_list.push_back(this->after_left);
-                    ret_xd.xd1.save_bi_list(xd_bi_list);
-                    ret_xd.type = FindXianDuanReturnType::One;
-                    this->start = this->middle;
-                    this->left = this->after_middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                }
-                else {
-                    if (this->middle.get_low() > this->start.get_high()) {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                    else {
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::RIGHT_NORMAL;
-                    }
-                }
-            }
-        }
-        break;
-    case XianDuanChuLiStatus::RIGHT_NORMAL:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->middle.get_high()){
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = this->middle;
-                this->after_left = bi.generate_bi(this->after_middle, this->right, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_high() > this->right.get_high()) {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-                else {
-                    this->after_right = bi;
-                    this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL;
-                }
-            }
-
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = this->middle;
-                this->after_left = bi.generate_bi(this->after_middle, this->right, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_low() < this->right.get_low()) {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-                else {
-                    this->after_right = bi;
-                    this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL;
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->middle.get_high()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                ret_xd.xd2 = XianDuan(this->middle, bi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->status = XianDuanChuLiStatus::START;
-            }
-            else {
-                if (bi.get_high() > this->right.get_high()) {
-                    this->right = bi.generate_bi(this->right, this->after_right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT_NORMAL;
-                }
-                else {
-                    this->free = bi;
-                    this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL;
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                ret_xd.xd2 = XianDuan(this->middle, bi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->status = XianDuanChuLiStatus::START;
-            }
-            else {
-                if (bi.get_low() < this->right.get_low()) {
-                    this->right = bi.generate_bi(this->right, this->after_right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT_NORMAL;
-                }
-                else {
-                    this->free = bi;
-                    this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL;
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                ret_xd.xd2 = XianDuan(this->middle, bi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->status = XianDuanChuLiStatus::START;
-            }
-            else {
-                if (bi.get_high() > this->start.get_low()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                }
-                else {
-                    if (bi.get_high() > this->middle.get_high()) {
-                        this->right = bi.generate_bi(this->right, this->after_right, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                    }
-                    else {
-                        if (bi.get_high() > this->right.get_high()) {
-                            this->right = bi.generate_bi(this->right, this->after_right, bi);
-                            this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL;
-                        } else {
-                            this->after_right = bi;
-                            this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL_NORMAL;
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            if (bi.get_type() == BiType::DOWN) {
-                if (bi.get_low() < this->start.get_low()){
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    ret_xd.xd2 = XianDuan(this->middle, bi);
-                    ret_xd.type = FindXianDuanReturnType::Two;
-                    this->status = XianDuanChuLiStatus::START;
-                } else {
-                    if (bi.get_low() < this->start.get_high()){
-                        this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                        this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                    } else {
-                        if (bi.get_low() < this->middle.get_low()){
-                            this->right = bi.generate_bi(this->right, this->after_right, bi);
-                            this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                        } else {
-                            if (bi.get_low() < this->after_right.get_low()) {
-                                                            this->after_right = bi;
-                            this->status = XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL_NORMAL;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        break;
-        
-    case XianDuanChuLiStatus::RIGHT_NORMAL_NORMAL_NORMAL_NORMAL:
-        OutputDebugPrintf("RIGHT_NORMAL_NORMAL_NORMAL_NORMAL 未处理");
-        break;
-
-    case XianDuanChuLiStatus::AFTER_RIGHT:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->middle.get_high()) {
-                //创新高
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.xd2 = XianDuan(this->middle, this->right);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->middle);
-                xd_bi_list.push_back(this->after_middle);
-                xd_bi_list.push_back(this->right);
-                ret_xd.xd2.save_bi_list(xd_bi_list);
-                ret_xd.xd2.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->start = bi;
-                this->status = XianDuanChuLiStatus::LEFT;
-            }
-            else {
-                if (this->middle.get_low() > this->start.get_high()) {
-                    this->after_right = bi;
-                    this->status = XianDuanChuLiStatus::FREE;
-                }
-                else {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                //创新低
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.xd2 = XianDuan(this->middle, this->right);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->middle);
-                xd_bi_list.push_back(this->after_middle);
-                xd_bi_list.push_back(this->right);
-                ret_xd.xd2.save_bi_list(xd_bi_list);
-                ret_xd.xd2.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.type = FindXianDuanReturnType::Two;
-                this->start = bi;
-                this->status = XianDuanChuLiStatus::LEFT;
-            }
-            else {
-                if (this->middle.get_high() < this->start.get_low()) {
-                    this->after_right = bi;
-                    this->status = XianDuanChuLiStatus::FREE;
-                }
-                else {
-                    this->after_middle = bi.generate_bi(this->after_middle, this->right, bi);
-                    this->status = XianDuanChuLiStatus::RIGHT;
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::FREE:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->start.get_high()) {
-                //创新高
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            if (bi.get_high() > this->after_right.get_high()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->left = this->after_right;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = this->middle;
-                this->left = this->after_middle;
-                this->after_left = this->right;
-                this->middle = this->after_right;
-                this->after_middle = bi;
-                if (this->middle.get_low() > this->start.get_high())
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                else
-                    this->status = XianDuanChuLiStatus::RIGHT;
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                //创新低
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            if (bi.get_low() < this->after_right.get_low()) {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->left = this->after_right;
-                this->after_left = bi;
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                xd_bi_list.clear();
-                xd_bi_list.push_back(this->start);
-                xd_bi_list.push_back(this->left);
-                xd_bi_list.push_back(this->after_left);
-                ret_xd.xd1.save_bi_list(xd_bi_list);
-                ret_xd.xd1.set_kind(XianDuanKind::ThreeBi);
-                ret_xd.type = FindXianDuanReturnType::One;
-                this->start = this->middle;
-                this->left = this->after_middle;
-                this->after_left = this->right;
-                this->middle = this->after_right;
-                this->after_middle = bi;
-                if (this->middle.get_high() < this->start.get_low())
-                    this->status = XianDuanChuLiStatus::LONGXIANDUAN_RIGHT;
-                else
-                    this->status = XianDuanChuLiStatus::RIGHT;
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_FREE:
-        if (bi.get_type() == BiType::UP) {
-            //上升笔
-            if (bi.get_high() > this->middle.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->after_left = bi.generate_bi(this->after_right, this->free, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_high() < this->after_right.get_high()) {
-                    this->after_free = bi;
-                    this->status = XianDuanChuLiStatus::AFTER_FREE_1;
-                }
-                else {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    ret_xd.xd2 = XianDuan(this->middle, this->right);
-                    if (this->after_middle.get_low() >= this->after_right.get_high() + 0.01) {
-                        //after_middle和after_right有缺口
-                        ret_xd.xd2.set_type(XianDuanType::TEMP_DOWN);
-                        ret_xd.type = FindXianDuanReturnType::Two;
-                        this->start = this->middle;
-                        this->left = this->after_middle;
-                        this->after_left = this->right;
-                        this->middle = this->after_right;
-                        this->after_middle = this->free;
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                        return(ret_xd);
-                    }
-                    else {
-                        ret_xd.xd3 = XianDuan(this->after_right, bi);
-                        if (this->after_right.get_type() == BiType::UP)
-                            ret_xd.xd3.set_type(XianDuanType::TEMP_UP);
-                        else
-                            ret_xd.xd3.set_type(XianDuanType::TEMP_DOWN);
-                        ret_xd.type = FindXianDuanReturnType::Three;
-                        this->start = this->after_right;
-                        this->left = this->free;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                        return(ret_xd);
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->after_left = bi.generate_bi(this->after_right, this->free, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_low() > this->after_right.get_low()) {
-                    //after_right 包含 after_free
-                    this->after_free = bi;
-                    this->status = XianDuanChuLiStatus::AFTER_FREE_1;
-                }
-                else {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    ret_xd.xd1.save_bi_list(this->get_xd_bi_list());
-                    ret_xd.xd2 = XianDuan(this->middle, this->right);
-                    if (this->after_right.get_low() > this->after_middle.get_high() + 0.01) {
-                        //有缺口
-                        ret_xd.xd2.set_type(XianDuanType::TEMP_UP);
-                        ret_xd.type = FindXianDuanReturnType::Two;
-                        this->start = this->middle;
-                        this->left = this->after_middle;
-                        this->after_left = this->right;
-                        this->middle = this->after_right;
-                        this->after_middle = this->free;
-                        this->right = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                        return(ret_xd);
-                    }
-                    else {
-                        ret_xd.xd3 = XianDuan(this->after_right, bi);
-                        if (this->after_right.get_type() == BiType::UP)
-                            ret_xd.xd3.set_type(XianDuanType::TEMP_UP);
-                        else
-                            ret_xd.xd3.set_type(XianDuanType::TEMP_DOWN);
-                        ret_xd.type = FindXianDuanReturnType::Three;
-                        this->start = this->after_right;
-                        this->left = this->free;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                        return(ret_xd);
-                    }
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_FREE_1:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->right.get_high()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                }
-                else {
-                    if (bi.get_high() > this->free.get_high()) {
-                        this->free = bi.generate_bi(this->free, this->after_free, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE;
-                    }
-                    else {
-                        this->after_free_1 = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_2;
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() < this->right.get_low()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                }
-                else {
-                    if (bi.get_low() < this->free.get_low()) {
-                        this->free = bi.generate_bi(this->free, this->after_free, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE;
-                    }
-                    else {
-                        this->after_free_1 = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_2;
-                    }
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_FREE_2:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->middle.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->after_left = bi.generate_bi(this->right, this->after_right, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_high() > this->after_right.get_high()) {
-                    this->after_right = bi.generate_bi(this->after_right, this->free, bi);
-                    this->status = XianDuanChuLiStatus::FREE;
-                }
-                else {
-                    if (bi.get_high() > this->after_free.get_high()) {
-                        this->after_free = bi.generate_bi(this->after_free, this->after_free_1, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_1;
-                    }
-                    else {
-                        this->after_free_2 = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_3;
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->middle.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, this->right);
-                this->after_left = bi.generate_bi(this->right, this->after_right, bi);
-                this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-            }
-            else {
-                if (bi.get_low() < this->after_right.get_low()) {
-                    this->after_right = bi.generate_bi(this->after_right, this->free, bi);
-                    this->status = XianDuanChuLiStatus::FREE;
-                }
-                else {
-                    if (bi.get_low() < this->after_free.get_low()) {
-                        this->after_free = bi.generate_bi(this->after_free, this->after_free_1, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_1;
-                    }
-                    else {
-                        this->after_free_2 = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_FREE_3;
-                    }
-                }
-            }
-        }
-        break;
-
-    case XianDuanChuLiStatus::AFTER_FREE_3:
-        if (bi.get_type() == BiType::UP) {
-            if (bi.get_high() > this->start.get_high()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_high() > this->right.get_high()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                }
-                else {
-                    if (bi.get_high() > this->free.get_high()) {
-                        this->free = bi.generate_bi(this->free, this->after_free, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE;
-                    }
-                    else {
-                        if (bi.get_high() > this->after_free_1.get_high()) {
-                            this->after_free_1 = bi.generate_bi(this->after_free_1, this->after_free_2, bi);
-                            this->status = XianDuanChuLiStatus::AFTER_FREE_1;
-                        }
-                        else {
-                            OutputDebugPrintf("AFTER_FREE_4未处理");
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            //下降笔
-            if (bi.get_low() < this->start.get_low()) {
-                this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                return(this->failure_xd());
-            }
-            else {
-                if (bi.get_low() < this->right.get_low()) {
-                    this->start = bi.generate_bi(this->start, this->left, this->after_left);
-                    this->left = bi.generate_bi(this->middle, this->after_middle, bi);
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                }
-                else {
-                    if (bi.get_low() < this->free.get_low()) {
-                        this->free = bi.generate_bi(this->free, this->after_free, bi);
-                        this->status = XianDuanChuLiStatus::AFTER_FREE;
-                    }
-                    else {
-                        if (bi.get_low() < this->after_free_1.get_low()) {
-                            this->after_free_1 = bi.generate_bi(this->after_free_1, this->after_free_2, bi);
-                            this->status = XianDuanChuLiStatus::AFTER_FREE_1;
-                        }
-                        else {
-                            OutputDebugPrintf("AFTER_FREE_4 未处理");
-                        }
-                    }
-                }
-            }
-        }
-        break;
-        }
-    }
-    return(ret_xd);
-}
-
-
-FindXianDuanReturn XianDuanChuLi::__left_process(Bi bi) {
-    FindXianDuanReturn ret_fd = FindXianDuanReturn();
-    XianDuan last_xd, before_last_xd;
-    Bi start;
-
-    switch (bi.get_type()) {
-    case BiType::UP:
-        if (is_bi_equal(this->start.get_length(), bi.get_length())) {
-            last_xd = this->get_last_xd(-1);
-            switch (last_xd.get_type()) {
-            case XianDuanType::UP:
-                start = bi.generate_bi(last_xd.get_start_bi(), Bi(), last_xd.get_stop_bi());
-                break;
-            case XianDuanType::DOWN:
-                break;
-            }
-        }
-        else {
-            if (bi.get_length() > this->start.get_length()) {
-                return(this->failure_xd());
-            }
-            else {
-                this->left = bi;
-                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-            }
-        }
-        break;
-    case BiType::DOWN:
-        if (is_bi_equal(this->start.get_length(), bi.get_length())) {
-            last_xd = this->get_last_xd(-1);
-            switch (last_xd.get_type()) {
-            case XianDuanType::UP:
-                break;
-            case XianDuanType::DOWN:
-                break;
-            }
-        }
-        else {
-            if (bi.get_length() > this->start.get_length()) {
-                return(this->failure_xd());
-            }
-            else {
-                this->left = bi;
-                this->status = XianDuanChuLiStatus::AFTER_LEFT;
-            }
-        }
-        break;
-    }
-    return(ret_fd);
-}
-
-
-bool XianDuanChuLi::__middle_process(Bi bi) {
-    FindXianDuanReturn ret_fd = FindXianDuanReturn();
-    if (bi.get_high() >= this->left.get_high() && bi.get_low() <= this->left.get_low()) {
-        //middle 包含 left
-        this->start = bi.generate_bi(this->start, this->left, this->after_left);
-        this->left = bi;
-        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-        return(true);
-    }
-    else {
-        this->middle = bi;
-        this->status = XianDuanChuLiStatus::AFTER_MIDDLE;
-        return(false);
-    }
-}
-
-FindXianDuanReturn XianDuanChuLi::__right_process(Bi bi) {
-    FindXianDuanReturn ret_xd = FindXianDuanReturn();
-    if (this->middle.get_high() > this->left.get_high()) {
-        if (bi.get_high() > this->middle.get_high()) {
-            //上升处理
-            if (this->start.get_type() == BiType::DOWN) {
-                if (bi.get_high() > this->start.get_high()) {
-                    ret_xd.xd1 = XianDuan(this->start, this->start);
-                    ret_xd.xd2 = XianDuan(this->left, bi);
-                    ret_xd.xd2.set_type(XianDuanType::TEMP_UP);
-                    ret_xd.type = FindXianDuanReturnType::Two;
-                    this->start = bi.generate_bi(this->left, this->after_left, this->middle);
-                    this->left = this->middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    return(ret_xd);
-                }
-                else {
-                    this->left = bi.generate_bi(this->left, this->after_left, this->middle);
-                    this->after_left = this->after_middle;
-                    this->__middle_process(bi);
-                }
-            }
-            else {
-                //顶分型
-                if (this->middle.get_low() > this->left.get_high() + 0.01) {
-                    //left 和 middle 有缺口
-                    this->right = bi;
-                    this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-                }
-                else {
-                    if (this->start.get_type() == BiType::UP) {
-                        ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                        ret_xd.xd1.save_bi_list(this->get_xd_bi_list());
-                        ret_xd.xd2 = XianDuan(this->middle, bi);
-                        ret_xd.xd2.set_type(XianDuanType::TEMP_DOWN);
-                        ret_xd.type = FindXianDuanReturnType::Two;
-                        this->start = this->middle;
-                        this->left = this->after_middle;
-                        this->after_left = bi;
-                        this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                        return(ret_xd);
-                    }
-                    else {
-                        ret_xd.xd1 = XianDuan(this->start, this->start);
-                        ret_xd.xd1.save_bi_list(this->get_xd_bi_list());
-                        ret_xd.xd2 = XianDuan(this->left, this->middle);
-                        ret_xd.type = FindXianDuanReturnType::Two;
-                        this->start = this->after_middle;
-                        this->left = bi;
-                        this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                        return(ret_xd);
-                    }
-                }
-
-            }
-        }
-    }
-    else {
-        if (bi.get_low() < this->middle.get_low()) {
-            //下降处理
-            if (this->start.get_type() == BiType::UP) {
-                if (bi.get_low() < this->start.get_low()) {
-                    //创新低
-                    ret_xd.xd1 = XianDuan(this->start, this->start);
-                    ret_xd.xd2 = XianDuan(this->left, bi);
-                    ret_xd.xd2.set_type(XianDuanType::TEMP_DOWN);
-                    this->start = bi.generate_bi(this->left, this->after_left, this->middle);
-                    this->left = this->after_middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    return(ret_xd);
-                }
-                else {
-                    this->left = bi.generate_bi(this->left, this->after_left, this->middle);
-                    this->after_left = this->after_middle;
-                    this->__middle_process(bi);
-                }
-            }
-            else {
-                this->left = bi.generate_bi(this->left, this->after_left, this->middle);
-                this->after_left = this->after_middle;
-                this->__middle_process(bi);
-            }
-        }
-        else {
-            //底分型
-            if (this->left.get_low() > this->middle.get_high() + 0.01) {
-                //有缺口
-                this->right = bi;
-                this->status = XianDuanChuLiStatus::AFTER_RIGHT;
-            }
-            else {
-                if (this->start.get_type() == BiType::DOWN) {
-                    ret_xd.xd1 = XianDuan(this->start, this->after_left);
-                    ret_xd.xd1.save_bi_list(this->get_xd_bi_list());
-                    ret_xd.xd2 = XianDuan(this->middle, bi);
-                    ret_xd.xd2.set_type(XianDuanType::TEMP_UP);
-                    ret_xd.type = FindXianDuanReturnType::Two;
-                    this->start = this->middle;
-                    this->left = this->after_middle;
-                    this->after_left = bi;
-                    this->status = XianDuanChuLiStatus::MIDDLE_HIGHLOW;
-                    return(ret_xd);
-                }
-                else {
-                    ret_xd.xd1 = XianDuan(this->start, this->start);
-                    ret_xd.xd1.save_bi_list(this->get_xd_bi_list());
-                    ret_xd.xd2 = XianDuan(this->left, this->middle);
-                    ret_xd.type = FindXianDuanReturnType::Two;
-                    this->start = this->after_middle;
-                    this->left = bi;
-                    this->status = XianDuanChuLiStatus::AFTER_LEFT;
-                    return(ret_xd);
-                }
-            }
-        }
-    }
-    ret_xd.type = FindXianDuanReturnType::None;
-    return(ret_xd);
-}
 
 
 void Bi3_xianduan(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {
@@ -3680,7 +1440,6 @@ void Bi3_xianduan_bi(int nCount, float* pOut, float* pHigh, float* pLow, float* 
             }
         }
     }
-    show_xd_bi_list(xdchuli.get_xd_bi_list(), pOut);
 }
 
 void Bi4_xianduan(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn) {

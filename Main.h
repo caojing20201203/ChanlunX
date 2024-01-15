@@ -4,10 +4,8 @@
 #include <float.h>
 #include <vector>
 #include "ChanlunZb.h"
-#include "ZhongShu.h"
 #include "Bi1.h"
 #include "XianDuan.h"
-#include "ZouShi.h"
 #include "bi_zoushi.h"
 #include "bi_zhongshu.h"
 #include "CompositeBi.h"

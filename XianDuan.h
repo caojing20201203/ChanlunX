@@ -7,24 +7,75 @@ using namespace std;
 
 enum class XianDuanType { NONE, TEMP_UP, TEMP_DOWN, FAILURE_TEMP_UP, FAILURE_TEMP_DOWN, UP, DOWN, FAILURE_UP, FAILURE_DOWN, LONG_XIANDUAN };
 enum class XianDuanKind {NONE, SigleBi,ThreeBi,LONGXIANDUAN, PANZHENG, QUSHI};
-/*
-class ZhongShu {
+
+class Bi_ZhongShu {
 private:
     Bi input;
     Bi bi1;
     Bi bi2;
     Bi bi3;
     Bi output;
+    Bi max_bi;
+    Bi min_bi;
     float max_high, min_low, high, low;
 public:
-    ZhongShu(Bi input, Bi bi1, Bi bi2, Bi bi3, Bi output) {
+    Bi_ZhongShu() {
+        this->max_high = 0;
+        this->min_low = 0;
+        this->high = 0;
+        this->low = 0;
+    }
+
+    Bi_ZhongShu(Bi input, Bi bi1, Bi bi2, Bi bi3, Bi output) {
+        this->input = input;
         this->max_high = max(bi1.get_high(), bi3.get_high());
         this->high = min(bi1.get_high(), bi3.get_high());
         this->min_low = min(bi1.get_low(), bi3.get_low());
         this->low = max(bi1.get_low(), bi3.get_low());
+        this->output = output;
+    }
+
+    float get_low() {
+        return(this->low);
+    }
+
+    float get_high() {
+        return(this->high);
+    }
+
+    void set_max_bi(Bi bi) {
+        this->max_bi = bi;
+    }
+
+    void set_min_bi(Bi bi) {
+        this->min_bi = bi;
+    }
+
+    float get_max_high() {
+        return(this->max_high);
+    }
+
+    float get_min_low() {
+        return(this->min_low);
+    }
+
+    Bi get_input() {
+        return(this->input);
+    }
+
+    Bi get_output() {
+        return(this->output);
+    }
+
+    void set_input(Bi bi) {
+        this->input = bi;
+    }
+
+    void set_output(Bi bi) {
+        this->output = bi;
     }
 };
-*/
+
 class XianDuan {
 private:
     XianDuanType type = XianDuanType::NONE;
@@ -152,7 +203,7 @@ public:
     }
 };
 
-enum class XianDuanChuLiStatus { a_1, a_2, a1_equal_a2, a_3, a2_equal_a3, a3_highlow_a1, a3_normal_a1, a_4, A};
+enum class XianDuanChuLiStatus { a_1, a_2, a1_equal_a2, a_3, a2_equal_a3, a3_highlow_a1, a3_normal_a1, longxianduan, longxianduan_normal, A, b_3, b_3_normal, b, b2_equal_b3, B};
 
 enum class FindXianDuanReturnType { None, Failure, NewXianDuan, XianDuanUpgrade, One, Two, Two_Bi, Three, FindZhongShu, ZhongShuSuccess, ZhongShuFailer, ZhongShuUpgrade };
 struct FindXianDuanReturn {
@@ -161,6 +212,12 @@ struct FindXianDuanReturn {
     XianDuan xd2;
     XianDuan xd3;
     Bi_ZhongShu zhongshu;
+};
+
+enum class FindZhongShuReturnType {None, ThreeBuy, ThreeSell, BeiChi};
+struct FindZhongShuReturn {
+    FindZhongShuReturnType type;
+    ZhongShu zs;
 };
 
 class XianDuanChuLi {
@@ -173,17 +230,31 @@ private:
     Bi a_2 = Bi();
     Bi a_3 = Bi();
     Bi a_4 = Bi();
+    Bi a_5 = Bi();
+    Bi b_1 = Bi();
+    Bi b_2 = Bi();
+    Bi b_3 = Bi();
+    Bi b_4 = Bi();
+    Bi b_5 = Bi();
+    Bi b = Bi();
+    Bi a = Bi();
+
+    Bi zhongshu_last_bi = Bi();
 
     BiChuLi bicl;
 
     Bi_ZhongShuChuLi A_zscl, B_zscl;
+    ZhongShu A, B;
 
     FindXianDuanReturn find_xianduan(Bi bi);
     FindXianDuanReturn __find_xianduan(Bi bi);
 
 
     void debug_xianduan(XianDuan xd);
-    FindXianDuanReturn failure_xd();
+    FindXianDuanReturn failure_xd(Bi bi1, Bi bi2);
+    vector<Bi> normal_process(Bi bi1, Bi bi2, Bi bi3);
+    vector<Bi> pre_zhongshu_process(Bi input, Bi bi1, Bi bi2, Bi bi3);
+    FindZhongShuReturn zhongshu_process(ZhongShu zs, Bi bi);
 
     XianDuan get_last_xd(int num);
     void push_bi_list();

@@ -498,11 +498,9 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
         break;
 
     case FenXingChuLiStatus::THREE:
-        if (this->one.get_high() < this->two.get_high())
+        if (this->one.get_high() < this->two.get_high()) {
             if (kx_gao > this->two.get_high()) {
                 //上升趋势
-                if (kx_gao > this->max_high)
-                    this->max_high = kx_gao;
                 if (this->one.get_position() == 0) {
                     Kxian1 zero_kx = Kxian1(this->one.get_high() + (float)0.01, this->one.get_low() + float(0.01), Direction::UP, -1);
                     ret_fx = FenXing(zero_kx, this->one, this->two, kxian);
@@ -520,33 +518,24 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             else {
                 //临时顶分型
                 this->three = kxian;
-                if (kx_gao > this->max_high) {
+                if ((this->two.get_high() != this->max_high) && (this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low())) {
+                    ret_fx = this->fx;
+                    ret_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
                     this->one = this->last_bar;
                     this->two = kxian;
+                    this->state = FenXingChuLiState::DOWN;
                     this->status = FenXingChuLiStatus::THREE;
-                    this->max_high = kx_gao;
                 }
                 else {
-                    if (this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low()) {
-                        if (kx_di < this->min_low)
-                            this->min_low = kx_di;
-                        ret_fx = this->fx;
-                        ret_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
-                        this->one = this->last_bar;
-                        this->two = kxian;
-                        this->state = FenXingChuLiState::DOWN;
-                        this->status = FenXingChuLiStatus::THREE;
+                    ret_fx = FenXing(this->one, this->two, kxian, kxian);
+                    if (ret_fx.get_high() == this->max_high) {
+                        ret_fx.set_high_low_type(HighLowType::NEW_HIGH);
                     }
-                    else {
-                        ret_fx = FenXing(this->one, this->two, kxian, kxian);
-                        if (ret_fx.get_high() == this->max_high) {
-                            ret_fx.set_high_low_type(HighLowType::NEW_HIGH);
-                        }
-                        this->state = FenXingChuLiState::TOP;
-                        this->status = FenXingChuLiStatus::FOUR;
-                    }
+                    this->state = FenXingChuLiState::TOP;
+                    this->status = FenXingChuLiStatus::FOUR;
                 }
             }
+        }
         else {
             if (kx_di < this->two.get_low()) {
                 //下降趋势
@@ -565,31 +554,23 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             }
             else {
                 //临时底分型
-                if (kx_di < this->min_low) {
-                    this->one = this->last_bar;
+                if ((this->two.get_low() != this->min_low) && (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high())) {
                     this->two = kxian;
+                    this->one = this->last_bar;
+                    this->state = FenXingChuLiState::UP;
                     this->status = FenXingChuLiStatus::THREE;
-                    this->min_low = kxian.get_low();
+                    if (kx_gao > this->max_high)
+                        this->max_high = kx_gao;
+                    ret_fx = this->fx;
+                    ret_fx.set_type(FenXingType::FAILURE_VERIFY_TOP);
                 }
                 else {
-                    if (this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
-                        this->two = kxian;
-                        this->one = this->last_bar;
-                        this->state = FenXingChuLiState::UP;
-                        this->status = FenXingChuLiStatus::THREE;
-                        if (kx_gao > this->max_high)
-                            this->max_high = kx_gao;
-                        ret_fx = this->fx;
-                        ret_fx.set_type(FenXingType::FAILURE_VERIFY_TOP);
-                    }
-                    else {
-                        this->three = kxian;
-                        ret_fx = FenXing(this->one, this->two, kxian, kxian);
-                        this->state = FenXingChuLiState::BOTTOM;
-                        this->status = FenXingChuLiStatus::FOUR;
-                        if (ret_fx.get_low() == this->min_low) {
-                            ret_fx.set_high_low_type(HighLowType::NEW_LOW);
-                        }
+                    this->three = kxian;
+                    ret_fx = FenXing(this->one, this->two, kxian, kxian);
+                    this->state = FenXingChuLiState::BOTTOM;
+                    this->status = FenXingChuLiStatus::FOUR;
+                    if (ret_fx.get_low() == this->min_low) {
+                        ret_fx.set_high_low_type(HighLowType::NEW_LOW);
                     }
                 }
             }
@@ -612,7 +593,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             }
             else {
                 if (kx_gao > this->last_bar.get_high()) {
-                    if (kx_di > this->last_bar.get_high() + 0.01) {
+                    if (kx_di > this->last_bar.get_high() + 0.0001) {
                         //缺口处理
                         ret_fx = FenXing(this->one, this->two, this->three, kxian);
                         ret_fx.set_type(FenXingType::VERIFY_BOTTOM);
@@ -623,8 +604,23 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         this->status = FenXingChuLiStatus::THREE;
                     }
                     else {
-                        this->four = kxian;
-                        this->status = FenXingChuLiStatus::FIVE;
+                        if (this->temp_fx.get_high_low_type() == HighLowType::NONE && this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
+                            if (this->temp_fx.get_low() < this->fx.get_low()) {
+                                this->four = kxian;
+                                this->status = FenXingChuLiStatus::FIVE;
+                            }
+                            else {
+                                ret_fx = this->fx;
+                                ret_fx.set_type(FenXingType::FAILURE_VERIFY_TOP);
+                                this->one = this->last_bar;
+                                this->two = kxian;
+                                this->status = FenXingChuLiStatus::THREE;
+                            }
+                        }
+                        else {
+                            this->four = kxian;
+                            this->status = FenXingChuLiStatus::FIVE;
+                        }
                     }
                     if (kx_gao > this->max_high)
                         this->max_high = kx_gao;
@@ -648,7 +644,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             }
             else {
                 if (kx_di < this->last_bar.get_low()) {
-                    if (kx_gao < this->last_bar.get_low() - 0.01) {
+                    if (kx_gao < this->last_bar.get_low() - 0.0001) {
                         //缺口处理
                         ret_fx = FenXing(this->one, this->two, this->three, kxian);
                         ret_fx.set_type(FenXingType::VERIFY_TOP);
@@ -659,8 +655,23 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         this->status = FenXingChuLiStatus::THREE;
                     }
                     else {
-                        this->four = kxian;
-                        this->status = FenXingChuLiStatus::FIVE;
+                        if (this->temp_fx.get_high_low_type() == HighLowType::NONE && this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low()) {
+                            if (this->temp_fx.get_high() > this->fx.get_high()) {
+                                this->four = kxian;
+                                this->status = FenXingChuLiStatus::FIVE;
+                            }
+                            else {
+                                ret_fx = this->fx;
+                                ret_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
+                                this->one = this->last_bar;
+                                this->two = kxian;
+                                this->status = FenXingChuLiStatus::THREE;
+                            }
+                        }
+                        else {
+                            this->four = kxian;
+                            this->status = FenXingChuLiStatus::FIVE;
+                        }
                     }
                 }
                 else {
@@ -686,7 +697,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             }
             else {
                 if (kx_gao > this->last_bar.get_high()) {
-                    if (kx_di > this->last_bar.get_high() + 0.01) {
+                    if (kx_di > this->last_bar.get_high() + 0.0001) {
                         //缺口处理
                         ret_fx = FenXing(this->one, this->two, this->three, kxian);
                         ret_fx.set_type(FenXingType::VERIFY_BOTTOM);
@@ -697,8 +708,23 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         this->status = FenXingChuLiStatus::THREE;
                     }
                     else {
-                        this->five = kxian;
-                        this->status = FenXingChuLiStatus::SIX;
+                        if (this->temp_fx.get_high_low_type() == HighLowType::NONE && this->fx.get_type() == FenXingType::VERIFY_TOP && kx_gao > this->fx.get_high()) {
+                            if (this->temp_fx.get_low() < this->fx.get_low()) {
+                                this->five = kxian;
+                                this->status = FenXingChuLiStatus::SIX;
+                            }
+                            else {
+                                ret_fx = this->fx;
+                                ret_fx.set_type(FenXingType::FAILURE_VERIFY_TOP);
+                                this->one = this->last_bar;
+                                this->two = kxian;
+                                this->status = FenXingChuLiStatus::THREE;
+                            }
+                        }
+                        else {
+                            this->five = kxian;
+                            this->status = FenXingChuLiStatus::SIX;
+                        }
                     }
                     if (kx_gao > this->max_high)
                         this->max_high = kx_gao;
@@ -719,7 +745,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             }
             else {
                 if (kx_di < this->last_bar.get_low()) {
-                    if (kx_gao < this->last_bar.get_low() - 0.01) {
+                    if (kx_gao < this->last_bar.get_low() - 0.0001) {
                         //缺口处理
                         ret_fx = FenXing(this->one, this->two, this->three, kxian);
                         ret_fx.set_type(FenXingType::VERIFY_TOP);
@@ -730,8 +756,23 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
                         this->status = FenXingChuLiStatus::THREE;
                     }
                     else {
-                        this->five = kxian;
-                        this->status = FenXingChuLiStatus::SIX;
+                        if (this->temp_fx.get_high_low_type() == HighLowType::NONE && this->fx.get_type() == FenXingType::VERIFY_BOTTOM && kx_di < this->fx.get_low()) {
+                            if (this->temp_fx.get_high() > this->fx.get_high()) {
+                                this->five = kxian;
+                                this->status = FenXingChuLiStatus::SIX;
+                            }
+                            else {
+                                ret_fx = this->fx;
+                                ret_fx.set_type(FenXingType::FAILURE_VERIFY_BOTTOM);
+                                this->one = this->last_bar;
+                                this->two = kxian;
+                                this->status = FenXingChuLiStatus::THREE;
+                            }
+                        }
+                        else {
+                            this->five = kxian;
+                            this->status = FenXingChuLiStatus::SIX;
+                        }
                     }
                 }
                 else {
@@ -797,6 +838,7 @@ FenXing FenXingChuLi::__find_fenxing(Kxian1 kxian) {
             }
             break;
         }
+        break;
     }
     this->last_bar = kxian;
     return(ret_fx);

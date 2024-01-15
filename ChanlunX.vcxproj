@@ -263,7 +263,6 @@
     <ClCompile Include="FenXingChuLi.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="XianDuan.cpp" />
-    <ClCompile Include="ZouShi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaoHanChuLi.h" />
@@ -276,8 +275,6 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="OutputDebug.h" />
     <ClInclude Include="XianDuan.h" />
-    <ClInclude Include="ZhongShu.h" />
-    <ClInclude Include="ZouShi.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

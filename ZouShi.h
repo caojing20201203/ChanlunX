@@ -1,105 +1,280 @@
-﻿#pragma once
-#include <vector>
-#include "CompositeBi.h"
-#include "ZhongShu.h"
+#ifndef __ZOUSHI_H
+#define __ZOUSHI_H
 
-enum class ZouShiType {NONE, PANZHENG, UP, DOWN};
+#include "XianDuan.h"
+#include "Level.h"
+
+using namespace std;
+#pragma pack(push, 1)
+
+class ZhongShu {
+    private:
+        Level level;
+        XianDuan input;
+        XianDuan output;
+        float max_high, high, min_low, low;
+        XianDuan max_xd, min_xd, after_max_xd, after_min_xd;
+        XianDuan last_xd;
+        int xd_count;
+
+    public:
+        ZhongShu() {
+            this->input = XianDuan();
+            this->output = XianDuan();
+            this->max_high = 0;
+            this->min_low = 0;
+            this->high = 0;
+            this->low = 0;
+            this->max_xd = XianDuan();
+            this->min_xd = XianDuan();
+            this->after_max_xd = XianDuan();
+            this->after_min_xd = XianDuan();
+            this->last_xd = XianDuan();
+            this->xd_count = 0;
+        }
+
+        ZhongShu(XianDuan input, XianDuan xd1, XianDuan xd2, XianDuan xd3, XianDuan output){
+            this->input = input;
+            this->max_high = max(xd1.get_high(), xd3.get_high());
+            this->min_low = min(xd1.get_low(), xd3.get_low());
+            this->high = min(xd1.get_high(), xd3.get_high());
+            this->low = max(xd1.get_low(), xd3.get_low());
+            if (xd1.get_high() == this->max_high) {
+                this->max_xd = xd1;
+                this->after_max_xd = xd2;
+            } else {
+                this->max_xd = xd3;
+                this->after_max_xd = XianDuan();
+            }
+            if (xd1.get_low() == this->min_low){
+                this->min_xd = xd1;
+                this->after_min_xd = xd2;
+            } else {
+                this->min_xd = xd3;
+                this->after_min_xd = XianDuan();
+            }
+            this->last_xd = xd3;
+            this->xd_count = 3;
+        }
+
+        void set_output(XianDuan xd) {
+            this->output = xd;
+        }
+
+        XianDuan get_after_max_xd() {
+            return(this->after_max_xd);
+        }
+
+        void set_after_max_xd(XianDuan xd) {
+            this->after_max_xd = xd;
+        }
+
+        XianDuan get_after_min_xd() {
+            return(this->after_min_xd);
+        }
+
+        void set_after_min_xd(XianDuan xd) {
+            this->after_min_xd = xd;
+        }
+
+        XianDuan get_max_xd() {
+            return(this->max_xd);
+        }
+
+        void set_max_xd(XianDuan xd) {
+            this->max_xd = xd;
+            this->max_high = xd.get_high();
+            this->after_max_xd = XianDuan();
+        }
+
+        XianDuan get_min_xd(XianDuan xd) {
+            return(this->min_xd);
+        }
+
+        void set_min_xd(XianDuan xd) {
+            this->min_xd = xd;
+            this->min_low = xd.get_low();
+            this->after_min_xd = XianDuan();
+        }
+
+        XianDuan get_last_xd() {
+            return(this->last_xd);
+        }
+
+        void set_last_xd(XianDuan xd) {
+            this->last_xd = xd;
+        }
+
+        float get_high() {
+            return(this->high);
+        }
+
+        float get_low() {
+            return(this->low);
+        }
+
+        float get_max_high() {
+            return(this->max_high);
+        }
+
+        float get_min_low() {
+            return(this->min_low);
+        }
+
+        int get_xd_count() {
+            return(this->xd_count);
+        }
+
+        void set_xd_count(int count){
+            this->xd_count = count;
+        }
+};
+
+enum class ZouShiType {NONE, DAXIANDUAN_UP, UPDATE_DAXIANDUAN_UP, DAXIANDUAN_DOWN, UPDATE_DAXIANDUAN_DOWN, PANZHENG, UPDATE_PANZHENG, QUSHI_UP, UPDATE_QUSHI_UP, QUSHI_DOWN, UPDATE_QUSHI_DOWN};
+enum class ZouShiDirection {NONE, UP, DOWN};
+enum class ZouShiLevel {MONTH, WEEK, DAY, MIN_30, MIN_5, MIN_1};
 class ZouShi {
     private:
         ZouShiType type;
-        float high, low, lenght;
-        int start_pos, stop_pos;
-        CompositeBi start_bi, stop_bi;
+        float high;
+        float low;
+        XianDuan a, b, c;
+        ZhongShu A, B;
+        XianDuan start_xd, stop_xd;
+        float length;
+        int count;
+
     public:
         ZouShi() {
             this->type = ZouShiType::NONE;
             this->high = 0;
             this->low = 0;
-            this->lenght = 0;
-            this->start_pos = 0;
-            this->stop_pos = 0;
-            this->start_bi = CompositeBi();
-            this->stop_bi = CompositeBi();
+            this->a = XianDuan();
+            this->b = XianDuan();
+            this->c = XianDuan();
+            this->A = ZhongShu();
+            this->B = ZhongShu();
+            this->start_xd = XianDuan();
+            this->stop_xd = XianDuan(); 
+            this->length = 0;
+            this->count = 0;
         }
 
-        ZouShi(ZouShiType type, CompositeBi start_bi, CompositeBi stop_bi) {
-            this->type = type;
-            this->start_bi = start_bi;
-            this->stop_bi = stop_bi;
-            if (start_bi.get_type() == CompositeBiType::UP) {
-                this->low = start_bi.get_low();
-                this->high = stop_bi.get_high();
+        ZouShi(XianDuan xd1, XianDuan xd2, XianDuan xd3, XianDuan xd4, XianDuan xd5){
+            if (xd1.get_type() == XianDuanType::UP) {
+                this->type = ZouShiType::DAXIANDUAN_UP;
+                this->length = xd5.get_high() - xd1.get_low();
             } else {
-                if (start_bi.get_type() == CompositeBiType::DOWN) {
-                    this->high = start_bi.get_high();
-                    this->low = stop_bi.get_low();
-                }
+                this->type = ZouShiType::DAXIANDUAN_DOWN;
+                this->length = xd1.get_high() - xd5.get_low();
             }
-            this->lenght = this->high - this->low;
-            this->start_pos = start_bi.get_start_pos();
-            this->stop_pos = stop_bi.get_stop_pos();
+            this->start_xd = xd1;
+            this->stop_xd = xd5;
+            //this->count = xd5.get_count() - xd1.get_count();
+        }
+
+        ZouShi(XianDuan a, ZhongShu A, XianDuan b){
+            this->type = ZouShiType::PANZHENG;
+            this->start_xd = a;
+            this->A = A;
+            this->stop_xd = b;
+            this->a = a;
+            this->b = b;
+            if (a.get_type() == XianDuanType::UP){
+                this->length = b.get_high() - a.get_low();
+            } else {
+                this->length = a.get_high() - b.get_low();
+            }
+        }
+
+        ZouShi(XianDuan a, ZhongShu A, XianDuan b, ZhongShu B, XianDuan c){
+            if (a.get_type() == XianDuanType::UP){
+                this->type = ZouShiType::QUSHI_UP;
+                this->length = c.get_high() - a.get_low();
+            } else {
+                this->type = ZouShiType::QUSHI_DOWN;
+                this->length = a.get_high() - c.get_low();
+            }
+            this->a = a;
+            this->A = A;
+            this->b = b;
+            this->B = B;
+            this->c = c;
+            this->start_xd = a;
+            this->stop_xd = c;
         }
 
         ZouShiType get_type(){
             return(this->type);
         }
 
-        int get_start_pos() {
-            return(this->start_pos);
-        }
-
-        int get_stop_pos() {
-            return(this->stop_pos);
-        }
-
-        CompositeBi get_start_xd(){
-            return(this->start_bi);
-        }
-
-        CompositeBi get_stop_xd() {
-            return(this->stop_bi);
+        void set_type(ZouShiType type){
+            this->type = type;
         }
 
         float get_high(){
             return(this->high);
         }
 
-        float get_low(){
+        float get_low() {
             return(this->low);
+        }
+
+        float get_length(){
+            return(this->length);
+        }
+
+        int get_start_pos() {
+            return(this->start_xd.get_start_pos());
+        }
+
+        int get_stop_pos(){
+            return(this->stop_xd.get_stop_verify_pos());
+        }
+
+        XianDuan get_start_xd(){
+            return(this->start_xd);
+        }
+
+        XianDuan get_stop_xd() {
+            return(this->stop_xd);
+        }
+
+        void set_stop_xd(XianDuan xd) {
+            this->stop_xd = xd;
+            if (this->start_xd.get_type() == XianDuanType::UP){
+                this->length = xd.get_high() - this->start_xd.get_low();
+            } else {
+                this->length = this->start_xd.get_high() - xd.get_low();
+            }
+        }
+
+        bool operator==(ZouShi comp){
+            if (this->type == comp.type && this->start_xd == comp.start_xd && this->stop_xd == comp.stop_xd)
+                return(true);
+            else
+                return(false);
         }
 };
 
-enum class FindZouShiReturnType {None, Failure, One, Two};
-struct FindZouShiReturn{
-    FindZouShiReturnType type;
-    ZouShi zoushi1;
-    ZouShi zoushi2;
-};
-
-//enum class ZouShiChuLiStatus {NONE, START, LEFT, LEFT_EQUAL, AFTER_LEFT_EQUAL, AFTER_LEFT, AFTER_LEFT_NORMAL, AFTER_LEFT_NORMAL_NORMAL, a, A_xd1, A_xd2, A_xd2_highlow, A_xd2_normal, A_THREEBUY, A_THREESELL, A_REVERSE_THREESELL, A_REVERSE_THREEBUY, A_THREEBUY_NORMAL, A_THREESELL_NORMAL,  A_xd3, A, b, B_xd1, B_xd2, B_xd2_normal, B_xd3, B, c};
-enum class ZouShiChuLiStatus {a0, a1, a1_equal_a0, a1_equal_a0_normal, a2_equal_a1, a2_equal_a1_normal, a2, a2_normal, a3, LONGXIANDUAN, A, A_MAX_HIGH, THREE_BUY, THREE_SELL, A_MIN_LOW, b0, b1, b2, b3, B, c0, c1, c2};
+enum class ZouShiChuLiStatus {a1, a2, a1_equal_a2, a1_equal_a2_normal, a1_equal_a2_normal_normal, a2_normal, a2_equal_a3, a2_normal_normal, a3, a3_normal, a4, A, b3, b, B, c};
 class ZouShiChuLi {
     private:
-        CompositeBiChuLi compbicl;
         ZouShiChuLiStatus status;
-        CompositeBi a, b, c;
-        CompositeBi A_xd1, A_xd2, A_xd3, B_xd1, B_xd2, B_xd3;
-        CompositeBi a_0, a_1, a_2, a_3;
-        CompositeBi b_0, b_1, b_2;
-        CompositeBi c_0, c_1, c_2;
+        XianDuan a1, a2, a3, a4;
+        XianDuan b1, b2, b3;
+        XianDuanChuLi xdcl;
+        ZouShi last_zoushi;
         ZhongShu A, B;
-        CompositeBi normal_bi, normal_first_bi;
     public:
         ZouShiChuLi();
-        ZouShi get_last_zoushi();
-        CompositeBi generate_bi(CompositeBi bi1, CompositeBi bi3);
-        bool match_zhongshu_xianduan(CompositeBi bi1, CompositeBi bi2);
-        void handle(vector<Kxian1>& kxianList);
-        FindZouShiReturn find_zoushi(CompositeBi xd);
-        void last_zoushi_process(CompositeBi bi1, CompositeBi bi2);
-        CompositeBi normal_process(CompositeBi bi);
+        void handle(vector<Kxian1>& xdlist);
+        ZouShi __find_zoushi(XianDuan xd);
+        ZouShi failure_zoushi(XianDuan xd1, XianDuan xd2, XianDuan xd3);
+        void zhongshu_process(ZhongShu zs, XianDuan xd);
         vector<ZouShi> zoushi_list;
 };
 
-void Bi3_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
-void Bi4_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn);
+void ZouShi_process(int count, float *pOut, float *pHigh, float *pLow, float *pIn);
+
+#endif

@@ -74,7 +74,7 @@ void Func6(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 //============================================================================
 void Func7(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 {
-    Bi3_zoushi(nCount, pOut, pHigh, pLow, pIgnore);
+    //Bi3_zoushi(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
 //============================================================================
@@ -82,7 +82,7 @@ void Func7(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 //============================================================================
 void Func8(int nCount, float *pOut, float *pHigh, float *pLow, float *pIgnore)
 {
-    Bi4_zoushi(nCount, pOut, pHigh, pLow, pIgnore);
+    //Bi4_zoushi(nCount, pOut, pHigh, pLow, pIgnore);
 }
 
 //============================================================================

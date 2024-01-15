@@ -1,733 +1,419 @@
-﻿#include "ZouShi.h"
-#include "ZhongShu.h"
+#include "BaoHanChuLi.h"
+#include "ZouShi.h"
 
-using namespace std;
-
- ZouShi ZouShiChuLi::get_last_zoushi() {
-    if (!this->zoushi_list.empty())
-        return(this->zoushi_list.back());
-    return(ZouShi());
- }
-
- CompositeBi ZouShiChuLi::generate_bi(CompositeBi bi1, CompositeBi bi3) {
-    CompositeBi ret_bi = CompositeBi();
-    Bi start_bi, stop_bi;
-    start_bi = bi1.get_start_bi();
-    stop_bi = bi3.get_stop_bi();
-    ret_bi = CompositeBi(start_bi, stop_bi);
-    return(ret_bi);
+ZouShiChuLi::ZouShiChuLi(){
+    this->status = ZouShiChuLiStatus::a1;
+    this->xdcl = XianDuanChuLi();
+    this->last_zoushi = ZouShi();
 }
 
-bool ZouShiChuLi::match_zhongshu_xianduan(CompositeBi bi1, CompositeBi bi2) {
-    float bilv = 0;
+void ZouShiChuLi::handle(vector<Kxian1>& kxlist){
+    vector<XianDuan> xd_list;
+    ZouShi zoushi;
+    XianDuan xd;
 
-    if (bi1.get_length() > bi2.get_length()) {
-        bilv = bi1.get_length() / bi2.get_length();
-    } else {
-        bilv = bi2.get_length() / bi1.get_length();
+    this->xdcl.handle(kxlist);
+    xd_list = this->xdcl.xianDuanList;
+
+    int count = xd_list.size();
+    if (count == 0)
+        return;
+
+    for (int i = 0; i < count; i++){
+        xd = xd_list[i];
+        zoushi = this->__find_zoushi(xd);
+        if (zoushi.get_type() != ZouShiType::NONE) {
+            this->zoushi_list.push_back(zoushi);
+        }
     }
+}
 
-    if (bilv > 0.618)
+bool is_xd_equal(XianDuan xd1, XianDuan xd2){
+    float radio;
+    float xd1_len = xd1.get_length();
+    float xd2_len = xd2.get_length();
+
+    if (xd1_len <= xd2_len)
+        radio = xd1_len / xd2_len;
+    else 
+        radio = xd2_len / xd1_len;
+    
+    if (radio >= 0.618)
         return(true);
     else
         return(false);
 }
 
-ZouShiChuLi::ZouShiChuLi(){
-    this->status = ZouShiChuLiStatus::a0;
-    this->compbicl = CompositeBiChuLi();
-}
+ZouShi ZouShiChuLi::failure_zoushi(XianDuan xd1, XianDuan xd2, XianDuan xd3){
+    ZouShi ret_zoushi = ZouShi();
+    XianDuan start_xd, stop_xd;
 
-void ZouShiChuLi::handle(vector<Kxian1>& kxianList) {
-    FindZouShiReturn ret_zoushi;
-    ZouShi zoushi = ZouShi();
-    CompositeBi comp_bi = CompositeBi();
-    this->compbicl.handle(kxianList, true);
-
-    int count = this->compbicl.composite_bi_list.size();
-    for (int i = 0; i < count; i++) {
-        comp_bi = this->compbicl.composite_bi_list[i];
-        ret_zoushi = this->find_zoushi(comp_bi);
-    }
-}
-
-bool is_composite_bi_equal(CompositeBi bi1, CompositeBi bi2) {
-    float radio;
-    float bi1_len, bi2_len;
-
-    bi1_len = bi1.get_length();
-    bi2_len = bi2.get_length();
-    if (bi1_len < bi2_len) {
-        radio = bi1_len / bi2_len;
+    if (this->last_zoushi.get_type() == ZouShiType::NONE){
+        if (xd3.get_type() == XianDuanType::NONE) {
+            this->a1 = xd2;
+            this->status = ZouShiChuLiStatus::a2;
+        } else {
+            this->a1 = xd3;
+            this->status = ZouShiChuLiStatus::a2;
+        }
     } else {
-        radio = bi2_len / bi1_len;
-    }
-    if (radio >= 0.618) {
-        return(true);
-    } else {
-        return(false);
-    }
-}
+        ret_zoushi = this->last_zoushi;
+        ret_zoushi.set_stop_xd(xd2);
 
-
-CompositeBi ZouShiChuLi::normal_process(CompositeBi bi) {
-    CompositeBi ret_bi = CompositeBi();
-
-    switch(this->normal_bi.get_type()){
-        case CompositeBiType::UP:
-            if (bi.get_high() > this->normal_bi.get_high()){
-                ret_bi = bi.generate_bi(this->normal_bi, bi);
-            } else {
-                if (bi.get_low() < this->normal_bi.get_low()){
-                    if (this->normal_first_bi.get_type() == CompositeBiType::NONE) {
-                        ret_bi = bi;
-                    } else {
-                        ret_bi = bi.generate_bi(this->normal_first_bi, bi);
-                    }
-                } else {
-                    if (this->normal_first_bi.get_type() == CompositeBiType::NONE) {
-                        this->normal_first_bi = bi;
-                    }
-                }
-            }
-            break;
-        case CompositeBiType::DOWN:
-            if (bi.get_low() < this->normal_bi.get_low()){
-                ret_bi = bi.generate_bi(this->normal_bi, bi);
-            } else {
-                if (bi.get_high() > this->normal_bi.get_high()) {
-                    if (this->normal_first_bi.get_type() == CompositeBiType::NONE) {
-                        ret_bi = bi;
-                    } else {
-                        ret_bi = bi.generate_bi(this->normal_first_bi, bi);
-                    }                    
-                } else {
-                    if (this->normal_first_bi.get_type() == CompositeBiType::NONE) {
-                        this->normal_first_bi = bi;
-                    }
-                }
-            }
-            break;
-    }
-    return(ret_bi);
-}
-
-void ZouShiChuLi::last_zoushi_process(CompositeBi bi1, CompositeBi bi2){
-    ZouShi last_zoushi;
-    if (this->zoushi_list.empty()) {
-        this->a_0 = bi2;
-        this->status = ZouShiChuLiStatus::a1;
-    }
-    else {
-        last_zoushi = this->zoushi_list.back();
-        if (last_zoushi.get_type() == ZouShiType::UP && bi2.get_high() > last_zoushi.get_high()) {
-            last_zoushi = ZouShi(ZouShiType::UP, last_zoushi.get_start_xd(), bi2);
-            this->zoushi_list.pop_back();
-            this->zoushi_list.push_back(last_zoushi);
-            this->status = ZouShiChuLiStatus::a0;
+        switch (ret_zoushi.get_type()) {
+            case ZouShiType::DAXIANDUAN_UP:
+                ret_zoushi.set_type(ZouShiType::UPDATE_DAXIANDUAN_UP);
+                break;
+            case ZouShiType::DAXIANDUAN_DOWN:
+                ret_zoushi.set_type(ZouShiType::UPDATE_DAXIANDUAN_DOWN);
+                break;
+            case ZouShiType::PANZHENG:
+                ret_zoushi.set_type(ZouShiType::UPDATE_PANZHENG);
+                break;
+            case ZouShiType::QUSHI_UP:
+                ret_zoushi.set_type(ZouShiType::UPDATE_QUSHI_UP);
+                break;
+            case ZouShiType::QUSHI_DOWN:
+                ret_zoushi.set_type(ZouShiType::UPDATE_QUSHI_DOWN);
+                break;
         }
-        else {
-            if (last_zoushi.get_type() == ZouShiType::DOWN && bi2.get_low() < last_zoushi.get_low()) {
-                last_zoushi = ZouShi(ZouShiType::UP, last_zoushi.get_start_xd(), bi2);
-                this->zoushi_list.pop_back();
-                this->zoushi_list.push_back(last_zoushi);
-                this->status == ZouShiChuLiStatus::a0;
-            }
-            else {
-                OutputDebugPrintf("last_zoushi未处理");
-            }
-        }
-    }
-
-}
-
-FindZouShiReturn ZouShiChuLi::find_zoushi(CompositeBi comp_bi) {
-    FindZouShiReturn ret_zoushi;
-    ZouShi last_zoushi, zoushi;
-
-    float bi_high = comp_bi.get_high();
-    float bi_low = comp_bi.get_low();
-    float bi_len = comp_bi.get_length();
-    CompositeBiType bi_type = comp_bi.get_type();
-    CompositeBi ret_bi;
-    FindZhongShuReturn ret_zs_value;
-
-    switch (this->status) {
-    case ZouShiChuLiStatus::a0:
-        //style 1(2)
-        this->a_0 = comp_bi;
-        this->status = ZouShiChuLiStatus::a1;
-        break;
-
-    case ZouShiChuLiStatus::a1:
-        if (is_composite_bi_equal(this->a_0, comp_bi)) {
-            this->a_1 = comp_bi;
-            this->status = ZouShiChuLiStatus::a1_equal_a0;
+        if (xd3.get_type() == XianDuanType::NONE) {
+            this->status = ZouShiChuLiStatus::a1;
         } else {
-            switch(bi_type) {
-                case CompositeBiType::UP:
-                    if (bi_high > this->a_0.get_high()){
-                        this->last_zoushi_process(this->a_0, comp_bi);
-                        this->status = ZouShiChuLiStatus::a0;
-                    } else {
-                        this->a_1 = comp_bi;
-                        this->status = ZouShiChuLiStatus::a2;
-                    }
-                    break;
-                case CompositeBiType::DOWN:
-                    if (bi_low < this->a_0.get_low()) {
-                        this->last_zoushi_process(this->a_0, this->a_1);
-                        this->status = ZouShiChuLiStatus::a0;
-                    } else {
-                        this->a_1 = comp_bi;
-                        this->status = ZouShiChuLiStatus::a2;
-                    }
-                    break;
-            }
+            this->a1 = xd3;
+            this->status = ZouShiChuLiStatus::a2;
         }
-        break;
-
-    case ZouShiChuLiStatus::a1_equal_a0:
-        if (is_composite_bi_equal(this->a_1, comp_bi)) {
-            this->a_2 = comp_bi;
-            this->A = ZhongShu(CompositeBi(), this->a_0, this->a_1, comp_bi);
-            this->status = ZouShiChuLiStatus::A;
-        } else {
-            switch (bi_type) {
-            case CompositeBiType::UP:
-                if (bi_high > this->a_0.get_high()){
-                    if (this->a_0.get_low() < this->a_1.get_low()){
-                        this->a_0 = comp_bi.generate_bi(this->a_0, comp_bi);
-                        this->status = ZouShiChuLiStatus::a1;
-                    } else {
-                        this->last_zoushi_process(this->a_0, this->a_1);
-                        this->a_0 = comp_bi;
-                        this->status = ZouShiChuLiStatus::a1;
-                    }
-                } else {
-                    this->a_2 = comp_bi;
-                    this->status = ZouShiChuLiStatus::a1_equal_a0_normal;
-                }
-                break;
-            case CompositeBiType::DOWN:
-                if (bi_low < this->a_0.get_low()) {
-                    if (this->a_0.get_high() > this->a_1.get_high()){
-                        this->a_0 = comp_bi.generate_bi(this->a_0, comp_bi);
-                        this->status = ZouShiChuLiStatus::a1;                        
-                    } else {
-                        this->last_zoushi_process(this->a_0, this->a_1);
-                        this->a_0 = comp_bi;
-                        this->status = ZouShiChuLiStatus::a1;                        
-                    }
-                } else {
-                    this->normal_bi = comp_bi;
-                    this->normal_first_bi = CompositeBi();
-                    this->status = ZouShiChuLiStatus::a1_equal_a0_normal;
-                }
-                break;
-            }
-        }
-        break;
-
-    case ZouShiChuLiStatus::a1_equal_a0_normal:
-        ret_bi = this->normal_process(comp_bi);
-        bi_type = ret_bi.get_type();
-        if (bi_type == this->normal_bi.get_type()) {
-            this->a_2 = ret_bi;
-            if (is_composite_bi_equal(this->a_2, this->a_1)){
-                this->A = ZhongShu(CompositeBi(), this->a_0, this->a_1, this->a_2);
-                this->status = ZouShiChuLiStatus::A;
-            } else {
-                switch(bi_type){
-                    case CompositeBiType::UP:
-                        if (this->a_2.get_high() > this->a_0.get_high()){
-                            if (this->a_0.get_low() < this->a_1.get_low()){
-                                this->a_0 = comp_bi.generate_bi(this->a_1, this->a_3);
-                                this->status = ZouShiChuLiStatus::a1;
-                            } else {
-                                this->last_zoushi_process(this->a_0, this->a_1);
-                                this->a_0 = this->a_2;
-                                this->status = ZouShiChuLiStatus::a1;
-                            }
-                        } else {
-                            this->status = ZouShiChuLiStatus::a1_equal_a0_normal;
-                        }
-                        break;
-                    case CompositeBiType::DOWN:
-                        if (this->a_2.get_low() < this->a_0.get_low()) {
-                            if (this->a_0.get_high() > this->a_1.get_high()){
-                                this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                this->status = ZouShiChuLiStatus::a1;
-                            } else {
-                                this->last_zoushi_process(this->a_0, this->a_1);
-                                this->a_0 = this->a_2;
-                                this->status = ZouShiChuLiStatus::a1;
-                            }
-                         } else {
-                            this->status = ZouShiChuLiStatus::a1_equal_a0_normal;
-                         }
-                        break;
-                    }
-                }
-            } else {
-                if (bi_type == CompositeBiType::NONE) {
-                    this->status = ZouShiChuLiStatus::a1_equal_a0_normal;
-                } else {
-                    //返回两笔
-                    this->a_1 = comp_bi.generate_bi(this->a_1, ret_bi);
-                    if (is_composite_bi_equal(this->a_0, this->a_1)){
-                        this->status = ZouShiChuLiStatus::a1_equal_a0;
-                    } else {
-                        switch(bi_type) {
-                            case CompositeBiType::UP:
-                                if (this->a_1.get_high() > this->a_0.get_high()){
-                                    this->last_zoushi_process(this->a_0, this->a_1);
-                                    this->status = ZouShiChuLiStatus::a0;
-                                }else {
-                                    this->status = ZouShiChuLiStatus::a2;
-                                }
-                                break;
-                            case CompositeBiType::DOWN:
-                                if (this->a_1.get_low() < this->a_0.get_low()) {
-                                    this->last_zoushi_process(this->a_0, this->a_1);
-                                    this->status = ZouShiChuLiStatus::a0;
-                                } else {
-                                    this->status = ZouShiChuLiStatus::a2;                            
-                                }
-                                break;
-                            }
-                    }
-                }
-            }
-        break;
-        
-    case ZouShiChuLiStatus::a2:
-        if (is_composite_bi_equal(this->a_1, comp_bi)) {
-            this->a_2 = comp_bi;
-            this->status = ZouShiChuLiStatus::a2_equal_a1;
-        } else {
-            switch(bi_type) {
-                case CompositeBiType::UP:
-                    if (bi_high > this->a_0.get_high()) {
-                        this->a_0 = comp_bi.generate_bi(this->a_0, comp_bi);
-                        this->status = ZouShiChuLiStatus::a1;
-                    } else {
-                        this->normal_bi = comp_bi;
-                        this->normal_first_bi = CompositeBi();
-                        this->status = ZouShiChuLiStatus::a2_normal;
-                    }
-                    break;
-                case CompositeBiType::DOWN:
-                    if (bi_low < this->a_0.get_low()) {
-                        this->a_0 = comp_bi.generate_bi(this->a_0, comp_bi);
-                        this->status = ZouShiChuLiStatus::a1;
-                    } else {
-                        this->normal_bi = comp_bi;
-                        this->normal_first_bi = CompositeBi();
-                        this->status = ZouShiChuLiStatus::a2_normal;
-                    }
-                    break;
-            }
-        }
-        break;
-    case ZouShiChuLiStatus::a2_normal:
-            ret_bi = this->normal_process(comp_bi);
-            bi_type = ret_bi.get_type();
-            if (bi_type == this->normal_bi.get_type()){
-                //返回1笔
-                this->a_2 = comp_bi.generate_bi(this->a_2, comp_bi);
-                if (is_composite_bi_equal(this->a_1, comp_bi)){
-                    this->status = ZouShiChuLiStatus::a1_equal_a0;
-                } else {
-                    switch(bi_type) {
-                        case CompositeBiType::UP:
-                            if (this->a_2.get_high() > this->a_0.get_high()){
-                                this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                this->status = ZouShiChuLiStatus::a1;
-                            } else {
-                                this->status = ZouShiChuLiStatus::a2;
-                            }
-                            break;
-                        case CompositeBiType::DOWN:
-                            if (this->a_2.get_low() < this->a_0.get_low()){
-                                this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                this->status = ZouShiChuLiStatus::a1;
-                            } else {
-                                this->status = ZouShiChuLiStatus::a2;
-                            }
-                            break;
-                    }
-                }
-            } else {
-                if (bi_type == CompositeBiType::NONE) {
-                    this->status = ZouShiChuLiStatus::a2_normal;
-                } else {
-                    //返回两笔
-                    this->a_1 = comp_bi.generate_bi(this->a_1, ret_bi);
-                    if (is_composite_bi_equal(this->a_0, this->a_1)) {
-                        this->status = ZouShiChuLiStatus::a1_equal_a0;
-                    } else {
-                        switch(bi_type) {
-                            case CompositeBiType::UP:
-                                if (this->a_1.get_high() > this->a_0.get_high()){
-                                    this->last_zoushi_process(this->a_0, this->a_1);
-                                    this->status = ZouShiChuLiStatus::a0;
-                                } else {
-                                    this->status = ZouShiChuLiStatus::a2;
-                                }
-                                break;
-                            case CompositeBiType::DOWN:
-                                if (this->a_1.get_low() < this->a_0.get_low()){
-                                    this->last_zoushi_process(this->a_0, this->a_1);
-                                    this->status = ZouShiChuLiStatus::a0;
-                                } else {
-                                    this->status = ZouShiChuLiStatus::a2;
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-            break;
-
-    case ZouShiChuLiStatus::a2_equal_a1:
-        if (is_composite_bi_equal(this->a_2, comp_bi)) {
-            //中枢
-            this->A = ZhongShu(this->a_0, this->a_1, this->a_2, comp_bi);
-            this->status = ZouShiChuLiStatus::A;
-        } else {
-            switch (comp_bi.get_type()) {
-            case CompositeBiType::UP:
-                if (bi_high > this->a_1.get_high()){
-                    if (this->a_0.get_low() < this->a_2.get_low()){
-                        this->a_1 = comp_bi.generate_bi(this->a_1, comp_bi);
-                        if (is_composite_bi_equal(this->a_0, this->a_1)) {
-                            this->status = ZouShiChuLiStatus::a1_equal_a0;
-                        } else {
-                            if (bi_high > this->a_0.get_high()){
-                                this->last_zoushi_process(this->a_0, this->a_1);
-                                this->status = ZouShiChuLiStatus::a0;
-                            } else {
-                                this->status = ZouShiChuLiStatus::a2;
-                            }
-                        }
-                    } else {
-                        this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                        this->a_1 = comp_bi;
-                        if (is_composite_bi_equal(this->a_0, this->a_1)){
-                            this->status = ZouShiChuLiStatus::a1_equal_a0;
-                        } else {
-                            if (this->a_1.get_high() > this->a_0.get_high()){
-                                this->last_zoushi_process(this->a_0, this->a_1);
-                                this->status = ZouShiChuLiStatus::a0;
-                            } else {
-                                this->status = ZouShiChuLiStatus::a2;
-                            }
-                        }
-                    }
-                } else {
-                    this->normal_bi = comp_bi;
-                    this->normal_first_bi = CompositeBi();
-                    this->status = ZouShiChuLiStatus::a2_equal_a1_normal;
-                }
-                break;
-            case CompositeBiType::DOWN:
-                if (bi_low < this->a_1.get_low()){
-                    if (this->a_0.get_high() > this->a_2.get_high()){
-                        this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                        this->a_1 = comp_bi;
-                        if (is_composite_bi_equal(this->a_0, this->a_1)) {
-                            this->status = ZouShiChuLiStatus::a1_equal_a0;
-                        } else {
-                            if (this->a_1.get_low() < this->a_0.get_low()){
-                                this->last_zoushi_process(this->a_0, this->a_1);
-                                this->status = ZouShiChuLiStatus::a0;
-                            } else {
-                                this->status = ZouShiChuLiStatus::a2;
-                            }
-                        }
-                    } else {
-                        this->a_1 = comp_bi.generate_bi(this->a_1, comp_bi);
-                        if (is_composite_bi_equal(this->a_0, this->a_1)){
-                            this->status = ZouShiChuLiStatus::a1_equal_a0;
-                        } else {
-                            if (this->a_1.get_low() < this->a_0.get_low()) {
-                                this->last_zoushi_process(this->a_0, this->a_1);
-                                this->status = ZouShiChuLiStatus::a0;
-                            } else {
-                                this->status = ZouShiChuLiStatus::a2;
-                            }
-                        }
-                    }
-                } else {
-                    this->normal_bi = comp_bi;
-                    this->normal_first_bi = CompositeBi();
-                    this->status = ZouShiChuLiStatus::a2_equal_a1_normal;
-                }
-                break;
-            }
-        }
-        break;
-
-    case ZouShiChuLiStatus::a2_equal_a1_normal:
-        ret_bi = this->normal_process(comp_bi);
-        bi_type = ret_bi.get_type();
-        if (bi_type == this->normal_bi.get_type()) {
-            //返回一笔
-            this->a_3 = ret_bi;
-            if (is_composite_bi_equal(this->a_2, this->a_3)){
-                this->A = ZhongShu(this->a_0, this->a_1, this->a_2, this->a_3);
-                this->status = ZouShiChuLiStatus::A;
-            } else {
-                switch(bi_type){
-                    case CompositeBiType::UP:
-                        if (this->a_3.get_high() > this->a_1.get_high()){
-                            if (this->a_0.get_low() < this->a_2.get_low()) {
-                                this->a_1 = comp_bi.generate_bi(this->a_1, this->a_3);
-                                if (is_composite_bi_equal(this->a_0, this->a_1)){
-                                    this->status = ZouShiChuLiStatus::a1_equal_a0;
-                                } else {
-                                    if (this->a_1.get_high() > this->a_0.get_high()){
-                                        this->last_zoushi_process(this->a_0, this->a_1);
-                                        this->status = ZouShiChuLiStatus::a0;
-                                    } else {
-                                        this->status = ZouShiChuLiStatus::a2;
-                                    }
-                                }
-                            } else {
-                                this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                this->a_1 = ret_bi;
-                                if (is_composite_bi_equal(this->a_0, this->a_1)){
-                                    this->status = ZouShiChuLiStatus::a1_equal_a0;
-                                } else {
-                                    if (this->a_1.get_high() > this->a_0.get_high()){
-                                        this->last_zoushi_process(this->a_0, this->a_1);
-                                        this->status = ZouShiChuLiStatus::a0;
-                                    } else {
-                                        this->status = ZouShiChuLiStatus::a2;
-                                    }
-                                }
-                            }
-                        } else {
-                            this->status = ZouShiChuLiStatus::a2_equal_a1_normal;
-                        }
-                        break;
-                    case CompositeBiType::DOWN:
-                        if (this->a_3.get_low() < this->a_1.get_low()){
-                            if (this->a_0.get_high() > this->a_1.get_high()){
-                                this->a_1 = comp_bi.generate_bi(this->a_0, this->a_1);
-                                if (is_composite_bi_equal(this->a_0, this->a_1)){
-                                    this->status = ZouShiChuLiStatus::a1_equal_a0;
-                                } else {
-                                    if (this->a_1.get_low() < this->a_0.get_low()){
-                                        this->last_zoushi_process(this->a_0, this->a_1);
-                                        this->status = ZouShiChuLiStatus::a0;
-                                    } else {
-                                        this->status = ZouShiChuLiStatus::a2_equal_a1_normal;
-                                    }
-                                }
-                            } else {
-                                this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                this->a_1 = comp_bi;
-                                if (is_composite_bi_equal(this->a_0, this->a_1)){
-                                    this->status = ZouShiChuLiStatus::a1_equal_a0;
-                                } else {
-                                    if (this->a_1.get_low() < this->a_0.get_low()){
-                                        this->last_zoushi_process(this->a_0, this->a_1);
-                                        this->status = ZouShiChuLiStatus::a0;
-                                    } else {
-                                        this->status = ZouShiChuLiStatus::a2;
-                                    }
-                                }
-                            }
-
-                        } else {
-                            this->status = ZouShiChuLiStatus::a2_equal_a1_normal;
-                        }
-                        break;
-                    }
-                }
-            } else {
-                if (bi_type == CompositeBiType::NONE) {
-                    this->status = ZouShiChuLiStatus::a2_equal_a1_normal;
-                } else {
-                    //返回两笔
-                    this->a_2 = comp_bi.generate_bi(this->a_2, ret_bi);
-                    if (is_composite_bi_equal(this->a_2, this->a_1)){
-                        this->status = ZouShiChuLiStatus::a2_equal_a1;
-                    } else {
-                        switch(bi_type) {
-                            case CompositeBiType::UP:
-                                if (this->a_2.get_high() > this->a_0.get_high()){
-                                    this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                    this->status = ZouShiChuLiStatus::a1;
-                                }else {
-                                    this->status = ZouShiChuLiStatus::a2_normal;
-                                }
-                                break;
-                            case CompositeBiType::DOWN:
-                                if (this->a_2.get_low() < this->a_0.get_low()) {
-                                    this->a_0 = comp_bi.generate_bi(this->a_0, this->a_2);
-                                    this->status = ZouShiChuLiStatus::a1;
-                                } else {
-                                    this->status = ZouShiChuLiStatus::a2_normal;                            
-                                }
-                                break;
-                            }
-                    }
-                }
-            }
-        break;
-    case ZouShiChuLiStatus::A:
-        ret_zs_value = this->A.find_zhongshu(comp_bi);
-        switch(ret_zs_value.type) {
-            case FindZhongShuReturnType::MAX_HIGH:
-                this->b_0 = comp_bi;
-                this->status = ZouShiChuLiStatus::A_MAX_HIGH;                
-                break;
-            case FindZhongShuReturnType::MIN_LOW:
-                this->b_0 = comp_bi;
-                this->status = ZouShiChuLiStatus::A_MIN_LOW;
-                break;
-            case FindZhongShuReturnType::THREE_BUY:
-                this->b_1 = ret_zs_value.b_1;
-                this->b_2 = ret_zs_value.b_2;
-                this->status = ZouShiChuLiStatus::b3;
-                break;
-            case FindZhongShuReturnType::THREE_SELL:
-                this->b_1 = ret_zs_value.b_1;
-                this->b_2 = ret_zs_value.b_2;
-                this->status = ZouShiChuLiStatus::b3;
-                break;
-        }
-        break;
-    case ZouShiChuLiStatus::A_MAX_HIGH:
-        this->A.find_zhongshu(comp_bi);
-        if (bi_low >= this->A.get_high()){
-            this->b_1 = comp_bi;
-            this->status = ZouShiChuLiStatus::THREE_BUY;
-        }else {
-            if (bi_low > this->A.get_low()) {
-                this->status = ZouShiChuLiStatus::A;
-            } else {
-                this->A.stop(this->b_0);
-                ret_zoushi.type = FindZouShiReturnType::One;
-                ret_zoushi.zoushi1 = ZouShi(ZouShiType::UP, this->A.get_input(), this->A.get_output());
-                this->a_0 = comp_bi;
-                this->status = ZouShiChuLiStatus::a1;
-            }
-        }
-        break;
-    case ZouShiChuLiStatus::A_MIN_LOW:
-        this->A.find_zhongshu(comp_bi);
-        if (bi_high <= this->A.get_low()){
-            this->b_1 = comp_bi;
-            this->status = ZouShiChuLiStatus::THREE_SELL;
-        }else {
-            if (bi_high> this->A.get_low()) {
-                this->status = ZouShiChuLiStatus::A;
-            } else {
-                this->A.stop(this->b_0);
-                ret_zoushi.type = FindZouShiReturnType::One;
-                ret_zoushi.zoushi1 = ZouShi(ZouShiType::DOWN, this->A.get_input(), this->A.get_output());
-                this->a_0 = comp_bi;
-                this->status = ZouShiChuLiStatus::a1;
-            }
-        }    
-        break;
-    case ZouShiChuLiStatus::b3:
-        break;
     }
-
     return(ret_zoushi);
 }
 
-void Bi3_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn){
-    BaoHanChuLi baohanChuli;
-    ZouShiChuLi zoushichuli;
-    ZouShi zoushi;
-    int start_pos, stop_pos;
+void ZouShiChuLi::zhongshu_process(ZhongShu zs, XianDuan xd){
+    XianDuanType xd_type = xd.get_type();
+    float xd_high = xd.get_high();
+    float xd_low = xd.get_low();
+    int xd_count = zs.get_xd_count();
 
-    for (int i = 0; i < nCount; i++) {
-        baohanChuli.add(pHigh[i], pLow[i]);
+    if (zs.get_after_max_xd().get_type() == XianDuanType::NONE) {
+        zs.set_after_max_xd(xd);
     }
-
-    for (int i = 0; i < nCount; i++) {
-        pOut[i] = 0;
-    }
-
-    zoushichuli.handle(baohanChuli.kxianList);
-
-    unsigned int count = zoushichuli.zoushi_list.size() - 1;
-    if (count == 0)
-        return;
-
-    if (!zoushichuli.zoushi_list.empty()) {
-        ZouShi start_zoushi = zoushichuli.zoushi_list[0];
-        start_pos = start_zoushi.get_start_pos();
-        stop_pos = start_zoushi.get_stop_pos();
-        if (start_zoushi.get_start_xd().get_type() == CompositeBiType::UP) {
-            pOut[start_pos] = -3;
-            pOut[stop_pos] = 3;
-        } else {
-            pOut[start_pos] = 3;
-            pOut[start_pos] = -3;
+    if (zs.get_after_min_xd().get_type() == XianDuanType::NONE) {
+        zs.set_after_min_xd(xd);
+    } 
+    
+    if ((xd_type == XianDuanType::UP && xd_high < zs.get_low()) || (xd_type == XianDuanType::DOWN && xd_low > zs.get_high())) {
+        zs.set_output(zs.get_last_xd());
+        this->b1 = zs.get_last_xd();
+        this->b2 = xd;
+        this->status = ZouShiChuLiStatus::b3;
+    } else {
+        if (xd_type == XianDuanType::UP && xd_high > zs.get_max_high()){
+                zs.set_max_xd(xd);
+            }
+        if (xd_type == XianDuanType::DOWN && xd_low < zs.get_min_low()){
+            zs.set_min_xd(xd);
         }
-
-        for (unsigned int i = count; i > 0; i--) {
-            zoushi = zoushichuli.zoushi_list[i - 1];
-            stop_pos = zoushi.get_stop_pos();
-            if (zoushi.get_start_xd().get_type() == CompositeBiType::UP)
-                pOut[stop_pos] = 3;
-            else
-                pOut[stop_pos] = -3;
-        }
-        
     }
 
+    zs.set_xd_count(xd_count + 1);
+    if (xd_count == 9) {
+        //中枢升级
+    }
+    zs.set_last_xd(xd);
 }
 
-void Bi4_zoushi(int nCount, float* pOut, float* pHigh, float* pLow, float* pIn){
+
+ZouShi ZouShiChuLi::__find_zoushi(XianDuan xd){
+    ZouShi ret_zoushi = ZouShi();
+    float xd_high = xd.get_high();
+    float xd_low = xd.get_low();
+    XianDuanType xd_type = xd.get_type();
+
+    switch(this->status) {
+        case ZouShiChuLiStatus::a1:
+            this->a1 = xd;
+            this->status = ZouShiChuLiStatus::a2;
+            break;
+
+        case ZouShiChuLiStatus::a2:
+            if (is_xd_equal(this->a1, xd)){
+                this->a2 = xd;
+                this->status = ZouShiChuLiStatus::a1_equal_a2;
+            } else {
+                switch (xd_type){
+                    case XianDuanType::UP:
+                        if (xd_high > this->a1.get_high()){
+                            ret_zoushi = this->failure_zoushi(this->a1, xd, XianDuan());
+                        } else {
+                            this->a2 = xd;
+                            this->status = ZouShiChuLiStatus::a2_normal;
+                        }
+                        break;
+                    case XianDuanType::DOWN:
+                        if (xd_low < this->a1.get_low()){
+                            ret_zoushi = this->failure_zoushi(this->a1, xd, XianDuan());
+                        } else {
+                            this->a2 = xd;
+                            this->status = ZouShiChuLiStatus::a2_normal;
+                        }
+                        break;
+                }
+            }
+            break;
+        
+        case ZouShiChuLiStatus::a1_equal_a2:
+            if (is_xd_equal(this->a2, xd)) {
+                this->A = ZhongShu(XianDuan(), this->a1, this->a2, xd, XianDuan());
+                this->status = ZouShiChuLiStatus::A;
+            } else {
+                switch ((xd_type)) {
+                    case XianDuanType::UP:
+                        if (xd_high > this->a1.get_high()){
+                            if (this->a1.get_low() < this->a2.get_low()){
+                                this->a1 = xd.generate_xd(this->a1, this->a2, xd);
+                                this->status = ZouShiChuLiStatus::a2;
+                            } else {
+                                ret_zoushi = this->failure_zoushi(this->a1, this->a2, xd);
+                            }
+                        }  else {
+                            this->a3 = xd;
+                            this->status = ZouShiChuLiStatus::a1_equal_a2_normal;
+                        }
+                        break;
+                    case XianDuanType::DOWN:
+                        if (xd_low < this->a1.get_low()){
+                            if (this->a1.get_high() > this->a2.get_high()){
+                                this->a1 = xd.generate_xd(this->a1, this->a2, xd);
+                                this->status = ZouShiChuLiStatus::a2;
+                            } else {
+                                ret_zoushi = this->failure_zoushi(this->a1, this->a2, xd);
+                            }
+                        } else {
+                            this->a3 = xd;
+                            this->status = ZouShiChuLiStatus::a1_equal_a2_normal;
+                        }
+                        break;
+                }
+            }
+            break;
+
+        case ZouShiChuLiStatus::a1_equal_a2_normal:
+            switch (xd_type) {
+                case XianDuanType::UP:
+                    if (this->a1.get_high() > this->a2.get_high()){
+                        if (xd_high > this->a3.get_high()){
+                            if (this->a1.get_high() > this->a2.get_high()){
+                                this->a2 = xd.generate_xd(this->a2, this->a3, xd);
+                                if (is_xd_equal(this->a1, this->a2)){
+                                    this->status = ZouShiChuLiStatus::a1_equal_a2;
+                                } else {
+                                    ret_zoushi = this->failure_zoushi(this->a1, this->a2, XianDuan());
+                                }
+                            } else {
+                                this->a4 = xd;
+                                this->status = ZouShiChuLiStatus::a1_equal_a2_normal_normal;
+                            }
+                        }
+                    } else {
+                        if (xd_high > this->a2.get_high()){
+                            this->a2 = xd.generate_xd(this->a2, this->a3, xd);
+                            if (is_xd_equal(this->a1, this->a2)) {
+                                this->status = ZouShiChuLiStatus::a1_equal_a2;
+                            } else {
+                                ret_zoushi = this->failure_zoushi(this->a1, this->a2, XianDuan());
+                            }
+                        } else {
+                            this->a4 = xd;
+                            this->status = ZouShiChuLiStatus::a1_equal_a2_normal_normal;
+                        }
+                    }
+                    break;
+                case XianDuanType::DOWN:
+                    if (this->a1.get_low() < this->a2.get_low()){
+                        if (xd_low < this->a2.get_low()){
+                            this->a2 = xd.generate_xd(this->a2, this->a3, xd);
+                            if (is_xd_equal(this->a1, this->a2)) {
+                                this->status = ZouShiChuLiStatus::a1_equal_a2;
+                            } else {
+                                ret_zoushi = this->failure_zoushi(this->a1, this->a2, XianDuan());
+                            }
+                        } else {
+                            this->a4 = xd;
+                            this->status = ZouShiChuLiStatus::a1_equal_a2_normal_normal;
+                        }
+                    } else {
+                        if (xd_low < this->a2.get_low()){
+                            this->a2 = xd.generate_xd(this->a2, this->a3, xd);
+                            if (is_xd_equal(this->a1, this->a2)) {
+                                this->status = ZouShiChuLiStatus::a1_equal_a2;
+                            } else {
+                                ret_zoushi = this->failure_zoushi(this->a1, this->a2, XianDuan());
+                            }
+                        } else {
+                            this->a4 = xd;
+                            this->status = ZouShiChuLiStatus::a1_equal_a2_normal_normal;
+                        }
+                    }
+                    break;
+            }
+            break;
+
+        case ZouShiChuLiStatus::a1_equal_a2_normal_normal:
+            switch(xd_type) {
+                case XianDuanType::UP:
+                    if (this->a1.get_type() == XianDuanType::UP){
+                        if (xd_high > this->a3.get_high()){
+                            this->a3 = xd.generate_xd(this->a3, this->a4, xd);
+                            if (is_xd_equal(this->a2, this->a3)) {
+                                this->A = ZhongShu(XianDuan(), this->a1, this->a2, this->a3, XianDuan());
+                                this->status = ZouShiChuLiStatus::A;
+                            } else {
+                                if (this->a1.get_low() < this->a2.get_low()){
+                                    this->a1 = xd.generate_xd(this->a1, this->a2, this->a3);
+                                    this->status = ZouShiChuLiStatus::a2;
+                                } else {
+                                    ret_zoushi = this->failure_zoushi(this->a1, this->a2, this->a3);
+                                }
+                            }
+                        } 
+                    } else {
+                        if (xd_high > this->a2.get_high()){
+                            this->a2 = xd.generate_xd(this->a2, this->a3, xd);
+                            if (is_xd_equal(this->a1, this->a2)){
+                                this->status = ZouShiChuLiStatus::a1_equal_a2;
+                            } else {
+                                if (this->a1.get_high() > this->a2.get_high()){
+                                    this->status = ZouShiChuLiStatus::a3;
+                                } else {
+                                    ret_zoushi = this->failure_zoushi(this->a1, this->a2, XianDuan());
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case XianDuanType::DOWN:
+                    if (this->a1.get_type() == XianDuanType::DOWN) {
+                        if (xd_low < this->a3.get_low()){
+                            this->a3 = xd.generate_xd(this->a3, this->a4, xd);
+                            if (is_xd_equal(this->a2, this->a3)) {
+                                this->A = ZhongShu(XianDuan(), this->a1, this->a2, this->a3, XianDuan());
+                                this->status = ZouShiChuLiStatus::A;
+                            } else {
+                                if (this->a1.get_high() > this->a2.get_high()){
+                                    this->a1 = xd.generate_xd(this->a1, this->a2, this->a3);
+                                    this->status = ZouShiChuLiStatus::a2;
+                                } else {
+                                    ret_zoushi = this->failure_zoushi(this->a1, this->a2, this->a3);
+                                }
+                            }
+                        }
+                    } else {
+                        if (xd_low < this->a2.get_low()){
+                            this->a2 = xd.generate_xd(this->a2, this->a3, xd);
+                            if (is_xd_equal(this->a1, this->a2)){
+                                this->status = ZouShiChuLiStatus::a1_equal_a2;
+                            } else {
+                                if (this->a1.get_low() < this->a2.get_low()){
+                                    this->status = ZouShiChuLiStatus::a3;
+                                } else {
+                                    ret_zoushi = this->failure_zoushi(this->a1, this->a2, XianDuan());
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+            break;
+
+        case ZouShiChuLiStatus::a2_normal:
+            switch(xd_type) {
+                case XianDuanType::UP:
+                    if (is_xd_equal(this->a2, xd)){
+                        this->a3 = xd;
+                        this->status = ZouShiChuLiStatus::a2_equal_a3;
+                    } else {
+                        if (xd_high > this->a1.get_high()){
+                            this->a1 = xd.generate_xd(this->a1, this->a2, xd);
+                            this->status = ZouShiChuLiStatus::a2;
+                        } else {
+                            this->a3 = xd;
+                            this->status = ZouShiChuLiStatus::a2_normal_normal;
+                        }
+                    }
+                    break;
+                case XianDuanType::DOWN:
+                    if (is_xd_equal(this->a2, xd)){
+                        this->a3 = xd;
+                        this->status = ZouShiChuLiStatus::a2_equal_a3;
+                    } else {
+                        if (xd_low < this->a1.get_low()){
+                            this->a1 = xd.generate_xd(this->a1, this->a2, xd);
+                            this->status = ZouShiChuLiStatus::a2;
+                        } else {
+                            this->a3 = xd;
+                            this->status = ZouShiChuLiStatus::a2_normal_normal;
+                        }
+                    }
+                    break;
+            }
+            break;
+
+        case ZouShiChuLiStatus::a2_equal_a3:
+            switch(xd_type) {
+                case XianDuanType::UP:
+                    break;
+                case XianDuanType::DOWN:
+                    break;
+            }
+            break;
+        case ZouShiChuLiStatus::A:
+            this->zhongshu_process(this->A, xd);
+            break;
+
+        case ZouShiChuLiStatus::b3:
+            break;
+    }
+    return(ret_zoushi);
+}
+
+void ZouShi_process(int nCount, float *pOut, float *pHigh, float *pLow, float *pIn){
     BaoHanChuLi baohanChuli;
-    ZouShiChuLi zoushichuli;
+    ZouShiChuLi zoushiChuLi;
     ZouShi zoushi;
     int start_pos, stop_pos;
 
-    for (int i = 0; i < nCount; i++) {
+    for (int i = 0; i < nCount; i++){
         baohanChuli.add(pHigh[i], pLow[i]);
     }
 
-    for (int i = 0; i < nCount; i++) {
+    for (int i = 0; i < nCount; i++){
         pOut[i] = 0;
     }
 
-    zoushichuli.handle(baohanChuli.kxianList);
+    zoushiChuLi.handle(baohanChuli.kxianList);
 
-    unsigned int count = zoushichuli.zoushi_list.size() - 1;
+    int count = zoushiChuLi.zoushi_list.size();
     if (count == 0)
         return;
 
-    if (!zoushichuli.zoushi_list.empty()) {
-        ZouShi start_zoushi = zoushichuli.zoushi_list[0];
-        start_pos = start_zoushi.get_start_pos();
-        stop_pos = start_zoushi.get_stop_pos();
-        if (start_zoushi.get_start_xd().get_type() == CompositeBiType::UP) {
-            pOut[start_pos] = -3;
-            pOut[stop_pos] = 3;
-        } else {
-            pOut[start_pos] = 3;
-            pOut[start_pos] = -3;
-        }
+    zoushi = zoushiChuLi.zoushi_list[0];
+    start_pos = zoushi.get_start_pos();
+    stop_pos = zoushi.get_stop_pos();
+    if (zoushi.get_start_xd().get_type() == XianDuanType::UP) {
+        pOut[start_pos] = -3;
+        pOut[stop_pos] = 3;
+    } else {
+        pOut[start_pos] = 3;
+        pOut[stop_pos] = -3;
+    }
 
-        for (unsigned int i = count; i > 0; i--) {
-            zoushi = zoushichuli.zoushi_list[i - 1];
-            stop_pos = zoushi.get_stop_pos();
-            if (zoushi.get_start_xd().get_type() == CompositeBiType::UP)
+    for (int i = 1; i < count; i++){
+        zoushi = zoushiChuLi.zoushi_list[i];
+        stop_pos = zoushi.get_stop_pos();
+        switch(zoushi.get_type()){
+            if (zoushi.get_start_xd().get_type() == XianDuanType::UP)
                 pOut[stop_pos] = 3;
             else
                 pOut[stop_pos] = -3;
         }
-        
     }
-
 }
